@@ -16,14 +16,15 @@ import {
   PieChartIcon,
   UserIcon,
 } from "lucide-react";
-import { SignInButton } from "@clerk/nextjs";
-import Link from "next/link";
+// import { SignInButton } from "@clerk/nextjs";
+// import Link from "next/link";
 import Navbar from "../_components/navbar";
 import Footer from "../_components/footer";
 import AOS from "aos";
 import "aos/dist/aos.css";
 
-const LandingPage = ({ userId }: { userId: string | null }) => {
+// TODO:This component will accept userId parameter when auth is implemented
+const LandingPage = () => {
   useEffect(() => {
     AOS.init({
       duration: 800,
@@ -119,13 +120,15 @@ const LandingPage = ({ userId }: { userId: string | null }) => {
               fill
               className="relative z-10 rounded-xl object-cover shadow-2xl"
             />
-            {/* Elementos decorativos em torno da imagem */}
+            {/* === Elementos decorativos em torno da imagem === */}
+
             <div className="absolute -right-4 -top-4 h-8 w-8 rounded-full bg-primary"></div>
             <div className="absolute -bottom-4 -left-4 h-8 w-8 rounded-full bg-indigo-500"></div>
           </div>
         </div>
 
-        {/* Estatísticas rápidas - Adiciona credibilidade */}
+        {/* === Estatísticas rápidas - Adiciona credibilidade === */}
+
         <div className="relative mx-auto mt-20 max-w-6xl px-4">
           <div
             className="grid grid-cols-2 gap-4 rounded-xl border border-white/10 bg-white/5 p-6 backdrop-blur-sm md:grid-cols-4"
@@ -151,7 +154,8 @@ const LandingPage = ({ userId }: { userId: string | null }) => {
         </div>
       </section>
 
-      {/* Features Section - Com ícones maiores e card design mais moderno */}
+      {/* === Features Section - Com ícones maiores e card design mais moderno === */}
+
       <section className="relative w-full bg-white py-32" id="features">
         <div className="absolute inset-0 bg-[url('/dots.svg')] opacity-5"></div>
         <div className="mx-auto max-w-6xl px-4">
@@ -229,7 +233,8 @@ const LandingPage = ({ userId }: { userId: string | null }) => {
         </div>
       </section>
 
-      {/* FIIs em Destaque - Nova seção */}
+      {/* === FIIs em Destaque - Nova seção === */}
+
       <section className="w-full bg-slate-50 py-32">
         <div className="mx-auto max-w-6xl px-4">
           <div className="mb-16 text-center" data-aos="fade-up">
@@ -246,7 +251,8 @@ const LandingPage = ({ userId }: { userId: string | null }) => {
           </div>
 
           <div className="grid gap-6 md:grid-cols-4">
-            {/* Cards de FIIs populares */}
+            {/* === Cards de FIIs populares === */}
+
             {["KNCR11", "MXRF11", "HGLG11", "XPLG11"].map((fii, index) => (
               <div
                 key={fii}
@@ -349,6 +355,7 @@ const LandingPage = ({ userId }: { userId: string | null }) => {
             <div data-aos="fade-up" data-aos-delay="100">
               <div className="aspect-video w-full overflow-hidden rounded-xl shadow-lg">
                 <iframe
+                  id="mainVideoPlayer"
                   className="h-full w-full"
                   src="https://www.youtube.com/embed/cxO_bmcRSGs"
                   title="YouTube video player"
@@ -369,25 +376,101 @@ const LandingPage = ({ userId }: { userId: string | null }) => {
               </h3>
 
               <div className="space-y-4">
-                {[1, 2, 3, 4].map((item, index) => (
+                {[
+                  {
+                    id: "cxO_bmcRSGs",
+                    title: "#IRDM11 - SEGUE DEVAGAR!",
+                    thumbnail:
+                      "https://img.youtube.com/vi/cxO_bmcRSGs/mqdefault.jpg",
+                    date: "30/03/25",
+                  },
+                  {
+                    id: "7jE7yJpNRk0",
+                    title: "#KNHF11 - SEGUE VENDENDO TIJOLO!",
+                    thumbnail:
+                      "https://img.youtube.com/vi/7jE7yJpNRk0/mqdefault.jpg",
+                    date: "29/03/25",
+                  },
+                  {
+                    id: "haoc0d4YArk",
+                    title: "#ICRI11 - DA PRA SUBIR ESSE RENDIMENTO HEIN!?",
+                    thumbnail:
+                      "https://img.youtube.com/vi/haoc0d4YArk/mqdefault.jpg",
+                    date: "29/03/25",
+                  },
+                  {
+                    id: "09BBpgWvgTA",
+                    title: "#HGRE11 - CONTINUA DE GRAÇA!",
+                    thumbnail:
+                      "https://img.youtube.com/vi/09BBpgWvgTA/mqdefault.jpg",
+                    date: "29/03/25",
+                  },
+                ].map((video, index) => (
                   <div
                     key={index}
-                    className="group flex items-center gap-4 rounded-lg p-2 transition-all hover:bg-slate-50"
+                    id={`video-card-${video.id}`}
+                    className={`group flex cursor-pointer items-center gap-4 rounded-lg p-2 transition-all hover:bg-slate-50 ${
+                      index === 0
+                        ? "border-l-4 border-primary bg-primary/10"
+                        : ""
+                    }`}
+                    onClick={() => {
+                      const player = document.getElementById(
+                        "mainVideoPlayer",
+                      ) as HTMLIFrameElement;
+                      if (player) {
+                        player.src = `https://www.youtube.com/embed/${video.id}?autoplay=1`;
+                      }
+
+                      document
+                        .querySelectorAll('[id^="video-card-"]')
+                        .forEach((el) => {
+                          el.classList.remove(
+                            "bg-primary/10",
+                            "border-l-4",
+                            "border-primary",
+                          );
+                        });
+
+                      const currentVideo = document.getElementById(
+                        `video-card-${video.id}`,
+                      );
+                      if (currentVideo) {
+                        currentVideo.classList.add(
+                          "bg-primary/10",
+                          "border-l-4",
+                          "border-primary",
+                        );
+                      }
+                    }}
                   >
                     <div className="relative h-20 w-32 flex-shrink-0 overflow-hidden rounded-md">
                       <Image
-                        src={`/NBRR11.png`}
-                        alt={`FIIs: O QUE ESPERAR PARA 2025?`}
+                        src={video.thumbnail}
+                        alt={video.title}
                         fill
                         className="object-cover"
                       />
                       <div className="absolute inset-0 bg-black/10 transition-all group-hover:bg-black/0"></div>
+                      <div className="absolute inset-0 flex items-center justify-center">
+                        <div className="flex h-8 w-8 items-center justify-center rounded-full bg-black/40 text-white transition-transform duration-300 group-hover:scale-110">
+                          <svg
+                            xmlns="http://www.w3.org/2000/svg"
+                            width="16"
+                            height="16"
+                            viewBox="0 0 24 24"
+                            fill="white"
+                          >
+                            <path d="M8 5v14l11-7z" />
+                          </svg>
+                        </div>
+                      </div>
                     </div>
                     <div>
                       <h4 className="font-semibold text-slate-800 transition-all group-hover:text-primary">
-                        FIIs: O QUE ESPERAR PARA 2025?
+                        {video.title}
                       </h4>
-                      <p className="text-xs text-slate-500">25/03/25</p>
+                      <p className="text-xs text-slate-500">{video.date}</p>
                     </div>
                   </div>
                 ))}
@@ -412,14 +495,16 @@ const LandingPage = ({ userId }: { userId: string | null }) => {
         </div>
       </section>
 
-      {/* Planos de Assinatura - Modernizado */}
+      {/* === Planos de Assinatura - Modernizado === */}
+
       <section
         className="relative w-full bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 py-32 text-white"
         id="pricing"
       >
         <div className="absolute inset-0 bg-[url('/grid.svg')] opacity-10"></div>
 
-        {/* Formas decorativas */}
+        {/* === Formas decorativas === */}
+
         <div className="absolute -right-20 top-20 h-64 w-64 rounded-full bg-primary/20 blur-3xl"></div>
         <div className="absolute -left-20 bottom-20 h-64 w-64 rounded-full bg-indigo-500/20 blur-3xl"></div>
 
@@ -467,14 +552,15 @@ const LandingPage = ({ userId }: { userId: string | null }) => {
                   <p className="text-slate-400">Suporte prioritário</p>
                 </div>
               </div>
-              <SignInButton>
+
+              {/* TODO: <SignInButton>
                 <Button className="w-full rounded-full border-white/20 bg-white/10 py-6 transition-all duration-300 hover:bg-white/20">
                   Começar Grátis
                 </Button>
-              </SignInButton>
+              </SignInButton> */}
             </div>
 
-            {/* Plano Premium */}
+            {/* === Plano Premium === */}
             <div
               className="relative transform overflow-hidden rounded-xl border border-primary/30 bg-white/5 p-8 shadow-lg shadow-primary/5 backdrop-blur-sm transition-all duration-300 hover:scale-[1.01] hover:shadow-xl"
               data-aos="fade-up"
@@ -520,7 +606,8 @@ const LandingPage = ({ userId }: { userId: string | null }) => {
                   <p>Suporte prioritário 24/7</p>
                 </div>
               </div>
-              {!userId ? (
+
+              {/* TODO: {!userId ? (
                 <SignInButton>
                   <Button className="relative w-full rounded-full bg-primary py-6 text-white shadow-lg shadow-primary/20 transition-all duration-300 hover:bg-primary/90">
                     Seja Membro
@@ -532,7 +619,7 @@ const LandingPage = ({ userId }: { userId: string | null }) => {
                     Seja Membro
                   </Button>
                 </Link>
-              )}
+              )} */}
               <p className="mt-4 text-center text-xs text-slate-400">
                 Todos os benefícios do plano básico + recursos premium
               </p>
@@ -541,7 +628,8 @@ const LandingPage = ({ userId }: { userId: string | null }) => {
         </div>
       </section>
 
-      {/* Seção de Relatórios e Análises */}
+      {/* === Seção de Relatórios e Análises === */}
+
       <section className="w-full bg-white py-24">
         <div className="mx-auto max-w-6xl px-4">
           <div className="mb-12 text-center" data-aos="fade-up">
@@ -606,7 +694,9 @@ const LandingPage = ({ userId }: { userId: string | null }) => {
                   className="rounded-lg"
                 />
               </div>
-              {/* Elementos decorativos */}
+
+              {/* === Elementos decorativos === */}
+
               <div className="absolute -right-4 -top-4 h-8 w-8 rounded-full bg-primary"></div>
               <div className="absolute -bottom-4 -left-4 h-8 w-8 rounded-full bg-indigo-500"></div>
             </div>
@@ -614,12 +704,13 @@ const LandingPage = ({ userId }: { userId: string | null }) => {
         </div>
       </section>
 
-      {/* Por que escolher a Finance AI? */}
+      {/* === Por que escolher a CasaDeAnálises? === */}
+
       <section className="w-full bg-slate-50 py-24">
         <div className="mx-auto max-w-6xl px-4">
           <div className="mb-12 text-center" data-aos="fade-up">
             <h2 className="mb-4 bg-gradient-to-r from-slate-900 to-slate-700 bg-clip-text text-3xl font-bold text-transparent">
-              Por que escolher a Finance AI?
+              Por que escolher a CasaDeAnálises?
             </h2>
             <p className="mx-auto max-w-2xl text-lg text-slate-600">
               Nossa plataforma combina tecnologia de ponta com análise
