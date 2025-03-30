@@ -22,13 +22,20 @@ const Home = async ({ searchParams: { month } }: HomeProps) => {
   if (!userId) {
     redirect("/login");
   }
+
+  const user = await clerkClient().users.getUser(userId);
+  // Check if user has premium subscription
+  if (user.publicMetadata.subscriptionPlan !== "premium") {
+    redirect("/subscription?message=subscription-required");
+  }
+
   const monthIsInvalid = !month || !isMatch(month, "MM");
   if (monthIsInvalid) {
     redirect(`?month=${new Date().getMonth() + 1}`);
   }
   const dashboard = await getDashboard(month);
   const userCanAddTransaction = await canUserAddTransaction();
-  const user = await clerkClient().users.getUser(userId);
+
   return (
     <>
       <Navbar />

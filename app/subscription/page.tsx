@@ -6,8 +6,15 @@ import { CheckIcon, XIcon } from "lucide-react";
 import AcquirePlanButton from "./_components/acquire-plan-button";
 import { Badge } from "../_components/ui/badge";
 import { getCurrentMonthTransactions } from "../_data/get-current-month-transactions";
+import SubscriptionToast from "./_components/subscription-toast";
 
-const SubscriptionPage = async () => {
+interface SubscriptionPageProps {
+  searchParams: {
+    message?: string;
+  };
+}
+
+const SubscriptionPage = async ({ searchParams }: SubscriptionPageProps) => {
   const { userId } = await auth();
   if (!userId) {
     redirect("/login");
@@ -15,10 +22,16 @@ const SubscriptionPage = async () => {
   const user = await clerkClient().users.getUser(userId);
   const currentMonthTransactions = await getCurrentMonthTransactions();
   const hasPremiumPlan = user.publicMetadata.subscriptionPlan == "premium";
+
   return (
     <>
       <Navbar />
-      <div className="space-y-6 p-6">
+      <SubscriptionToast />
+      <div
+        className="space-y-6 p-6"
+        id="subscription-page"
+        data-message={searchParams.message}
+      >
         <h1 className="text-2xl font-bold">Assinatura</h1>
 
         <div className="flex gap-6">
