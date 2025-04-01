@@ -116,7 +116,7 @@ const LandingPage = () => {
             <div className="absolute -left-10 -top-10 h-full w-full rounded-2xl bg-gradient-to-br from-primary/20 to-indigo-500/20 blur-xl"></div>
             <Image
               src="/login.png"
-              alt="Finance AI Dashboard"
+              alt="CasaDeAnálises | Lucas FII"
               fill
               className="relative z-10 rounded-xl object-cover shadow-2xl"
             />

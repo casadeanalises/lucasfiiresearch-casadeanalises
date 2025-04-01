@@ -17,7 +17,7 @@ const Footer = () => {
       <div className="mx-auto max-w-6xl">
         <div className="flex flex-col items-center justify-between gap-6 md:flex-row">
           <div className="flex items-center">
-            <Image src="/logo.svg" width={150} height={35} alt="Finance AI" />
+            <Image src="/logo.png" width={64} height={64} alt="Lucas FII" />
           </div>
 
           <div className="flex gap-4">
