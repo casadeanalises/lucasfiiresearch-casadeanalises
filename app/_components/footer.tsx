@@ -69,19 +69,19 @@ const Footer = () => {
 
           <div className="flex gap-6">
             <Link
-              href="#"
+              href="/terms"
               className="text-sm text-slate-500 hover:text-primary"
             >
               Termos
             </Link>
             <Link
-              href="#"
+              href="/privacy"
               className="text-sm text-slate-500 hover:text-primary"
             >
               Privacidade
             </Link>
             <Link
-              href="#"
+              href="/contact"
               className="text-sm text-slate-500 hover:text-primary"
             >
               Contato

@@ -35,7 +35,12 @@ const Navbar = () => {
       {/* ESQUERDA */}
       <div className="flex items-center gap-10">
         <Link href="/">
-          <Image src="/logo.png" width={50} height={50} alt="Finance AI" />
+          <Image
+            src="/logo.png"
+            width={50}
+            height={50}
+            alt="Casa de Análises"
+          />
         </Link>
 
         <Link
