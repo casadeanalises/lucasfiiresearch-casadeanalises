@@ -329,21 +329,22 @@ const LandingPage = () => {
                     </svg>
                   </div>
                 </div>
-                <div className="mt-4">
+
+                {/* TODO:<div className="mt-4">
                   <Button
                     variant="outline"
                     className="w-full rounded-lg border-primary/20 text-primary hover:bg-primary/5"
                   >
                     Ver análise completa
                   </Button>
-                </div>
+                </div> */}
               </div>
             ))}
           </div>
         </div>
       </section>
 
-      {/* Vídeos do Youtube - Nova seção */}
+      {/* === Vídeos do Youtube - Nova seção === */}
 
       <section className="w-full bg-white py-32">
         <div className="mx-auto max-w-6xl px-4">
@@ -679,9 +680,10 @@ const LandingPage = () => {
                   </p>
                 </li>
               </ul>
-              <Button className="mt-6 rounded-full" variant="outline">
+
+              {/* TODO:<Button className="mt-6 rounded-full" variant="outline">
                 Ver exemplo de relatório
-              </Button>
+              </Button> */}
             </div>
             <div className="relative order-1 md:order-2" data-aos="fade-left">
               <div className="absolute -left-10 -top-10 h-full w-full rounded-2xl bg-gradient-to-br from-primary/5 to-indigo-500/5 blur-xl"></div>
