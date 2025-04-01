@@ -1,5 +1,5 @@
 <div align="center">
-  <img src="../casadeanalises-lucasfii/public/login.png" alt="CasaDeAnálises Banner" width="100%" />
+  <img src="./docs/lucasfii_banner_logo.png" alt="CasaDeAnálises Banner" width="100%" />
 
 # CasaDeAnálises | Lucas FII 📊
 
