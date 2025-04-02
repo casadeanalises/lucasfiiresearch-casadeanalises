@@ -13,7 +13,7 @@ interface VideoCardProps {
     code: string;
     type: string;
     thumbnail: string;
-    videoId: string;
+    videoId?: string;
     premium: boolean;
     tags: string[];
     dividendYield?: string;
@@ -28,15 +28,17 @@ const VideoCard = ({ report }: VideoCardProps) => {
 
   // Gerar a URL do thumbnail do YouTube
   useEffect(() => {
+    const videoId = report.videoId || "";
     const thumbnailUrl =
       report.thumbnail ||
-      `https://img.youtube.com/vi/${report.videoId}/maxresdefault.jpg`;
+      `https://img.youtube.com/vi/${videoId}/maxresdefault.jpg`;
     setImageUrl(thumbnailUrl);
   }, [report.thumbnail, report.videoId]);
 
   // Função para lidar com erros de carregamento de imagem
   const handleImageError = () => {
-    setImageUrl(`https://img.youtube.com/vi/${report.videoId}/0.jpg`);
+    const videoId = report.videoId || "";
+    setImageUrl(`https://img.youtube.com/vi/${videoId}/0.jpg`);
   };
 
   return (

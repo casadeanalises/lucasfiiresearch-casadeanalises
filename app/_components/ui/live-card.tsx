@@ -1,3 +1,28 @@
+/**
+ * LiveCard Component
+ * =================
+ * Este componente renderiza um card para transmissões ao vivo ou gravadas.
+ *
+ * RECURSOS:
+ * - Exibe thumbnail com botão de play
+ * - Mostra indicador "AO VIVO" para transmissões em tempo real
+ * - Contador de visualizações simulado para transmissões ao vivo
+ * - Reproduz o vídeo do YouTube incorporado quando clicado
+ * - Exibe data e duração para transmissões gravadas
+ * - Mostra tags relacionadas ao conteúdo
+ * - Lista FIIs mencionados na transmissão com seus dividend yields
+ * - Exibe informações do autor
+ * - Botões para assistir no YouTube
+ *
+ * COMO MODIFICAR:
+ * 1. Para adicionar novos campos, expanda a interface LiveCardProps
+ * 2. O contador de visualizações usa uma simulação aleatória para transmissões ao vivo
+ * 3. Os estilos são baseados em Tailwind CSS e podem ser personalizados
+ * 4. Para alterar a exibição de FIIs, modifique a seção "FIIs mencionados"
+ * 5. Os links para YouTube são gerados automaticamente usando o videoId
+ * 6. As thumbnails são carregadas do YouTube, com fallback se a imagem principal falhar
+ */
+
 "use client";
 
 import { useState, useEffect } from "react";
