@@ -1,6 +1,7 @@
 "use client";
 
 import dynamic from "next/dynamic";
+import SubNavbar from "../components/SubNavbar";
 
 // Importar o Navbar apenas no lado do cliente sem SSR
 const Navbar = dynamic(() => import("./navbar"), {
@@ -20,5 +21,10 @@ const Navbar = dynamic(() => import("./navbar"), {
 });
 
 export default function NavbarWrapper() {
-  return <Navbar />;
+  return (
+    <>
+      <Navbar />
+      <SubNavbar />
+    </>
+  );
 }

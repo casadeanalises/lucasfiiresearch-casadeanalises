@@ -4,6 +4,7 @@ import "./globals.css";
 import { ClerkProvider } from "@clerk/nextjs";
 import { dark } from "@clerk/themes";
 import { Toaster } from "sonner";
+import NavbarWrapper from "./_components/navbar-wrapper";
 
 const mulish = Mulish({
   subsets: ["latin-ext"],
@@ -27,7 +28,10 @@ export default function RootLayout({
             baseTheme: dark,
           }}
         >
-          <div className="flex h-full flex-col overflow-hidden">{children}</div>
+          <div className="flex h-full flex-col overflow-hidden">
+            <NavbarWrapper />
+            {children}
+          </div>
         </ClerkProvider>
 
         <Toaster />

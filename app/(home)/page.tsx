@@ -18,7 +18,6 @@ import {
 } from "lucide-react";
 // import { SignInButton } from "@clerk/nextjs";
 // import Link from "next/link";
-import Navbar from "../_components/navbar";
 import Footer from "../_components/footer";
 import AOS from "aos";
 import "aos/dist/aos.css";
@@ -35,8 +34,6 @@ const LandingPage = () => {
 
   return (
     <div className="w-full overflow-x-hidden">
-      <Navbar />
-
       {/* === Hero Section === */}
 
       <section className="relative w-full overflow-hidden bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 py-32 text-white">

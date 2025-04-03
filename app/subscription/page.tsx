@@ -1,5 +1,4 @@
 import { auth, clerkClient } from "@clerk/nextjs/server";
-import Navbar from "../_components/navbar";
 import { redirect } from "next/navigation";
 import { CheckIcon, XIcon, SparklesIcon, CreditCardIcon } from "lucide-react";
 import AcquirePlanButton from "./_components/acquire-plan-button";
@@ -25,7 +24,6 @@ const SubscriptionPage = async ({ searchParams }: SubscriptionPageProps) => {
 
   return (
     <>
-      <Navbar />
       <SubscriptionToast />
       <div
         className="flex min-h-[calc(100vh-80px)] items-center justify-center bg-gradient-to-br from-blue-950 via-blue-900 to-indigo-900 bg-fixed"

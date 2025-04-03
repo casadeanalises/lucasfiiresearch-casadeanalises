@@ -1,4 +1,3 @@
-import NavbarWrapper from "../_components/navbar-wrapper";
 import { auth, clerkClient } from "@clerk/nextjs/server";
 import { redirect } from "next/navigation";
 import { ScrollArea } from "../_components/ui/scroll-area";
@@ -241,7 +240,6 @@ const ReportsPage = async () => {
 
   return (
     <>
-      <NavbarWrapper />
       <ScrollArea>
         <div className="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100 py-8">
           <div className="container mx-auto px-4">
