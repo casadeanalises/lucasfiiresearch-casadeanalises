@@ -1,7 +1,7 @@
 <div align="center">
   <img src="./docs/lucasfii_banner_logo.png" alt="CasaDeAnálises Banner" width="100%" />
 
-# CasaDeAnálises | Lucas FII 📊
+# Lucas FII Research - CasaDeAnálises 📊
 
  <!-- <p align="center">
     Plataforma profissional de análise de Fundos Imobiliários
