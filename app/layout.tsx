@@ -10,7 +10,7 @@ const mulish = Mulish({
 });
 
 export const metadata: Metadata = {
-  title: "Lucas FII | Casa de Análises",
+  title: "Lucas FII Research",
   description: "VENHA APRENDER A INVESTIR COM SABEDORIA!",
 };
 

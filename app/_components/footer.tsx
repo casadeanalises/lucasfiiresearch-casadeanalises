@@ -91,8 +91,8 @@ const Footer = () => {
 
         <div className="mt-6 flex flex-col items-center justify-between gap-4 border-t border-slate-200 pt-6 md:flex-row">
           <p className="text-sm text-slate-500">
-            © {new Date().getFullYear()} Lucas Fii | CasadeAnálises. Todos os
-            direitos reservados.
+            © {new Date().getFullYear()} Lucas FII Research L&L Consultoria
+            Financeira, CNPJ: 99.999.999/9999-99
           </p>
 
           <span className="text-sm text-slate-500">
