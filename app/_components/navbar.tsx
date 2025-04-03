@@ -84,8 +84,8 @@ const Navbar = () => {
         href="/"
         className={
           pathname === "/"
-            ? "flex items-center gap-2 rounded-lg bg-primary/10 px-3 py-2 font-bold text-primary"
-            : "flex items-center gap-2 rounded-lg px-3 py-2 text-muted-foreground transition-colors hover:bg-primary/10 hover:text-primary"
+            ? "flex items-center gap-2 rounded-lg bg-gradient-to-r from-blue-600 to-indigo-600 px-4 py-3 font-bold text-white shadow-sm transition-all duration-200"
+            : "flex items-center gap-2 rounded-lg px-4 py-3 text-gray-600 transition-all duration-200 hover:bg-gradient-to-r hover:from-blue-600 hover:to-indigo-600 hover:text-white hover:shadow-sm"
         }
         onClick={() => setIsOpen(false)}
       >
@@ -96,8 +96,8 @@ const Navbar = () => {
         href="/subscription"
         className={
           pathname === "/subscription"
-            ? "flex items-center gap-2 rounded-lg bg-primary/10 px-3 py-2 font-bold text-primary"
-            : "flex items-center gap-2 rounded-lg px-3 py-2 text-muted-foreground transition-colors hover:bg-primary/10 hover:text-primary"
+            ? "flex items-center gap-2 rounded-lg bg-gradient-to-r from-blue-600 to-indigo-600 px-4 py-3 font-bold text-white shadow-sm transition-all duration-200"
+            : "flex items-center gap-2 rounded-lg px-4 py-3 text-gray-600 transition-all duration-200 hover:bg-gradient-to-r hover:from-blue-600 hover:to-indigo-600 hover:text-white hover:shadow-sm"
         }
         onClick={(e) => handleRestrictedLink(e, "/subscription")}
       >
@@ -108,8 +108,8 @@ const Navbar = () => {
         href="/reports"
         className={
           pathname === "/reports"
-            ? "flex items-center gap-2 rounded-lg bg-primary/10 px-3 py-2 font-bold text-primary"
-            : "flex items-center gap-2 rounded-lg px-3 py-2 text-muted-foreground transition-colors hover:bg-primary/10 hover:text-primary"
+            ? "flex items-center gap-2 rounded-lg bg-gradient-to-r from-blue-600 to-indigo-600 px-4 py-3 font-bold text-white shadow-sm transition-all duration-200"
+            : "flex items-center gap-2 rounded-lg px-4 py-3 text-gray-600 transition-all duration-200 hover:bg-gradient-to-r hover:from-blue-600 hover:to-indigo-600 hover:text-white hover:shadow-sm"
         }
         onClick={(e) => handleRestrictedLink(e, "/reports")}
       >
@@ -120,8 +120,8 @@ const Navbar = () => {
         href="/dashboard"
         className={
           pathname === "/dashboard"
-            ? "flex items-center gap-2 rounded-lg bg-primary/10 px-3 py-2 font-bold text-primary"
-            : "flex items-center gap-2 rounded-lg px-3 py-2 text-muted-foreground transition-colors hover:bg-primary/10 hover:text-primary"
+            ? "flex items-center gap-2 rounded-lg bg-gradient-to-r from-blue-600 to-indigo-600 px-4 py-3 font-bold text-white shadow-sm transition-all duration-200"
+            : "flex items-center gap-2 rounded-lg px-4 py-3 text-gray-600 transition-all duration-200 hover:bg-gradient-to-r hover:from-blue-600 hover:to-indigo-600 hover:text-white hover:shadow-sm"
         }
         onClick={(e) => handleRestrictedLink(e, "/dashboard")}
       >
@@ -176,14 +176,63 @@ const Navbar = () => {
               <Menu className="h-6 w-6 text-secondary" />
             </Button>
           </SheetTrigger>
-          <SheetContent side="left" className="w-80 p-0">
-            <SheetHeader className="border-b p-6">
-              <SheetTitle className="text-left text-lg font-bold text-secondary">
+          <SheetContent
+            side="left"
+            className="w-80 border-r border-blue-100 bg-gradient-to-br from-white to-blue-50 p-0"
+          >
+            <SheetHeader className="border-b border-blue-100 bg-gradient-to-r from-blue-600 to-indigo-600 p-6">
+              <SheetTitle className="text-left text-lg font-bold text-white">
                 Menu
               </SheetTitle>
             </SheetHeader>
-            <div className="flex flex-col gap-1 p-2">
-              <NavLinks />
+            <div className="flex flex-col gap-3 p-4">
+              <Link
+                href="/"
+                className={
+                  pathname === "/"
+                    ? "flex items-center gap-2 rounded-lg bg-gradient-to-r from-blue-600 to-indigo-600 px-4 py-3 font-bold text-white shadow-sm transition-all duration-200"
+                    : "flex items-center gap-2 rounded-lg px-4 py-3 text-gray-600 transition-all duration-200 hover:bg-gradient-to-r hover:from-blue-600 hover:to-indigo-600 hover:text-white hover:shadow-sm"
+                }
+                onClick={() => setIsOpen(false)}
+              >
+                Início
+              </Link>
+
+              <Link
+                href="/subscription"
+                className={
+                  pathname === "/subscription"
+                    ? "flex items-center gap-2 rounded-lg bg-gradient-to-r from-blue-600 to-indigo-600 px-4 py-3 font-bold text-white shadow-sm transition-all duration-200"
+                    : "flex items-center gap-2 rounded-lg px-4 py-3 text-gray-600 transition-all duration-200 hover:bg-gradient-to-r hover:from-blue-600 hover:to-indigo-600 hover:text-white hover:shadow-sm"
+                }
+                onClick={(e) => handleRestrictedLink(e, "/subscription")}
+              >
+                Assinatura
+              </Link>
+
+              <Link
+                href="/reports"
+                className={
+                  pathname === "/reports"
+                    ? "flex items-center gap-2 rounded-lg bg-gradient-to-r from-blue-600 to-indigo-600 px-4 py-3 font-bold text-white shadow-sm transition-all duration-200"
+                    : "flex items-center gap-2 rounded-lg px-4 py-3 text-gray-600 transition-all duration-200 hover:bg-gradient-to-r hover:from-blue-600 hover:to-indigo-600 hover:text-white hover:shadow-sm"
+                }
+                onClick={(e) => handleRestrictedLink(e, "/reports")}
+              >
+                Relatórios
+              </Link>
+
+              <Link
+                href="/dashboard"
+                className={
+                  pathname === "/dashboard"
+                    ? "flex items-center gap-2 rounded-lg bg-gradient-to-r from-blue-600 to-indigo-600 px-4 py-3 font-bold text-white shadow-sm transition-all duration-200"
+                    : "flex items-center gap-2 rounded-lg px-4 py-3 text-gray-600 transition-all duration-200 hover:bg-gradient-to-r hover:from-blue-600 hover:to-indigo-600 hover:text-white hover:shadow-sm"
+                }
+                onClick={(e) => handleRestrictedLink(e, "/dashboard")}
+              >
+                Dashboard
+              </Link>
             </div>
           </SheetContent>
         </Sheet>
