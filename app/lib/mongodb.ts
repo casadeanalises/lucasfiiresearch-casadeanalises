@@ -1,15 +1,26 @@
 import mongoose from "mongoose";
 
-if (!process.env.MONGODB_URI) {
-  throw new Error("Por favor, defina a variável de ambiente MONGODB_URI");
+interface GlobalMongoose {
+  conn: typeof mongoose | null;
+  promise: Promise<typeof mongoose> | null;
 }
 
-const MONGODB_URI = process.env.MONGODB_URI;
+declare global {
+  var mongoose: GlobalMongoose | undefined;
+}
 
-let cached = (global as any).mongoose;
+if (!process.env.MONGODB_URI) {
+  throw new Error(
+    "Por favor, defina a variável de ambiente MONGODB_URI no arquivo .env",
+  );
+}
 
-if (!cached) {
-  cached = (global as any).mongoose = { conn: null, promise: null };
+const MONGODB_URI: string = process.env.MONGODB_URI;
+
+let cached = global.mongoose || { conn: null, promise: null };
+
+if (!global.mongoose) {
+  global.mongoose = cached;
 }
 
 async function connectDB() {
@@ -22,7 +33,9 @@ async function connectDB() {
       bufferCommands: false,
     };
 
-    cached.promise = mongoose.connect(MONGODB_URI, opts);
+    cached.promise = mongoose.connect(MONGODB_URI).then((mongoose) => {
+      return mongoose;
+    });
   }
 
   try {

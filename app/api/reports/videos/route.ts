@@ -1,30 +1,58 @@
 import { NextResponse } from "next/server";
-import { auth } from "@clerk/nextjs/server";
-import connectDB from "@/app/lib/mongodb";
-import Report from "@/app/models/Report";
+import { auth, clerkClient } from "@clerk/nextjs/server";
+import { prisma } from "@/lib/prisma";
+import { isAdmin } from "@/lib/admin";
 
-export async function GET(request: Request) {
+async function checkSubscription(userId: string | null) {
+  if (!userId) return false;
+
+  const subscription = await prisma.subscription.findFirst({
+    where: {
+      userId: userId,
+      status: "active",
+    },
+  });
+
+  return !!subscription;
+}
+
+export async function GET() {
   try {
-    // Verificar se o usuário está autenticado
-    const { userId } = auth();
+    const { userId } = await auth();
+
     if (!userId) {
-      return NextResponse.json({ message: "Não autorizado" }, { status: 401 });
+      return NextResponse.json({ error: "Não autorizado" }, { status: 401 });
     }
 
-    await connectDB();
+    const user = await clerkClient().users.getUser(userId);
 
-    // Buscar todos os vídeos
-    const videos = await Report.find({
-      type: "video",
-    })
-      .sort({ createdAt: -1 })
-      .lean();
+    if (!user) {
+      return NextResponse.json({ error: "Não autorizado" }, { status: 401 });
+    }
 
-    return NextResponse.json(videos);
+    // Verifica se o usuário tem plano premium
+    if (user.publicMetadata.subscriptionPlan !== "premium") {
+      return NextResponse.json(
+        { error: "Necessário ter um plano premium" },
+        { status: 403 },
+      );
+    }
+
+    const reports = await prisma.report.findMany({
+      where: {
+        type: "video",
+      },
+      orderBy: {
+        createdAt: "desc",
+      },
+    });
+
+    console.log("Vídeos encontrados:", reports);
+    return NextResponse.json(reports);
   } catch (error) {
     console.error("Erro ao buscar vídeos:", error);
     return NextResponse.json(
-      { message: "Erro ao buscar vídeos", error },
+      { error: "Erro ao buscar vídeos" },
       { status: 500 },
     );
   }
@@ -32,43 +60,50 @@ export async function GET(request: Request) {
 
 export async function POST(request: Request) {
   try {
-    // Verificar se o usuário está autenticado
-    const { userId } = auth();
+    const { userId } = await auth();
+
     if (!userId) {
-      return NextResponse.json({ message: "Não autorizado" }, { status: 401 });
+      return NextResponse.json({ error: "Não autorizado" }, { status: 401 });
     }
 
-    await connectDB();
+    const user = await clerkClient().users.getUser(userId);
 
-    // Obter dados do corpo da requisição
+    if (!user) {
+      return NextResponse.json({ error: "Não autorizado" }, { status: 401 });
+    }
+
+    const userEmail = user.primaryEmailAddress?.emailAddress;
+
+    if (!isAdmin(userEmail)) {
+      console.log("Usuário não é admin:", { userEmail });
+      return NextResponse.json({ error: "Não autorizado" }, { status: 401 });
+    }
+
     const data = await request.json();
 
-    // Criar vídeo no banco de dados
-    const video = await Report.create({
-      title: data.title,
-      description: data.description,
-      author: data.author,
-      date: data.date,
-      time: data.time,
-      code: data.code,
-      type: "video",
-      thumbnail: data.thumbnail || "",
-      premium: data.premium || false,
-      tags: Array.isArray(data.tags) ? data.tags : [],
-      month: data.month,
-      year: data.year,
-      videoId: data.videoId || null,
-      dividendYield: data.dividendYield || null,
-      price: data.price || null,
-      createdById: userId,
+    const video = await prisma.report.create({
+      data: {
+        title: data.title,
+        description: data.description,
+        author: data.author,
+        date: data.date,
+        time: data.time,
+        code: data.code,
+        type: "video",
+        thumbnail: data.thumbnail || "",
+        premium: data.premium || false,
+        tags: Array.isArray(data.tags) ? data.tags : [],
+        month: data.month,
+        year: data.year,
+        videoId: data.videoId || null,
+        dividendYield: data.dividendYield || null,
+        price: data.price || null,
+      },
     });
 
     return NextResponse.json(video);
   } catch (error) {
     console.error("Erro ao criar vídeo:", error);
-    return NextResponse.json(
-      { message: "Erro ao criar vídeo", error },
-      { status: 500 },
-    );
+    return NextResponse.json({ error: "Erro ao criar vídeo" }, { status: 500 });
   }
 }

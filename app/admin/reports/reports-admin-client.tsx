@@ -4,10 +4,10 @@ import { useState, useRef, useEffect } from "react";
 import { toast } from "react-hot-toast";
 import ContentManager from "./_components/content-manager";
 
-interface ReportItem {
-  id: number | string;
+type ReportItem = {
+  id: string;
   title: string;
-  description: string;
+  description: string | null;
   author: string;
   date: string;
   time: string;
@@ -18,14 +18,13 @@ interface ReportItem {
   tags: string[];
   month: string;
   year: string;
-  videoId?: string;
-  url?: string;
-  pageCount?: number;
-  dividendYield?: string;
-  price?: string;
-  relatedVideoId?: string | null;
-  createdAt?: string;
-}
+  videoId: string | null;
+  url: string | null;
+  pageCount: number | null;
+  dividendYield: string | null;
+  price: string | null;
+  createdAt: string;
+};
 
 interface ReportsAdminClientProps {
   adminEmail: string;
@@ -197,7 +196,7 @@ const ReportsAdminClient = ({
       // Preparar os dados do PDF
       const pdfReport = {
         title: reportData.title || "Sem título",
-        description: reportData.description || "",
+        description: reportData.description ?? "",
         author: reportData.author || "Lucas Fii",
         date: reportData.date || new Date().toLocaleDateString("pt-BR"),
         time: reportData.time || new Date().toLocaleTimeString("pt-BR"),
@@ -205,12 +204,14 @@ const ReportsAdminClient = ({
         type: "pdf",
         thumbnail:
           reportData.thumbnail || "https://placehold.co/600x400/png?text=PDF",
-        url: reportData.url,
+        url: reportData.url ?? "",
         premium: reportData.premium || false,
-        tags: Array.isArray(reportData.tags) ? reportData.tags.join(",") : "",
-        pageCount: reportData.pageCount || 1,
+        tags: Array.isArray(reportData.tags) ? reportData.tags : [],
+        pageCount: reportData.pageCount ?? 1,
         month: reportData.month || obterMesAtual(),
         year: reportData.year || new Date().getFullYear().toString(),
+        dividendYield: reportData.dividendYield ?? "",
+        price: reportData.price ?? "",
       };
 
       // Enviar para a API
@@ -339,10 +340,10 @@ const ReportsAdminClient = ({
 
       // Criar o objeto JSON da descrição que inclui os detalhes adicionais
       const descriptionObject = {
-        description: videoData.description || "",
+        description: videoData.description ?? "",
         videoId: videoId,
-        dividendYield: videoData.dividendYield || "",
-        price: videoData.price || "",
+        dividendYield: videoData.dividendYield ?? "",
+        price: videoData.price ?? "",
       };
 
       // Preparar os dados do vídeo
@@ -362,8 +363,8 @@ const ReportsAdminClient = ({
         month: videoData.month || obterMesAtual(),
         year: videoData.year || new Date().getFullYear().toString(),
         videoId: videoId,
-        dividendYield: videoData.dividendYield || "",
-        price: videoData.price || "",
+        dividendYield: videoData.dividendYield ?? "",
+        price: videoData.price ?? "",
       };
 
       // Enviar para a API
@@ -432,6 +433,8 @@ const ReportsAdminClient = ({
         pageCount: item.pageCount,
         url: item.url,
         thumbnail: item.thumbnail,
+        dividendYield: item.dividendYield,
+        price: item.price,
       });
 
       // Se tiver thumbnail, mostrar preview
@@ -886,7 +889,7 @@ const ReportsAdminClient = ({
                     </label>
                     <textarea
                       name="description"
-                      value={reportData.description}
+                      value={reportData.description ?? ""}
                       onChange={handleChange}
                       rows={3}
                       className="mt-1 block w-full rounded-md border border-gray-300 p-2 shadow-sm focus:border-blue-500 focus:ring-blue-500"
@@ -1014,7 +1017,7 @@ const ReportsAdminClient = ({
                       <input
                         type="text"
                         name="videoId"
-                        value={videoData.videoId}
+                        value={videoData.videoId ?? ""}
                         onChange={handleVideoChange}
                         placeholder="Ex: dQw4w9WgXcQ"
                         className="mt-1 block w-full rounded-md border border-gray-300 p-2 shadow-sm focus:border-blue-500 focus:ring-blue-500"
@@ -1094,7 +1097,7 @@ const ReportsAdminClient = ({
                     </label>
                     <textarea
                       name="description"
-                      value={videoData.description}
+                      value={videoData.description ?? ""}
                       onChange={handleVideoChange}
                       rows={3}
                       className="mt-1 block w-full rounded-md border border-gray-300 p-2 shadow-sm focus:border-blue-500 focus:ring-blue-500"
@@ -1109,7 +1112,7 @@ const ReportsAdminClient = ({
                       <input
                         type="text"
                         name="dividendYield"
-                        value={videoData.dividendYield}
+                        value={videoData.dividendYield ?? ""}
                         onChange={handleVideoChange}
                         placeholder="Ex: 0,85%"
                         className="mt-1 block w-full rounded-md border border-gray-300 p-2 shadow-sm focus:border-blue-500 focus:ring-blue-500"
@@ -1123,7 +1126,7 @@ const ReportsAdminClient = ({
                       <input
                         type="text"
                         name="price"
-                        value={videoData.price}
+                        value={videoData.price ?? ""}
                         onChange={handleVideoChange}
                         placeholder="Ex: R$ 124,50"
                         className="mt-1 block w-full rounded-md border border-gray-300 p-2 shadow-sm focus:border-blue-500 focus:ring-blue-500"
@@ -1149,7 +1152,7 @@ const ReportsAdminClient = ({
         // Componente de gerenciamento de conteúdo existente
         <ContentManager
           activeTab={activeTab}
-          onEdit={(item: ReportItem) => {
+          onEdit={(item: any) => {
             console.log("Editando item:", item);
             setEditingItem(item);
 

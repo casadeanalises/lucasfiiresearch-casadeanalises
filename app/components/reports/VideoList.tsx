@@ -6,16 +6,18 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from "../ui/dialog";
 import { PlayCircle, Clock, Calendar, User, X } from "lucide-react";
 
 interface Video {
-  _id: string;
+  id: string;
   title: string;
-  description: string;
+  description: string | null;
   thumbnail: string;
-  videoId: string;
+  videoId: string | null;
   author: string;
   date: string;
   time: string;
   premium: boolean;
   tags: string[];
+  createdAt: string;
+  type: string;
 }
 
 export function VideoList() {
@@ -27,13 +29,21 @@ export function VideoList() {
   useEffect(() => {
     const fetchVideos = async () => {
       try {
-        const response = await fetch("/api/reports");
+        const response = await fetch("/api/reports/videos");
+        if (response.status === 403) {
+          setError(
+            "Você precisa ter um plano premium para acessar os vídeos. Assine agora!",
+          );
+          return;
+        }
         if (!response.ok) {
           throw new Error("Erro ao carregar os vídeos");
         }
         const data = await response.json();
-        setVideos(data.videos);
+        console.log("Vídeos recebidos:", data);
+        setVideos(data);
       } catch (err) {
+        console.error("Erro ao buscar vídeos:", err);
         setError(err instanceof Error ? err.message : "Erro desconhecido");
       } finally {
         setLoading(false);
@@ -67,12 +77,21 @@ export function VideoList() {
     );
   }
 
+  const formatDate = (dateString: string) => {
+    const date = new Date(dateString);
+    return date.toLocaleDateString("pt-BR", {
+      day: "2-digit",
+      month: "2-digit",
+      year: "numeric",
+    });
+  };
+
   return (
     <>
       <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
         {videos.map((video) => (
           <Card
-            key={video._id}
+            key={video.id}
             className="group cursor-pointer overflow-hidden transition-all hover:shadow-lg"
             onClick={() => setSelectedVideo(video)}
           >
@@ -110,7 +129,7 @@ export function VideoList() {
                 </div>
                 <div className="flex items-center gap-2">
                   <Calendar className="h-4 w-4" />
-                  <span>{video.date}</span>
+                  <span>{formatDate(video.createdAt)}</span>
                 </div>
                 <div className="flex items-center gap-2">
                   <Clock className="h-4 w-4" />
@@ -179,7 +198,7 @@ export function VideoList() {
                     <Calendar className="h-4 w-4 text-primary" />
                     <span className="font-medium">Data:</span>
                     <span className="text-muted-foreground">
-                      {selectedVideo.date}
+                      {formatDate(selectedVideo.createdAt)}
                     </span>
                   </div>
                   <div className="flex items-center gap-2">

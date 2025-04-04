@@ -1,15 +1,12 @@
-import { auth } from "@clerk/nextjs/server";
+import { currentUser } from "@clerk/nextjs/server";
 import ReportsAdminClient from "./reports-admin-client";
 
 export default async function ReportsPage() {
-  const { userId } = await auth();
-
-  if (!userId) {
-    return null;
-  }
+  const user = await currentUser();
+  const userEmail = user?.primaryEmailAddress?.emailAddress || "";
 
   return (
-    <div>
+    <div className="container mx-auto px-4 py-8">
       <div className="mb-8">
         <h1 className="text-2xl font-bold text-gray-900">
           Gerenciar Relatórios
@@ -19,7 +16,7 @@ export default async function ReportsPage() {
         </p>
       </div>
 
-      <ReportsAdminClient adminEmail="admin@casadeanalises.com" />
+      <ReportsAdminClient adminEmail={userEmail} />
     </div>
   );
 }

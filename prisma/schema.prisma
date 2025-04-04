@@ -1,27 +1,39 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
 generator client {
   provider = "prisma-client-js"
 }
 
 datasource db {
-  provider = "postgresql"
+  provider = "mongodb"
   url      = env("DATABASE_URL")
 }
 
-model Transaction {
-  id            String                   @id @default(uuid())
-  name          String
-  type          TransactionType
-  amount        Decimal                  @db.Decimal(10, 2)
-  category      TransactionCategory
-  paymentMethod TransactionPaymentMethod
-  date          DateTime
-  createdAt     DateTime                 @default(now())
-  updatedAt     DateTime                 @updatedAt
-  userId        String
+model User {
+  id            String         @id @map("_id")
+  email         String         @unique
+  name          String?
+  createdAt     DateTime       @default(now())
+  updatedAt     DateTime       @updatedAt
+  subscriptions Subscription[]
+}
+
+model Subscription {
+  id          String    @id @default(auto()) @map("_id") @db.ObjectId
+  userId      String
+  planType    String   // "basic", "premium", etc.
+  status      String   // "active", "cancelled", "expired"
+  startDate   DateTime @default(now())
+  endDate     DateTime?
+  price       Float
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  user        User     @relation(fields: [userId], references: [id])
 }
 
 model Report {
-  id            Int      @id @default(autoincrement())
+  id            String   @id @default(auto()) @map("_id") @db.ObjectId
   title         String
   description   String?
   author        String
@@ -30,46 +42,17 @@ model Report {
   code          String
   type          String
   thumbnail     String
-  url           String?
   premium       Boolean  @default(false)
-  tags          String?
-  pageCount     Int?
+  tags          String[]
   month         String
   year          String
-  createdById   String
-  createdAt     DateTime @default(now())
-  updatedAt     DateTime
-  fileContent   String?
-  categoria     String?
+  videoId       String?
+  url           String?
+  pageCount     Int?
   dividendYield String?
   price         String?
-  videoId       String?
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
 }
 
-enum TransactionType {
-  DEPOSIT
-  EXPENSE
-  INVESTMENT
-}
-
-enum TransactionCategory {
-  HOUSING
-  TRANSPORTATION
-  FOOD
-  ENTERTAINMENT
-  HEALTH
-  UTILITY
-  SALARY
-  EDUCATION
-  OTHER
-}
-
-enum TransactionPaymentMethod {
-  CREDIT_CARD
-  DEBIT_CARD
-  BANK_TRANSFER
-  BANK_SLIP
-  CASH
-  PIX
-  OTHER
-}
+// Você pode adicionar mais modelos conforme necessário 

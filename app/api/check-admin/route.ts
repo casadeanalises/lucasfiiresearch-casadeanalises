@@ -1,34 +1,42 @@
 import { NextResponse } from "next/server";
-import { auth } from "@clerk/nextjs/server";
-
-// Lista de IDs de usuários ou emails que são administradores
-const ADMIN_IDS = ["user_2VhTvI9jttCcNIzW6p1DNbLjm", "seu_id_do_clerk"];
-const ADMIN_EMAILS = [
-  "admin@casadeanalises.com",
-  "lucasfii@example.com",
-  "lana.santos@example.com",
-];
+import { auth, currentUser } from "@clerk/nextjs/server";
 
 export async function GET() {
   try {
     const { userId } = await auth();
+    const user = await currentUser();
+    const adminEmail = process.env.ADMIN_EMAIL;
 
-    if (!userId) {
+    if (!userId || !user) {
+      console.log("Usuário não autenticado:", { userId });
       return NextResponse.json(
         { isAdmin: false, message: "Usuário não autenticado" },
         { status: 401 },
       );
     }
 
-    // Para fins de demonstração, considerando todos os usuários como admin
-    // Isso facilita testar a interface de admin
-    // Em produção, use uma verificação mais restrita
-    const isAdmin = true;
+    const userEmail = user.primaryEmailAddress?.emailAddress;
 
-    // Verificação real (descomente e ajuste para produção)
-    // const isAdmin = ADMIN_IDS.includes(userId) || ADMIN_EMAILS.includes(userEmail);
+    if (!userEmail || !adminEmail) {
+      console.log("Email não encontrado:", { userEmail });
+      return NextResponse.json(
+        { isAdmin: false, message: "Email não encontrado" },
+        { status: 401 },
+      );
+    }
 
-    return NextResponse.json({ isAdmin });
+    const isAdmin = userEmail.toLowerCase() === adminEmail.toLowerCase();
+    console.log("Verificando acesso admin:", {
+      userEmail,
+      isAdmin,
+    });
+
+    return NextResponse.json({
+      isAdmin,
+      debug: {
+        userEmail,
+      },
+    });
   } catch (error) {
     console.error("Erro ao verificar status de admin:", error);
     return NextResponse.json(

@@ -3,7 +3,7 @@ import { redirect } from "next/navigation";
 import { CheckIcon, XIcon, SparklesIcon, CreditCardIcon } from "lucide-react";
 import AcquirePlanButton from "./_components/acquire-plan-button";
 import { Badge } from "../_components/ui/badge";
-import { getCurrentMonthTransactions } from "../_data/get-current-month-transactions";
+import { getCurrentMonthSubscriptions } from "../_data/get-current-month-transactions";
 import SubscriptionToast from "./_components/subscription-toast";
 import ManageSubscriptionButton from "./_components/manage-subscription-button";
 
@@ -19,7 +19,7 @@ const SubscriptionPage = async ({ searchParams }: SubscriptionPageProps) => {
     redirect("/login");
   }
   const user = await clerkClient().users.getUser(userId);
-  const currentMonthTransactions = await getCurrentMonthTransactions();
+  const currentMonthSubscriptions = await getCurrentMonthSubscriptions();
   const hasPremiumPlan = user.publicMetadata.subscriptionPlan == "premium";
 
   return (
@@ -95,7 +95,7 @@ const SubscriptionPage = async ({ searchParams }: SubscriptionPageProps) => {
                   <div className="flex items-start gap-3 rounded-lg bg-white/5 p-3 transition-colors">
                     <CheckIcon className="mt-0.5 h-5 w-5 flex-shrink-0 text-blue-400" />
                     <p className="text-blue-100">
-                      Acesso a {currentMonthTransactions}/10 análises de FIIs
+                      Acesso a {currentMonthSubscriptions}/10 análises de FIIs
                       por mês
                     </p>
                   </div>

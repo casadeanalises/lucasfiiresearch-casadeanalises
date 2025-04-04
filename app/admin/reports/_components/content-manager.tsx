@@ -4,7 +4,7 @@ import React, { useEffect, useState } from "react";
 import { toast } from "sonner";
 
 interface Report {
-  id: number;
+  id: string;
   title: string;
   description: string | null;
   author: string;
@@ -14,18 +14,20 @@ interface Report {
   type: string;
   thumbnail: string;
   premium: boolean;
-  tags: string | null;
+  tags: string[];
   month: string;
   year: string;
   videoId?: string | null;
   url?: string | null;
   pageCount?: number | null;
+  dividendYield?: string | null;
+  price?: string | null;
   createdAt: string;
 }
 
 interface ContentManagerProps {
   activeTab: "pdf" | "video";
-  onEdit: (item: any) => void;
+  onEdit: (item: Report) => void;
   onSetAddMode: () => void;
 }
 
@@ -51,6 +53,7 @@ const ContentManager: React.FC<ContentManagerProps> = ({
         }
 
         const data = await response.json();
+        console.log("Dados recebidos:", data);
         setItems(data);
       } catch (error) {
         console.error("Erro ao buscar itens:", error);
@@ -70,7 +73,7 @@ const ContentManager: React.FC<ContentManagerProps> = ({
       item.author.toLowerCase().includes(searchTerm.toLowerCase()),
   );
 
-  const handleDelete = async (id: number) => {
+  const handleDelete = async (id: string) => {
     if (!confirm("Tem certeza que deseja excluir este item?")) {
       return;
     }
@@ -213,17 +216,11 @@ const ContentManager: React.FC<ContentManagerProps> = ({
                       scope="col"
                       className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500"
                     >
-                      Período
-                    </th>
-                    <th
-                      scope="col"
-                      className="px-6 py-3 text-center text-xs font-medium uppercase tracking-wider text-gray-500"
-                    >
                       Premium
                     </th>
                     <th
                       scope="col"
-                      className="px-6 py-3 text-right text-xs font-medium uppercase tracking-wider text-gray-500"
+                      className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500"
                     >
                       Ações
                     </th>
@@ -231,56 +228,34 @@ const ContentManager: React.FC<ContentManagerProps> = ({
                 </thead>
                 <tbody className="divide-y divide-gray-200 bg-white">
                   {filteredItems.map((item) => (
-                    <tr key={item.id} className="hover:bg-gray-50">
+                    <tr key={item.id}>
                       <td className="whitespace-nowrap px-6 py-4">
-                        <div className="flex items-center">
-                          <div className="h-10 w-10 flex-shrink-0">
-                            <img
-                              className="h-10 w-10 rounded-md object-cover"
-                              src={item.thumbnail || "/placeholder.jpg"}
-                              alt={item.title}
-                            />
-                          </div>
-                          <div className="ml-4">
-                            <div className="text-sm font-medium text-gray-900">
-                              {item.title}
-                            </div>
-                            <div className="line-clamp-1 text-sm text-gray-500">
-                              {item.description || "Sem descrição"}
-                            </div>
-                          </div>
+                        <div className="text-sm font-medium text-gray-900">
+                          {item.title}
+                        </div>
+                        <div className="text-sm text-gray-500">
+                          {item.description}
                         </div>
                       </td>
                       <td className="whitespace-nowrap px-6 py-4 text-sm text-gray-500">
                         {item.author}
                       </td>
                       <td className="whitespace-nowrap px-6 py-4 text-sm text-gray-500">
-                        {item.date}
+                        {formatDate(item.createdAt)}
                       </td>
                       <td className="whitespace-nowrap px-6 py-4 text-sm text-gray-500">
-                        {item.month}/{item.year}
+                        {item.premium ? "Sim" : "Não"}
                       </td>
-                      <td className="whitespace-nowrap px-6 py-4 text-center text-sm">
-                        {item.premium ? (
-                          <span className="inline-flex rounded-full bg-green-100 px-2 text-xs font-semibold leading-5 text-green-800">
-                            Sim
-                          </span>
-                        ) : (
-                          <span className="inline-flex rounded-full bg-gray-100 px-2 text-xs font-semibold leading-5 text-gray-800">
-                            Não
-                          </span>
-                        )}
-                      </td>
-                      <td className="whitespace-nowrap px-6 py-4 text-right text-sm font-medium">
+                      <td className="whitespace-nowrap px-6 py-4 text-sm">
                         <button
                           onClick={() => onEdit(item)}
-                          className="mr-2 rounded bg-blue-100 px-2 py-1 text-blue-700 hover:bg-blue-200"
+                          className="mr-2 text-blue-600 hover:text-blue-900"
                         >
                           Editar
                         </button>
                         <button
                           onClick={() => handleDelete(item.id)}
-                          className="rounded bg-red-100 px-2 py-1 text-red-700 hover:bg-red-200"
+                          className="text-red-600 hover:text-red-900"
                         >
                           Excluir
                         </button>

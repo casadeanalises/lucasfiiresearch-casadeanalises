@@ -6,13 +6,19 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from "../ui/dialog";
 import { FileText, Calendar, User, X, Download, Eye } from "lucide-react";
 
 interface PDF {
-  _id: string;
+  id: string;
   title: string;
-  description: string;
+  description: string | null;
+  thumbnail: string;
+  url: string | null;
   author: string;
   date: string;
+  time: string;
   premium: boolean;
   tags: string[];
+  createdAt: string;
+  type: string;
+  pageCount: number | null;
   fileContent?: string;
 }
 
@@ -23,22 +29,30 @@ export function PDFList() {
   const [selectedPDF, setSelectedPDF] = useState<PDF | null>(null);
 
   useEffect(() => {
-    const fetchPdfs = async () => {
+    const fetchPDFs = async () => {
       try {
-        const response = await fetch("/api/reports");
+        const response = await fetch("/api/reports/pdfs");
+        if (response.status === 403) {
+          setError(
+            "Você precisa ter um plano premium para acessar os PDFs. Assine agora!",
+          );
+          return;
+        }
         if (!response.ok) {
           throw new Error("Erro ao carregar os PDFs");
         }
         const data = await response.json();
-        setPdfs(data.pdfs);
+        console.log("PDFs recebidos:", data);
+        setPdfs(data.filter((pdf: PDF) => pdf.type === "pdf"));
       } catch (err) {
+        console.error("Erro ao buscar PDFs:", err);
         setError(err instanceof Error ? err.message : "Erro desconhecido");
       } finally {
         setLoading(false);
       }
     };
 
-    fetchPdfs();
+    fetchPDFs();
   }, []);
 
   if (loading) {
@@ -70,7 +84,7 @@ export function PDFList() {
       <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
         {pdfs.map((pdf) => (
           <Card
-            key={pdf._id}
+            key={pdf.id}
             className="group cursor-pointer overflow-hidden transition-all hover:shadow-lg"
             onClick={() => setSelectedPDF(pdf)}
           >
