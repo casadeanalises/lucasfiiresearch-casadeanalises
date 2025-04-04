@@ -1,10 +1,25 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { Card, CardContent, CardHeader, CardTitle } from "../ui/card";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "../ui/dialog";
-import { FileText, Calendar, User, X, Download, Eye } from "lucide-react";
+import {
+  FileText,
+  Calendar,
+  User,
+  X,
+  Download,
+  Search,
+  Eye,
+} from "lucide-react";
 import PdfViewer from "../ui/pdf-viewer";
+import { Input } from "../ui/input";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "../ui/select";
 
 interface PDF {
   id: string;
@@ -21,6 +36,7 @@ interface PDF {
   type: string;
   pageCount: number | null;
   fileContent?: string;
+  category?: string;
 }
 
 export function PDFList() {
@@ -28,6 +44,9 @@ export function PDFList() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [selectedPDF, setSelectedPDF] = useState<PDF | null>(null);
+  const [searchQuery, setSearchQuery] = useState("");
+  const [selectedYear, setSelectedYear] = useState<string>("todos");
+  const [selectedCategory, setSelectedCategory] = useState<string>("todas");
 
   useEffect(() => {
     const fetchPDFs = async () => {
@@ -56,6 +75,26 @@ export function PDFList() {
     fetchPDFs();
   }, []);
 
+  const filteredPDFs = pdfs.filter((pdf) => {
+    const matchesSearch = pdf.title
+      .toLowerCase()
+      .includes(searchQuery.toLowerCase());
+    const matchesYear =
+      selectedYear === "todos" ||
+      new Date(pdf.date).getFullYear().toString() === selectedYear;
+    const matchesCategory =
+      selectedCategory === "todas" || pdf.category === selectedCategory;
+    return matchesSearch && matchesYear && matchesCategory;
+  });
+
+  const years = Array.from(
+    new Set(pdfs.map((pdf) => new Date(pdf.date).getFullYear())),
+  ).sort((a, b) => b - a);
+
+  const categories = Array.from(
+    new Set(pdfs.map((pdf) => pdf.category).filter(Boolean)),
+  ).sort();
+
   if (loading) {
     return (
       <div className="flex min-h-[200px] items-center justify-center">
@@ -72,76 +111,102 @@ export function PDFList() {
     );
   }
 
-  if (!pdfs.length) {
-    return (
-      <div className="flex min-h-[200px] items-center justify-center text-muted-foreground">
-        Nenhum PDF encontrado.
-      </div>
-    );
-  }
-
   return (
-    <>
-      <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-        {pdfs.map((pdf) => (
-          <Card
-            key={pdf.id}
-            className="group cursor-pointer overflow-hidden transition-all hover:shadow-lg"
-            onClick={() => setSelectedPDF(pdf)}
-          >
-            <div className="relative aspect-video bg-gradient-to-br from-primary/5 to-primary/10">
-              <div className="absolute inset-0 flex items-center justify-center">
-                <FileText className="h-20 w-20 text-primary/40" />
-              </div>
-              <div className="absolute inset-0 flex items-center justify-center gap-4 bg-black/5 opacity-0 transition-opacity group-hover:opacity-100">
-                <div className="rounded-full bg-white/90 p-3">
-                  <Eye className="h-6 w-6 text-primary" />
-                </div>
-              </div>
-              {pdf.premium && (
-                <span className="absolute right-2 top-2 rounded-full bg-yellow-500 px-3 py-1 text-sm font-medium text-white shadow-lg">
-                  Premium
-                </span>
-              )}
-            </div>
-            <CardHeader className="pb-2">
-              <CardTitle className="line-clamp-2 text-lg">
-                {pdf.title}
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <p className="mb-4 line-clamp-2 text-sm text-muted-foreground">
-                {pdf.description}
-              </p>
-              <div className="grid grid-cols-2 gap-4 text-sm text-muted-foreground">
-                <div className="flex items-center gap-2">
-                  <User className="h-4 w-4" />
-                  <span className="truncate">{pdf.author}</span>
-                </div>
-                <div className="flex items-center gap-2">
-                  <Calendar className="h-4 w-4" />
-                  <span>{pdf.date}</span>
-                </div>
-              </div>
-              {pdf.tags.length > 0 && (
-                <div className="mt-4 flex flex-wrap gap-2">
-                  {pdf.tags.map((tag, index) => (
-                    <span
-                      key={index}
-                      className="rounded-full bg-primary/10 px-2 py-1 text-xs font-medium text-primary"
+    <div className="space-y-6">
+      <div className="flex flex-col gap-4">
+        <h2 className="text-2xl font-semibold text-primary">Documentos</h2>
+
+        <div className="flex items-center justify-between gap-4">
+          <div className="relative flex-1">
+            <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-500" />
+            <Input
+              placeholder="Buscar documentos..."
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              className="border-gray-200 bg-white pl-10 text-gray-900"
+            />
+          </div>
+          <Select value={selectedYear} onValueChange={setSelectedYear}>
+            <SelectTrigger className="w-[180px] border-gray-200 bg-white text-gray-900">
+              <SelectValue placeholder="Selecionar ano" />
+            </SelectTrigger>
+            <SelectContent className="border-gray-200 bg-white">
+              <SelectItem value="todos" className="text-gray-900">
+                Todos os anos
+              </SelectItem>
+              {years.map((year) => (
+                <SelectItem
+                  key={year}
+                  value={year.toString()}
+                  className="text-gray-900"
+                >
+                  {year}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+          <Select value={selectedCategory} onValueChange={setSelectedCategory}>
+            <SelectTrigger className="w-[180px] border-gray-200 bg-white text-gray-900">
+              <SelectValue placeholder="Selecionar categoria" />
+            </SelectTrigger>
+            <SelectContent className="border-gray-200 bg-white">
+              <SelectItem value="todas" className="text-gray-900">
+                Todas as categorias
+              </SelectItem>
+              {categories.map((category) => (
+                <SelectItem
+                  key={category}
+                  value={category || ""}
+                  className="text-gray-900"
+                >
+                  {category}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        </div>
+
+        <div className="rounded-lg border border-gray-200 bg-white">
+          <div className="grid grid-cols-[1fr,200px,150px,80px] gap-4 border-b border-gray-200 p-4 font-medium text-gray-700">
+            <div>Título</div>
+            <div>Categoria</div>
+            <div>Data</div>
+            <div className="text-center">Ações</div>
+          </div>
+          <div className="divide-y divide-gray-200">
+            {filteredPDFs.map((pdf) => (
+              <div
+                key={pdf.id}
+                className="grid grid-cols-[1fr,200px,150px,80px] gap-4 p-4 hover:bg-gray-50"
+              >
+                <div className="font-medium text-gray-900">{pdf.title}</div>
+                <div className="text-gray-600">{pdf.category}</div>
+                <div className="text-gray-600">{pdf.date}</div>
+                <div className="flex justify-center gap-2">
+                  <button
+                    onClick={() => setSelectedPDF(pdf)}
+                    className="rounded-full bg-blue-50 p-2 text-blue-600 hover:bg-blue-100"
+                  >
+                    <Eye className="h-4 w-4" />
+                  </button>
+                  {pdf.url && (
+                    <a
+                      href={pdf.url}
+                      download
+                      className="rounded-full bg-blue-50 p-2 text-blue-600 hover:bg-blue-100"
                     >
-                      {tag}
-                    </span>
-                  ))}
+                      <Download className="h-4 w-4" />
+                    </a>
+                  )}
                 </div>
-              )}
-            </CardContent>
-          </Card>
-        ))}
+              </div>
+            ))}
+          </div>
+        </div>
       </div>
 
       <Dialog open={!!selectedPDF} onOpenChange={() => setSelectedPDF(null)}>
-        <DialogContent className="h-[90vh] max-w-6xl overflow-hidden p-0">
+        <DialogContent className="h-[90vh] max-w-6xl overflow-hidden bg-white p-0">
           {selectedPDF && (
             <>
               <button
@@ -151,12 +216,12 @@ export function PDFList() {
                 <X className="h-4 w-4" />
               </button>
               <div className="flex h-full flex-col">
-                <div className="bg-gradient-to-b from-background to-background/80 p-6 backdrop-blur-sm">
+                <div className="border-b border-gray-200 bg-white p-6">
                   <DialogHeader>
-                    <DialogTitle className="text-2xl">
+                    <DialogTitle className="text-2xl text-gray-900">
                       {selectedPDF.title}
                     </DialogTitle>
-                    <div className="mt-2 flex items-center gap-4 text-sm text-muted-foreground">
+                    <div className="mt-2 flex items-center gap-4 text-sm text-gray-600">
                       <div className="flex items-center gap-2">
                         <User className="h-4 w-4" />
                         <span>{selectedPDF.author}</span>
@@ -168,7 +233,7 @@ export function PDFList() {
                     </div>
                   </DialogHeader>
                 </div>
-                <div className="flex-1 overflow-hidden bg-muted/30 p-6">
+                <div className="flex-1 overflow-hidden bg-white p-6">
                   {selectedPDF.url ? (
                     <PdfViewer
                       url={selectedPDF.url}
@@ -176,8 +241,8 @@ export function PDFList() {
                     />
                   ) : (
                     <div className="flex h-full flex-col items-center justify-center p-6 text-center">
-                      <FileText className="mb-4 h-12 w-12 text-primary/40" />
-                      <p className="mb-4 text-muted-foreground">
+                      <FileText className="mb-4 h-12 w-12 text-gray-400" />
+                      <p className="mb-4 text-gray-600">
                         PDF não disponível para visualização
                       </p>
                     </div>
@@ -188,6 +253,6 @@ export function PDFList() {
           )}
         </DialogContent>
       </Dialog>
-    </>
+    </div>
   );
 }
