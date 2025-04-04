@@ -1,7 +1,6 @@
 "use client";
 
 import Link from "next/link";
-import { Button } from "@/app/_components/ui/button";
 import { useEffect, useState } from "react";
 import { useAuth, useUser } from "@clerk/nextjs";
 import { ShieldCheck } from "lucide-react";
@@ -68,15 +67,12 @@ export function AdminButton() {
   }
 
   return (
-    <Button
-      asChild
-      className="!hover:bg-blue-600 !border-none !bg-blue-600 !text-white !shadow-none !transition-none"
-      variant="ghost"
+    <Link
+      href="/admin/reports"
+      className="flex items-center gap-2 text-gray-600"
     >
-      <Link href="/admin/reports" className="flex items-center">
-        <ShieldCheck className="mr-2 h-4 w-4" />
-        Admin
-      </Link>
-    </Button>
+      <ShieldCheck className="h-5 w-5" />
+      Admin
+    </Link>
   );
 }

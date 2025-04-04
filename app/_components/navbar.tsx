@@ -5,7 +5,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { Button } from "./ui/button";
-import { LogInIcon, Menu, X } from "lucide-react";
+import { LogInIcon, Menu, X, ShieldCheck } from "lucide-react";
 import { toast } from "sonner";
 import { MouseEvent, useState, useEffect } from "react";
 import {
@@ -152,18 +152,11 @@ const Navbar = () => {
       {isAdmin && (
         <Link
           href="/admin"
-          className={`${
-            pathname.startsWith("/admin")
-              ? "flex items-center gap-2 rounded-lg bg-gradient-to-r from-blue-600 to-indigo-600 px-4 py-3 font-bold text-white shadow-sm transition-all duration-200"
-              : "relative flex items-center gap-2 rounded-lg bg-gradient-to-r from-purple-600 to-indigo-600 px-4 py-3 font-bold text-white shadow-sm transition-all duration-200 hover:from-purple-700 hover:to-indigo-700"
-          } animate-pulse-subtle`}
+          className="flex items-center gap-2 text-gray-600"
           onClick={() => setIsOpen(false)}
         >
+          <ShieldCheck className="h-5 w-5" />
           Admin
-          <div className="absolute -right-1 -top-1 h-3 w-3">
-            <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-purple-400 opacity-75"></span>
-            <span className="relative inline-flex h-3 w-3 rounded-full bg-purple-500"></span>
-          </div>
         </Link>
       )}
     </>
@@ -277,18 +270,11 @@ const Navbar = () => {
               {isAdmin && (
                 <Link
                   href="/admin"
-                  className={`${
-                    pathname.startsWith("/admin")
-                      ? "flex items-center gap-2 rounded-lg bg-gradient-to-r from-blue-600 to-indigo-600 px-4 py-3 font-bold text-white shadow-sm transition-all duration-200"
-                      : "relative flex items-center gap-2 rounded-lg bg-gradient-to-r from-purple-600 to-indigo-600 px-4 py-3 font-bold text-white shadow-sm transition-all duration-200 hover:from-purple-700 hover:to-indigo-700"
-                  } animate-pulse-subtle`}
+                  className="flex items-center gap-2 text-gray-600"
                   onClick={() => setIsOpen(false)}
                 >
+                  <ShieldCheck className="h-5 w-5" />
                   Admin
-                  <div className="absolute -right-1 -top-1 h-3 w-3">
-                    <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-purple-400 opacity-75"></span>
-                    <span className="relative inline-flex h-3 w-3 rounded-full bg-purple-500"></span>
-                  </div>
                 </Link>
               )}
             </div>
