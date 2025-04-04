@@ -51,7 +51,7 @@ const ReportsAdminClient = ({
   const [reportData, setReportData] = useState<Partial<ReportItem>>({
     title: "",
     description: "",
-    author: "LANA SANTOS",
+    author: "Lucas Fii",
     date: new Date().toLocaleDateString("pt-BR"),
     time: new Date().toLocaleTimeString("pt-BR"),
     code: "N/D",
@@ -67,7 +67,7 @@ const ReportsAdminClient = ({
   const [videoData, setVideoData] = useState<Partial<ReportItem>>({
     title: "",
     description: "",
-    author: "LANA SANTOS",
+    author: "Lucas Fii",
     date: new Date().toLocaleDateString("pt-BR"),
     time: new Date().toLocaleTimeString("pt-BR"),
     code: "N/D",
@@ -198,7 +198,7 @@ const ReportsAdminClient = ({
       const pdfReport = {
         title: reportData.title || "Sem título",
         description: reportData.description || "",
-        author: reportData.author || "Lucas FII",
+        author: reportData.author || "Lucas Fii",
         date: reportData.date || new Date().toLocaleDateString("pt-BR"),
         time: reportData.time || new Date().toLocaleTimeString("pt-BR"),
         code: reportData.code || "N/D",
@@ -349,7 +349,7 @@ const ReportsAdminClient = ({
       const videoReport = {
         title: videoData.title || "Sem título",
         description: JSON.stringify(descriptionObject),
-        author: videoData.author || "Lucas FII",
+        author: videoData.author || "Lucas Fii",
         date: videoData.date || new Date().toLocaleDateString("pt-BR"),
         time: videoData.time || new Date().toLocaleTimeString("pt-BR"),
         code: videoData.code || "N/D",
@@ -563,7 +563,7 @@ const ReportsAdminClient = ({
     setReportData({
       title: "",
       description: "",
-      author: "LANA SANTOS",
+      author: "Lucas Fii",
       date: new Date().toLocaleDateString("pt-BR"),
       time: new Date().toLocaleTimeString("pt-BR"),
       code: "N/D",
@@ -590,7 +590,7 @@ const ReportsAdminClient = ({
     setVideoData({
       title: "",
       description: "",
-      author: "LANA SANTOS",
+      author: "Lucas Fii",
       date: new Date().toLocaleDateString("pt-BR"),
       time: new Date().toLocaleTimeString("pt-BR"),
       code: "N/D",

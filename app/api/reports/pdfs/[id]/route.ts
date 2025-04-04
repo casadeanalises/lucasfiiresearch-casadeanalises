@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { auth } from "@clerk/nextjs/server";
-import prisma from "@/app/lib/prisma";
+import connectDB from "@/app/lib/mongodb";
+import Report from "@/app/models/Report";
 
 export async function GET(
   request: Request,
@@ -16,13 +17,13 @@ export async function GET(
       return NextResponse.json({ message: "Não autorizado" }, { status: 401 });
     }
 
+    await connectDB();
+
     // Buscar o PDF específico por ID
-    const pdf = await prisma.report.findUnique({
-      where: {
-        id: Number(id),
-        type: "pdf",
-      },
-    });
+    const pdf = await Report.findOne({
+      _id: id,
+      type: "pdf",
+    }).lean();
 
     if (!pdf) {
       return NextResponse.json(
@@ -55,11 +56,7 @@ export async function PUT(
       return NextResponse.json({ message: "Não autorizado" }, { status: 401 });
     }
 
-    // Validar ID
-    const pdfId = Number(id);
-    if (isNaN(pdfId)) {
-      return NextResponse.json({ message: "ID inválido" }, { status: 400 });
-    }
+    await connectDB();
 
     // Obter dados do corpo da requisição
     const data = await request.json();
@@ -86,7 +83,7 @@ export async function PUT(
     for (const field of allowedFields) {
       if (field in data) {
         if (field === "tags" && Array.isArray(data[field])) {
-          updateData[field] = data[field].join(",");
+          updateData[field] = data[field];
         } else {
           updateData[field] = data[field];
         }
@@ -94,12 +91,18 @@ export async function PUT(
     }
 
     // Atualizar o PDF
-    const updatedPdf = await prisma.report.update({
-      where: {
-        id: pdfId,
-      },
-      data: updateData,
-    });
+    const updatedPdf = await Report.findByIdAndUpdate(
+      id,
+      { $set: updateData },
+      { new: true },
+    ).lean();
+
+    if (!updatedPdf) {
+      return NextResponse.json(
+        { message: "PDF não encontrado" },
+        { status: 404 },
+      );
+    }
 
     return NextResponse.json(updatedPdf);
   } catch (error) {
@@ -125,18 +128,17 @@ export async function DELETE(
       return NextResponse.json({ message: "Não autorizado" }, { status: 401 });
     }
 
-    // Validar ID
-    const pdfId = Number(id);
-    if (isNaN(pdfId)) {
-      return NextResponse.json({ message: "ID inválido" }, { status: 400 });
-    }
+    await connectDB();
 
     // Excluir o PDF
-    await prisma.report.delete({
-      where: {
-        id: pdfId,
-      },
-    });
+    const deletedPdf = await Report.findByIdAndDelete(id).lean();
+
+    if (!deletedPdf) {
+      return NextResponse.json(
+        { message: "PDF não encontrado" },
+        { status: 404 },
+      );
+    }
 
     return NextResponse.json({ message: "PDF excluído com sucesso" });
   } catch (error) {

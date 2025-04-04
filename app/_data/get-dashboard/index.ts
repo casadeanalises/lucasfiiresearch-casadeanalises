@@ -1,94 +1,80 @@
-import { db } from "@/app/_lib/prisma";
-import { TransactionType } from "@prisma/client";
-import { TotalExpensePerCategory, TransactionPercentagePerType } from "./types";
 import { auth } from "@clerk/nextjs/server";
+import connectDB from "@/app/lib/mongodb";
+import Transaction, { TransactionType } from "@/app/models/Transaction";
 
-export const getDashboard = async (month: string) => {
+export async function getDashboard(month?: string) {
   const { userId } = await auth();
+
   if (!userId) {
-    throw new Error("Unauthorized");
+    return {
+      totalTransactions: 0,
+      totalInvestments: 0,
+      totalExpenses: 0,
+      totalDeposits: 0,
+      percentageByCategory: [],
+      recentTransactions: [],
+    };
   }
-  const where = {
+
+  await connectDB();
+
+  const currentDate = new Date();
+  const currentYear = currentDate.getFullYear();
+  const targetMonth = month ? parseInt(month) : currentDate.getMonth() + 1;
+
+  const startDate = new Date(currentYear, targetMonth - 1, 1);
+  const endDate = new Date(currentYear, targetMonth, 0);
+
+  const transactions = await Transaction.find({
     userId,
     date: {
-      gte: new Date(`2024-${month}-01`),
-      lt: new Date(`2024-${month}-31`),
+      $gte: startDate,
+      $lte: endDate,
     },
-  };
-  const depositsTotal = Number(
-    (
-      await db.transaction.aggregate({
-        where: { ...where, type: "DEPOSIT" },
-        _sum: { amount: true },
-      })
-    )?._sum?.amount,
+  }).lean();
+
+  const totalTransactions = transactions.length;
+  const totalInvestments = transactions
+    .filter((t) => t.type === TransactionType.INVESTMENT)
+    .reduce((acc, t) => acc + Number(t.amount), 0);
+  const totalExpenses = transactions
+    .filter((t) => t.type === TransactionType.EXPENSE)
+    .reduce((acc, t) => acc + Number(t.amount), 0);
+  const totalDeposits = transactions
+    .filter((t) => t.type === TransactionType.DEPOSIT)
+    .reduce((acc, t) => acc + Number(t.amount), 0);
+
+  // Calcular percentagem por categoria
+  const expensesByCategory = transactions
+    .filter((t) => t.type === TransactionType.EXPENSE)
+    .reduce((acc: Record<string, number>, t) => {
+      acc[t.category] = (acc[t.category] || 0) + Number(t.amount);
+      return acc;
+    }, {});
+
+  const totalExpenseAmount = Object.values(expensesByCategory).reduce(
+    (a, b) => a + b,
+    0,
   );
-  const investmentsTotal = Number(
-    (
-      await db.transaction.aggregate({
-        where: { ...where, type: "INVESTMENT" },
-        _sum: { amount: true },
-      })
-    )?._sum?.amount,
+
+  const percentageByCategory = Object.entries(expensesByCategory).map(
+    ([category, amount]) => ({
+      category,
+      percentage: totalExpenseAmount ? (amount / totalExpenseAmount) * 100 : 0,
+    }),
   );
-  const expensesTotal = Number(
-    (
-      await db.transaction.aggregate({
-        where: { ...where, type: "EXPENSE" },
-        _sum: { amount: true },
-      })
-    )?._sum?.amount,
-  );
-  const balance = depositsTotal - investmentsTotal - expensesTotal;
-  const transactionsTotal = Number(
-    (
-      await db.transaction.aggregate({
-        where,
-        _sum: { amount: true },
-      })
-    )._sum.amount,
-  );
-  const typesPercentage: TransactionPercentagePerType = {
-    [TransactionType.DEPOSIT]: Math.round(
-      (Number(depositsTotal || 0) / Number(transactionsTotal)) * 100,
-    ),
-    [TransactionType.EXPENSE]: Math.round(
-      (Number(expensesTotal || 0) / Number(transactionsTotal)) * 100,
-    ),
-    [TransactionType.INVESTMENT]: Math.round(
-      (Number(investmentsTotal || 0) / Number(transactionsTotal)) * 100,
-    ),
-  };
-  const totalExpensePerCategory: TotalExpensePerCategory[] = (
-    await db.transaction.groupBy({
-      by: ["category"],
-      where: {
-        ...where,
-        type: TransactionType.EXPENSE,
-      },
-      _sum: {
-        amount: true,
-      },
-    })
-  ).map((category) => ({
-    category: category.category,
-    totalAmount: Number(category._sum.amount),
-    percentageOfTotal: Math.round(
-      (Number(category._sum.amount) / Number(expensesTotal)) * 100,
-    ),
-  }));
-  const lastTransactions = await db.transaction.findMany({
-    where,
-    orderBy: { date: "desc" },
-    take: 15,
-  });
+
+  // Pegar transações recentes
+  const recentTransactions = [...transactions]
+    .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime())
+    .slice(0, 5);
+
   return {
-    balance,
-    depositsTotal,
-    investmentsTotal,
-    expensesTotal,
-    typesPercentage,
-    totalExpensePerCategory,
-    lastTransactions: JSON.parse(JSON.stringify(lastTransactions)),
+    totalTransactions,
+    totalInvestments,
+    totalExpenses,
+    totalDeposits,
+    percentageByCategory,
+    recentTransactions,
   };
-};
+}

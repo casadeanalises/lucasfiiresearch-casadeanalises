@@ -1,13 +1,13 @@
 "use client";
 
-import { UserButton, SignInButton, useAuth } from "@clerk/nextjs";
+import { UserButton, SignInButton, useAuth, useUser } from "@clerk/nextjs";
 import Image from "next/image";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { Button } from "./ui/button";
 import { LogInIcon, Menu, X } from "lucide-react";
 import { toast } from "sonner";
-import { MouseEvent, useState } from "react";
+import { MouseEvent, useState, useEffect } from "react";
 import {
   Sheet,
   SheetContent,
@@ -19,7 +19,28 @@ import {
 const Navbar = () => {
   const pathname = usePathname();
   const { isSignedIn } = useAuth();
+  const { user } = useUser();
   const [isOpen, setIsOpen] = useState(false);
+  const [isAdmin, setIsAdmin] = useState(false);
+
+  useEffect(() => {
+    const checkAdmin = async () => {
+      if (isSignedIn && user) {
+        try {
+          const response = await fetch("/api/check-admin");
+          const data = await response.json();
+          setIsAdmin(data.isAdmin);
+        } catch (error) {
+          console.error("Erro ao verificar status de admin:", error);
+          setIsAdmin(false);
+        }
+      } else {
+        setIsAdmin(false);
+      }
+    };
+
+    checkAdmin();
+  }, [isSignedIn, user]);
 
   const desktopAppearance = {
     elements: {
@@ -127,6 +148,24 @@ const Navbar = () => {
       >
         Dashboard
       </Link>
+
+      {isAdmin && (
+        <Link
+          href="/admin"
+          className={`${
+            pathname.startsWith("/admin")
+              ? "flex items-center gap-2 rounded-lg bg-gradient-to-r from-blue-600 to-indigo-600 px-4 py-3 font-bold text-white shadow-sm transition-all duration-200"
+              : "relative flex items-center gap-2 rounded-lg bg-gradient-to-r from-purple-600 to-indigo-600 px-4 py-3 font-bold text-white shadow-sm transition-all duration-200 hover:from-purple-700 hover:to-indigo-700"
+          } animate-pulse-subtle`}
+          onClick={() => setIsOpen(false)}
+        >
+          Admin
+          <div className="absolute -right-1 -top-1 h-3 w-3">
+            <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-purple-400 opacity-75"></span>
+            <span className="relative inline-flex h-3 w-3 rounded-full bg-purple-500"></span>
+          </div>
+        </Link>
+      )}
     </>
   );
 
@@ -233,6 +272,24 @@ const Navbar = () => {
               >
                 Dashboard
               </Link>
+
+              {isAdmin && (
+                <Link
+                  href="/admin"
+                  className={`${
+                    pathname.startsWith("/admin")
+                      ? "flex items-center gap-2 rounded-lg bg-gradient-to-r from-blue-600 to-indigo-600 px-4 py-3 font-bold text-white shadow-sm transition-all duration-200"
+                      : "relative flex items-center gap-2 rounded-lg bg-gradient-to-r from-purple-600 to-indigo-600 px-4 py-3 font-bold text-white shadow-sm transition-all duration-200 hover:from-purple-700 hover:to-indigo-700"
+                  } animate-pulse-subtle`}
+                  onClick={() => setIsOpen(false)}
+                >
+                  Admin
+                  <div className="absolute -right-1 -top-1 h-3 w-3">
+                    <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-purple-400 opacity-75"></span>
+                    <span className="relative inline-flex h-3 w-3 rounded-full bg-purple-500"></span>
+                  </div>
+                </Link>
+              )}
             </div>
           </SheetContent>
         </Sheet>

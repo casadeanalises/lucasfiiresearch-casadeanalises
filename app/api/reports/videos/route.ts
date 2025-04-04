@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { auth } from "@clerk/nextjs/server";
-import prisma from "@/app/lib/prisma";
+import connectDB from "@/app/lib/mongodb";
+import Report from "@/app/models/Report";
 
 export async function GET(request: Request) {
   try {
@@ -10,15 +11,14 @@ export async function GET(request: Request) {
       return NextResponse.json({ message: "Não autorizado" }, { status: 401 });
     }
 
+    await connectDB();
+
     // Buscar todos os vídeos
-    const videos = await prisma.report.findMany({
-      where: {
-        type: "video",
-      },
-      orderBy: {
-        createdAt: "desc",
-      },
-    });
+    const videos = await Report.find({
+      type: "video",
+    })
+      .sort({ createdAt: -1 })
+      .lean();
 
     return NextResponse.json(videos);
   } catch (error) {
@@ -38,11 +38,13 @@ export async function POST(request: Request) {
       return NextResponse.json({ message: "Não autorizado" }, { status: 401 });
     }
 
+    await connectDB();
+
     // Obter dados do corpo da requisição
     const data = await request.json();
 
-    // Campos padrão para a criação do relatório
-    const reportData = {
+    // Criar vídeo no banco de dados
+    const video = await Report.create({
       title: data.title,
       description: data.description,
       author: data.author,
@@ -52,24 +54,13 @@ export async function POST(request: Request) {
       type: "video",
       thumbnail: data.thumbnail || "",
       premium: data.premium || false,
-      tags: Array.isArray(data.tags) ? data.tags.join(",") : "",
+      tags: Array.isArray(data.tags) ? data.tags : [],
       month: data.month,
       year: data.year,
+      videoId: data.videoId || null,
+      dividendYield: data.dividendYield || null,
+      price: data.price || null,
       createdById: userId,
-      updatedAt: new Date(),
-    };
-
-    // Adicionar campos extras se fornecidos
-    if (data.videoId)
-      reportData["videoId" as keyof typeof reportData] = data.videoId;
-    if (data.dividendYield)
-      reportData["dividendYield" as keyof typeof reportData] =
-        data.dividendYield;
-    if (data.price) reportData["price" as keyof typeof reportData] = data.price;
-
-    // Criar vídeo no banco de dados
-    const video = await prisma.report.create({
-      data: reportData as any,
     });
 
     return NextResponse.json(video);

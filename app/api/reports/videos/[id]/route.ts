@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { auth } from "@clerk/nextjs/server";
-import prisma from "@/app/lib/prisma";
+import connectDB from "@/app/lib/mongodb";
+import Report from "@/app/models/Report";
 
 export async function GET(
   request: Request,
@@ -16,13 +17,13 @@ export async function GET(
       return NextResponse.json({ message: "Não autorizado" }, { status: 401 });
     }
 
+    await connectDB();
+
     // Buscar o vídeo específico por ID
-    const video = await prisma.report.findUnique({
-      where: {
-        id: Number(id),
-        type: "video",
-      },
-    });
+    const video = await Report.findOne({
+      _id: id,
+      type: "video",
+    }).lean();
 
     if (!video) {
       return NextResponse.json(
@@ -55,11 +56,7 @@ export async function PUT(
       return NextResponse.json({ message: "Não autorizado" }, { status: 401 });
     }
 
-    // Validar ID
-    const videoId = Number(id);
-    if (isNaN(videoId)) {
-      return NextResponse.json({ message: "ID inválido" }, { status: 400 });
-    }
+    await connectDB();
 
     // Obter dados do corpo da requisição
     const data = await request.json();
@@ -83,11 +80,11 @@ export async function PUT(
     ];
 
     // Filtrar apenas os campos permitidos
-    const updateData: Record<string, string | number | boolean | null> = {};
+    const updateData: Record<string, any> = {};
     for (const field of allowedFields) {
       if (field in data) {
         if (field === "tags" && Array.isArray(data[field])) {
-          updateData[field] = data[field].join(",");
+          updateData[field] = data[field];
         } else {
           updateData[field] = data[field];
         }
@@ -95,12 +92,18 @@ export async function PUT(
     }
 
     // Atualizar o vídeo
-    const updatedVideo = await prisma.report.update({
-      where: {
-        id: videoId,
-      },
-      data: updateData,
-    });
+    const updatedVideo = await Report.findByIdAndUpdate(
+      id,
+      { $set: updateData },
+      { new: true },
+    ).lean();
+
+    if (!updatedVideo) {
+      return NextResponse.json(
+        { message: "Vídeo não encontrado" },
+        { status: 404 },
+      );
+    }
 
     return NextResponse.json(updatedVideo);
   } catch (error) {
@@ -126,18 +129,17 @@ export async function DELETE(
       return NextResponse.json({ message: "Não autorizado" }, { status: 401 });
     }
 
-    // Validar ID
-    const videoId = Number(id);
-    if (isNaN(videoId)) {
-      return NextResponse.json({ message: "ID inválido" }, { status: 400 });
-    }
+    await connectDB();
 
     // Excluir o vídeo
-    await prisma.report.delete({
-      where: {
-        id: videoId,
-      },
-    });
+    const deletedVideo = await Report.findByIdAndDelete(id).lean();
+
+    if (!deletedVideo) {
+      return NextResponse.json(
+        { message: "Vídeo não encontrado" },
+        { status: 404 },
+      );
+    }
 
     return NextResponse.json({ message: "Vídeo excluído com sucesso" });
   } catch (error) {
