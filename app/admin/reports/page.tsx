@@ -1,40 +1,25 @@
 import { auth } from "@clerk/nextjs/server";
-import { redirect } from "next/navigation";
 import ReportsAdminClient from "./reports-admin-client";
 
-export default async function AdminReportsPage({
-  searchParams,
-}: {
-  searchParams: { [key: string]: string | string[] | undefined };
-}) {
+export default async function ReportsPage() {
   const { userId } = await auth();
 
   if (!userId) {
-    redirect("/");
-  }
-
-  // Obter parâmetro 'add' da URL
-  const addType = searchParams.add as string | undefined;
-
-  // Definir a seção inicial com base nos parâmetros da URL
-  let initialSection: "add" | "manage" = "manage";
-  let initialTab: "pdf" | "video" = "pdf";
-
-  if (addType === "pdf") {
-    initialSection = "add";
-    initialTab = "pdf";
-  } else if (addType === "video") {
-    initialSection = "add";
-    initialTab = "video";
+    return null;
   }
 
   return (
-    <div className="container mx-auto">
-      <ReportsAdminClient
-        adminEmail="admin@casadeanalises.com"
-        initialSection={initialSection}
-        initialTab={initialTab}
-      />
+    <div>
+      <div className="mb-8">
+        <h1 className="text-2xl font-bold text-gray-900">
+          Gerenciar Relatórios
+        </h1>
+        <p className="mt-1 text-sm text-gray-600">
+          Adicione e gerencie PDFs e vídeos de análises
+        </p>
+      </div>
+
+      <ReportsAdminClient adminEmail="admin@casadeanalises.com" />
     </div>
   );
 }
