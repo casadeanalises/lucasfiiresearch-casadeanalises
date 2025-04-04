@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "../ui/card";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "../ui/dialog";
-import { PlayCircle, Clock, Calendar, User, X } from "lucide-react";
+import { PlayCircle, Clock, Calendar, User, X, TrendingUp } from "lucide-react";
 
 interface Video {
   id: string;
@@ -18,6 +18,8 @@ interface Video {
   tags: string[];
   createdAt: string;
   type: string;
+  dividendYield?: string;
+  price?: string;
 }
 
 export function VideoList() {
@@ -40,8 +42,28 @@ export function VideoList() {
           throw new Error("Erro ao carregar os vídeos");
         }
         const data = await response.json();
-        console.log("Vídeos recebidos:", data);
-        setVideos(data);
+
+        // Processar os vídeos para garantir que a descrição está correta
+        const processedVideos = data.map((video: Video) => {
+          try {
+            // Se a descrição for uma string JSON, tentar parsear
+            if (video.description && video.description.startsWith("{")) {
+              const parsedDesc = JSON.parse(video.description);
+              return {
+                ...video,
+                description:
+                  parsedDesc.description || "Sem descrição disponível",
+                dividendYield: parsedDesc.dividendYield,
+                price: parsedDesc.price,
+              };
+            }
+            return video;
+          } catch (e) {
+            return video;
+          }
+        });
+
+        setVideos(processedVideos);
       } catch (err) {
         console.error("Erro ao buscar vídeos:", err);
         setError(err instanceof Error ? err.message : "Erro desconhecido");
@@ -92,7 +114,7 @@ export function VideoList() {
         {videos.map((video) => (
           <Card
             key={video.id}
-            className="group cursor-pointer overflow-hidden transition-all hover:shadow-lg"
+            className="group cursor-pointer overflow-hidden bg-white transition-all hover:shadow-lg"
             onClick={() => setSelectedVideo(video)}
           >
             <div className="relative aspect-video">
@@ -114,34 +136,36 @@ export function VideoList() {
               )}
             </div>
             <CardHeader className="pb-2">
-              <CardTitle className="line-clamp-2 text-lg">
+              <CardTitle className="line-clamp-2 text-lg text-gray-900">
                 {video.title}
               </CardTitle>
             </CardHeader>
             <CardContent>
-              <p className="mb-4 line-clamp-2 text-sm text-muted-foreground">
-                {video.description}
+              <p className="mb-4 line-clamp-2 text-sm text-gray-600">
+                {video.description || "Sem descrição disponível"}
               </p>
-              <div className="grid grid-cols-2 gap-4 text-sm text-muted-foreground">
+              <div className="grid grid-cols-2 gap-4 text-sm text-gray-600">
                 <div className="flex items-center gap-2">
-                  <User className="h-4 w-4" />
+                  <User className="h-4 w-4 text-blue-600" />
                   <span className="truncate">{video.author}</span>
                 </div>
                 <div className="flex items-center gap-2">
-                  <Calendar className="h-4 w-4" />
+                  <Calendar className="h-4 w-4 text-blue-600" />
                   <span>{formatDate(video.createdAt)}</span>
                 </div>
-                <div className="flex items-center gap-2">
-                  <Clock className="h-4 w-4" />
-                  <span>{video.time}</span>
-                </div>
+                {video.dividendYield && video.dividendYield !== "N/D" && (
+                  <div className="flex items-center gap-2">
+                    <TrendingUp className="h-4 w-4 text-blue-600" />
+                    <span>DY: {video.dividendYield}</span>
+                  </div>
+                )}
               </div>
-              {video.tags.length > 0 && (
+              {video.tags && video.tags.length > 0 && (
                 <div className="mt-4 flex flex-wrap gap-2">
                   {video.tags.map((tag, index) => (
                     <span
                       key={index}
-                      className="rounded-full bg-primary/10 px-2 py-1 text-xs font-medium text-primary"
+                      className="rounded-full bg-blue-50 px-2 py-1 text-xs font-medium text-blue-700"
                     >
                       {tag}
                     </span>
@@ -157,70 +181,75 @@ export function VideoList() {
         open={!!selectedVideo}
         onOpenChange={() => setSelectedVideo(null)}
       >
-        <DialogContent className="max-w-4xl overflow-hidden p-0">
+        <DialogContent className="h-[90vh] max-w-6xl overflow-hidden bg-white p-0">
           {selectedVideo && (
             <>
               <button
                 onClick={() => setSelectedVideo(null)}
-                className="absolute right-4 top-4 z-50 rounded-full bg-black/50 p-2 text-white transition-colors hover:bg-black/70"
+                className="absolute right-4 top-4 z-50 rounded-full border border-gray-200 bg-white p-2 text-gray-600 shadow-sm transition-colors hover:text-gray-900"
               >
                 <X className="h-4 w-4" />
               </button>
-              <div className="aspect-video w-full">
-                <iframe
-                  width="100%"
-                  height="100%"
-                  src={`https://www.youtube.com/embed/${selectedVideo.videoId}`}
-                  title={selectedVideo.title}
-                  allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                  allowFullScreen
-                  className="rounded-t-lg"
-                />
-              </div>
-              <div className="bg-gradient-to-b from-background to-background/80 p-6 backdrop-blur-sm">
-                <DialogHeader>
-                  <DialogTitle className="mb-2 text-2xl">
-                    {selectedVideo.title}
-                  </DialogTitle>
-                  <p className="text-muted-foreground">
-                    {selectedVideo.description}
-                  </p>
-                </DialogHeader>
-                <div className="mt-6 grid grid-cols-3 gap-4 text-sm">
-                  <div className="flex items-center gap-2">
-                    <User className="h-4 w-4 text-primary" />
-                    <span className="font-medium">Autor:</span>
-                    <span className="text-muted-foreground">
-                      {selectedVideo.author}
-                    </span>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <Calendar className="h-4 w-4 text-primary" />
-                    <span className="font-medium">Data:</span>
-                    <span className="text-muted-foreground">
-                      {formatDate(selectedVideo.createdAt)}
-                    </span>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <Clock className="h-4 w-4 text-primary" />
-                    <span className="font-medium">Duração:</span>
-                    <span className="text-muted-foreground">
-                      {selectedVideo.time}
-                    </span>
-                  </div>
+              <div className="flex h-full flex-col">
+                <div className="relative aspect-video w-full bg-black">
+                  <iframe
+                    width="100%"
+                    height="100%"
+                    src={`https://www.youtube.com/embed/${selectedVideo.videoId}`}
+                    title={selectedVideo.title}
+                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                    allowFullScreen
+                    className="absolute inset-0"
+                  />
                 </div>
-                {selectedVideo.tags.length > 0 && (
-                  <div className="mt-6 flex flex-wrap gap-2">
-                    {selectedVideo.tags.map((tag, index) => (
-                      <span
-                        key={index}
-                        className="rounded-full bg-primary/10 px-3 py-1 text-sm font-medium text-primary"
-                      >
-                        {tag}
+                <div className="flex-1 overflow-y-auto bg-white p-6">
+                  <DialogHeader className="mb-6">
+                    <DialogTitle className="text-2xl font-bold text-gray-900">
+                      {selectedVideo.title}
+                    </DialogTitle>
+                    <p className="mt-2 text-gray-600">
+                      {selectedVideo.description || "Sem descrição disponível"}
+                    </p>
+                  </DialogHeader>
+                  <div className="grid grid-cols-1 gap-4 text-sm md:grid-cols-2">
+                    <div className="flex items-center gap-2">
+                      <User className="h-4 w-4 text-blue-600" />
+                      <span className="font-medium text-gray-700">Autor:</span>
+                      <span className="text-gray-600">
+                        {selectedVideo.author}
                       </span>
-                    ))}
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <Calendar className="h-4 w-4 text-blue-600" />
+                      <span className="font-medium text-gray-700">Data:</span>
+                      <span className="text-gray-600">
+                        {formatDate(selectedVideo.createdAt)}
+                      </span>
+                    </div>
+                    {selectedVideo.dividendYield &&
+                      selectedVideo.dividendYield !== "N/D" && (
+                        <div className="flex items-center gap-2">
+                          <TrendingUp className="h-4 w-4 text-blue-600" />
+                          <span className="font-medium text-gray-700">DY:</span>
+                          <span className="text-gray-600">
+                            {selectedVideo.dividendYield}
+                          </span>
+                        </div>
+                      )}
                   </div>
-                )}
+                  {selectedVideo.tags && selectedVideo.tags.length > 0 && (
+                    <div className="mt-6 flex flex-wrap gap-2">
+                      {selectedVideo.tags.map((tag, index) => (
+                        <span
+                          key={index}
+                          className="rounded-full bg-blue-50 px-3 py-1 text-sm font-medium text-blue-700"
+                        >
+                          {tag}
+                        </span>
+                      ))}
+                    </div>
+                  )}
+                </div>
               </div>
             </>
           )}

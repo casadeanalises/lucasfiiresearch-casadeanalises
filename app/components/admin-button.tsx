@@ -4,6 +4,7 @@ import Link from "next/link";
 import { Button } from "@/app/_components/ui/button";
 import { useEffect, useState } from "react";
 import { useAuth, useUser } from "@clerk/nextjs";
+import { ShieldCheck } from "lucide-react";
 
 export function AdminButton() {
   const [isAdmin, setIsAdmin] = useState(false);
@@ -67,8 +68,15 @@ export function AdminButton() {
   }
 
   return (
-    <Link href="/admin/reports" passHref>
-      <Button variant="outline">Admin</Button>
-    </Link>
+    <Button
+      asChild
+      className="!hover:bg-blue-600 !border-none !bg-blue-600 !text-white !shadow-none !transition-none"
+      variant="ghost"
+    >
+      <Link href="/admin/reports" className="flex items-center">
+        <ShieldCheck className="mr-2 h-4 w-4" />
+        Admin
+      </Link>
+    </Button>
   );
 }

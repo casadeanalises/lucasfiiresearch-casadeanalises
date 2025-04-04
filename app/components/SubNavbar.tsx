@@ -10,31 +10,31 @@ const SubNavbar = () => {
 
   const menuItems = {
     Fundos: [
-      "Lista de Fundos",
-      "Comparador de Fundos",
-      "Radar de Fundos",
-      "Posições Vendidas",
+      { label: "Lista de Fundos", href: "#" },
+      { label: "Comparador de Fundos", href: "#" },
+      { label: "Radar de Fundos", href: "#" },
+      { label: "Posições Vendidas", href: "#" },
     ],
     "Dados de Mercado": [
-      "Agenda da Semana",
-      "Boletim Focus",
-      "Selic",
-      "IPCA",
-      "IGP-M",
-      "Juros Futuros",
-      "Títulos Públicos",
-      "IFIX",
-      "Índices de Mercado",
-      "Dólar",
-      "Resultado Fiscal",
-      "Emissão primária CRI / CRA / Deb. Incentivada",
+      { label: "Agenda da Semana", href: "#" },
+      { label: "Boletim Focus", href: "#" },
+      { label: "Selic", href: "#" },
+      { label: "IPCA", href: "#" },
+      { label: "IGP-M", href: "#" },
+      { label: "Juros Futuros", href: "#" },
+      { label: "Títulos Públicos", href: "#" },
+      { label: "IFIX", href: "#" },
+      { label: "Índices de Mercado", href: "#" },
+      { label: "Dólar", href: "#" },
+      { label: "Resultado Fiscal", href: "#" },
+      { label: "Emissão primária CRI / CRA / Deb. Incentivada", href: "#" },
     ],
     Research: [
-      "Relatório Semanal",
-      "Carteira Recomendada",
-      "Curso de Investimento",
-      "Fundos não recomendados",
-      "Ranking de Gestoras",
+      { label: "Relatório Semanal", href: "/reports" },
+      { label: "Carteira Recomendada", href: "/dashboard" },
+      { label: "Curso de Investimento", href: "#" },
+      { label: "Fundos não recomendados", href: "#" },
+      { label: "Ranking de Gestoras", href: "#" },
     ],
   };
 
@@ -79,11 +79,11 @@ const SubNavbar = () => {
                   <div className="py-2">
                     {items.map((item) => (
                       <Link
-                        key={item}
-                        href="#"
+                        key={item.label}
+                        href={item.href}
                         className="block px-4 py-2 text-sm text-gray-300 hover:bg-gray-700 hover:text-white"
                       >
-                        {item}
+                        {item.label}
                       </Link>
                     ))}
                   </div>
@@ -130,11 +130,11 @@ const SubNavbar = () => {
                     <div className="py-2">
                       {items.map((item) => (
                         <Link
-                          key={item}
-                          href="#"
+                          key={item.label}
+                          href={item.href}
                           className="block px-4 py-2 text-sm text-gray-300 hover:bg-gray-700 hover:text-white"
                         >
-                          {item}
+                          {item.label}
                         </Link>
                       ))}
                     </div>

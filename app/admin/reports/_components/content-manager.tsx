@@ -2,6 +2,14 @@
 
 import React, { useEffect, useState } from "react";
 import { toast } from "sonner";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+} from "../../../components/ui/dialog";
+import { X } from "lucide-react";
+import PdfViewer from "../../../components/ui/pdf-viewer";
 
 interface Report {
   id: string;
@@ -39,6 +47,7 @@ const ContentManager: React.FC<ContentManagerProps> = ({
   const [loading, setLoading] = useState(true);
   const [items, setItems] = useState<Report[]>([]);
   const [searchTerm, setSearchTerm] = useState("");
+  const [selectedPdf, setSelectedPdf] = useState<Report | null>(null);
 
   useEffect(() => {
     const fetchItems = async () => {
@@ -93,10 +102,30 @@ const ContentManager: React.FC<ContentManagerProps> = ({
       }
 
       setItems(items.filter((item) => item.id !== id));
-      toast.success("Item excluído com sucesso");
+      toast.success(
+        `${activeTab === "pdf" ? "PDF" : "Vídeo"} excluído com sucesso!`,
+        {
+          duration: 4000,
+          icon: activeTab === "pdf" ? "📄" : "🎥",
+          style: {
+            background: "#4CAF50",
+            color: "#fff",
+          },
+        },
+      );
     } catch (error) {
-      console.error("Erro ao excluir item:", error);
-      toast.error("Erro ao excluir item");
+      console.error(
+        `Erro ao excluir ${activeTab === "pdf" ? "PDF" : "vídeo"}:`,
+        error,
+      );
+      toast.error(`Erro ao excluir ${activeTab === "pdf" ? "PDF" : "vídeo"}`, {
+        duration: 4000,
+        icon: "❌",
+        style: {
+          background: "#ef4444",
+          color: "#fff",
+        },
+      });
     }
   };
 
@@ -230,7 +259,14 @@ const ContentManager: React.FC<ContentManagerProps> = ({
                   {filteredItems.map((item) => (
                     <tr key={item.id}>
                       <td className="whitespace-nowrap px-6 py-4">
-                        <div className="text-sm font-medium text-gray-900">
+                        <div
+                          className={`text-sm font-medium ${activeTab === "pdf" ? "cursor-pointer text-blue-600 hover:text-blue-800" : "text-gray-900"}`}
+                          onClick={() =>
+                            activeTab === "pdf" &&
+                            item.url &&
+                            setSelectedPdf(item)
+                          }
+                        >
                           {item.title}
                         </div>
                         <div className="text-sm text-gray-500">
@@ -268,6 +304,20 @@ const ContentManager: React.FC<ContentManagerProps> = ({
           )}
         </>
       )}
+
+      <Dialog open={!!selectedPdf} onOpenChange={() => setSelectedPdf(null)}>
+        <DialogContent className="h-[80vh] max-w-4xl p-0">
+          <button
+            onClick={() => setSelectedPdf(null)}
+            className="absolute right-4 top-4 z-50 rounded-full bg-white/10 p-2 transition-colors hover:bg-white/20"
+          >
+            <X className="h-4 w-4" />
+          </button>
+          {selectedPdf && selectedPdf.url && (
+            <PdfViewer url={selectedPdf.url} title={selectedPdf.title} />
+          )}
+        </DialogContent>
+      </Dialog>
     </div>
   );
 };

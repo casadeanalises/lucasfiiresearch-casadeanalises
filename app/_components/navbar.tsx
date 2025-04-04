@@ -125,7 +125,7 @@ const Navbar = () => {
         Assinatura
       </Link>
 
-      <Link
+      {/* <Link
         href="/reports"
         className={
           pathname === "/reports"
@@ -135,9 +135,9 @@ const Navbar = () => {
         onClick={(e) => handleRestrictedLink(e, "/reports")}
       >
         Relatórios
-      </Link>
+      </Link> */}
 
-      <Link
+      {/* <Link
         href="/dashboard"
         className={
           pathname === "/dashboard"
@@ -147,7 +147,7 @@ const Navbar = () => {
         onClick={(e) => handleRestrictedLink(e, "/dashboard")}
       >
         Dashboard
-      </Link>
+      </Link> */}
 
       {isAdmin && (
         <Link
@@ -207,7 +207,8 @@ const Navbar = () => {
         </div>
       </div>
 
-      {/* Layout Mobile e Tablet */}
+      {/* === Layout Mobile e Tablet === */}
+
       <div className="flex items-center justify-between px-4 py-4 lg:hidden">
         <Sheet open={isOpen} onOpenChange={setIsOpen}>
           <SheetTrigger asChild>
@@ -249,7 +250,7 @@ const Navbar = () => {
                 Assinatura
               </Link>
 
-              <Link
+              {/* <Link
                 href="/reports"
                 className={
                   pathname === "/reports"
@@ -259,7 +260,7 @@ const Navbar = () => {
                 onClick={(e) => handleRestrictedLink(e, "/reports")}
               >
                 Relatórios
-              </Link>
+              </Link> */}
 
               <Link
                 href="/dashboard"

@@ -1,7 +1,9 @@
 import { NextResponse } from "next/server";
-import { auth } from "@clerk/nextjs/server";
+import { auth, clerkClient } from "@clerk/nextjs/server";
 import connectDB from "@/app/lib/mongodb";
 import Report from "@/app/models/Report";
+import { prisma } from "@/lib/prisma";
+import { isAdmin } from "@/lib/admin";
 
 export async function GET(
   request: Request,
@@ -120,23 +122,36 @@ export async function DELETE(
   { params }: { params: { id: string } },
 ) {
   try {
-    // Extrair o ID do vídeo dos parâmetros
-    const { id } = params;
+    const { userId } = await auth();
 
-    // Verificar se o usuário está autenticado
-    const { userId } = auth();
     if (!userId) {
-      return NextResponse.json({ message: "Não autorizado" }, { status: 401 });
+      return NextResponse.json({ error: "Não autorizado" }, { status: 401 });
     }
 
-    await connectDB();
+    const user = await clerkClient().users.getUser(userId);
 
-    // Excluir o vídeo
-    const deletedVideo = await Report.findByIdAndDelete(id).lean();
+    if (!user) {
+      return NextResponse.json({ error: "Não autorizado" }, { status: 401 });
+    }
 
-    if (!deletedVideo) {
+    const userEmail = user.primaryEmailAddress?.emailAddress;
+
+    if (!isAdmin(userEmail)) {
+      console.log("Usuário não é admin:", { userEmail });
+      return NextResponse.json({ error: "Não autorizado" }, { status: 401 });
+    }
+
+    const { id } = params;
+
+    const video = await prisma.report.delete({
+      where: {
+        id: id,
+      },
+    });
+
+    if (!video) {
       return NextResponse.json(
-        { message: "Vídeo não encontrado" },
+        { error: "Vídeo não encontrado" },
         { status: 404 },
       );
     }
@@ -145,7 +160,7 @@ export async function DELETE(
   } catch (error) {
     console.error("Erro ao excluir vídeo:", error);
     return NextResponse.json(
-      { message: "Erro ao excluir vídeo", error },
+      { error: "Erro ao excluir vídeo" },
       { status: 500 },
     );
   }

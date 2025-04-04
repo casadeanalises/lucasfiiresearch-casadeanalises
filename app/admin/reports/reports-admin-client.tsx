@@ -229,7 +229,14 @@ const ReportsAdminClient = ({
 
       const result = await response.json();
 
-      toast.success("PDF salvo com sucesso!");
+      toast.success("PDF salvo com sucesso!", {
+        duration: 4000,
+        icon: "📄",
+        style: {
+          background: "#4CAF50",
+          color: "#fff",
+        },
+      });
 
       // Resetar o formulário
       resetForm();
@@ -382,7 +389,14 @@ const ReportsAdminClient = ({
 
       const result = await response.json();
 
-      toast.success("Vídeo salvo com sucesso!");
+      toast.success("Vídeo salvo com sucesso!", {
+        duration: 4000,
+        icon: "🎥",
+        style: {
+          background: "#4CAF50",
+          color: "#fff",
+        },
+      });
 
       // Resetar o formulário
       resetVideoForm();

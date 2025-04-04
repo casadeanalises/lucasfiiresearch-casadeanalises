@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "../ui/card";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "../ui/dialog";
 import { FileText, Calendar, User, X, Download, Eye } from "lucide-react";
+import PdfViewer from "../ui/pdf-viewer";
 
 interface PDF {
   id: string;
@@ -140,7 +141,7 @@ export function PDFList() {
       </div>
 
       <Dialog open={!!selectedPDF} onOpenChange={() => setSelectedPDF(null)}>
-        <DialogContent className="max-w-4xl overflow-hidden p-0">
+        <DialogContent className="h-[90vh] max-w-6xl overflow-hidden p-0">
           {selectedPDF && (
             <>
               <button
@@ -149,59 +150,36 @@ export function PDFList() {
               >
                 <X className="h-4 w-4" />
               </button>
-              <div className="bg-gradient-to-b from-background to-background/80 p-6 backdrop-blur-sm">
-                <DialogHeader className="mb-6">
-                  <DialogTitle className="mb-2 text-2xl">
-                    {selectedPDF.title}
-                  </DialogTitle>
-                  <p className="text-muted-foreground">
-                    {selectedPDF.description}
-                  </p>
-                </DialogHeader>
-                <div className="mb-6 grid grid-cols-2 gap-4 text-sm">
-                  <div className="flex items-center gap-2">
-                    <User className="h-4 w-4 text-primary" />
-                    <span className="font-medium">Autor:</span>
-                    <span className="text-muted-foreground">
-                      {selectedPDF.author}
-                    </span>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <Calendar className="h-4 w-4 text-primary" />
-                    <span className="font-medium">Data:</span>
-                    <span className="text-muted-foreground">
-                      {selectedPDF.date}
-                    </span>
-                  </div>
+              <div className="flex h-full flex-col">
+                <div className="bg-gradient-to-b from-background to-background/80 p-6 backdrop-blur-sm">
+                  <DialogHeader>
+                    <DialogTitle className="text-2xl">
+                      {selectedPDF.title}
+                    </DialogTitle>
+                    <div className="mt-2 flex items-center gap-4 text-sm text-muted-foreground">
+                      <div className="flex items-center gap-2">
+                        <User className="h-4 w-4" />
+                        <span>{selectedPDF.author}</span>
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <Calendar className="h-4 w-4" />
+                        <span>{selectedPDF.date}</span>
+                      </div>
+                    </div>
+                  </DialogHeader>
                 </div>
-                {selectedPDF.tags.length > 0 && (
-                  <div className="mb-6 flex flex-wrap gap-2">
-                    {selectedPDF.tags.map((tag, index) => (
-                      <span
-                        key={index}
-                        className="rounded-full bg-primary/10 px-3 py-1 text-sm font-medium text-primary"
-                      >
-                        {tag}
-                      </span>
-                    ))}
-                  </div>
-                )}
-                <div className="rounded-lg border bg-card">
-                  {selectedPDF.fileContent ? (
-                    <iframe
-                      src={`data:application/pdf;base64,${selectedPDF.fileContent}`}
-                      className="h-[600px] w-full rounded-lg"
+                <div className="flex-1 overflow-hidden bg-muted/30 p-6">
+                  {selectedPDF.url ? (
+                    <PdfViewer
+                      url={selectedPDF.url}
+                      title={selectedPDF.title}
                     />
                   ) : (
-                    <div className="flex h-[200px] flex-col items-center justify-center p-6 text-center">
+                    <div className="flex h-full flex-col items-center justify-center p-6 text-center">
                       <FileText className="mb-4 h-12 w-12 text-primary/40" />
                       <p className="mb-4 text-muted-foreground">
-                        Conteúdo do PDF não disponível para visualização
+                        PDF não disponível para visualização
                       </p>
-                      <button className="inline-flex items-center gap-2 rounded-full bg-primary px-4 py-2 text-sm font-medium text-primary-foreground transition-colors hover:bg-primary/90">
-                        <Download className="h-4 w-4" />
-                        Baixar PDF
-                      </button>
                     </div>
                   )}
                 </div>
