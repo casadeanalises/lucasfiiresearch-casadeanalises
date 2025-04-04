@@ -3,6 +3,7 @@
 import { useEffect } from "react";
 import Image from "next/image";
 import { Button } from "../_components/ui/button";
+import { useAuth } from "@clerk/nextjs";
 import {
   // LogInIcon,
   BarChart3Icon,
@@ -15,15 +16,18 @@ import {
   LineChartIcon,
   PieChartIcon,
   UserIcon,
+  PlayCircleIcon,
 } from "lucide-react";
 // import { SignInButton } from "@clerk/nextjs";
 // import Link from "next/link";
 import Footer from "../_components/footer";
 import AOS from "aos";
 import "aos/dist/aos.css";
+import LoggedInHome from "./LoggedInHome";
 
-// TODO:This component will accept userId parameter when auth is implemented
 const LandingPage = () => {
+  const { isSignedIn } = useAuth();
+
   useEffect(() => {
     AOS.init({
       duration: 800,
@@ -31,6 +35,10 @@ const LandingPage = () => {
       once: false,
     });
   }, []);
+
+  if (isSignedIn) {
+    return <LoggedInHome />;
+  }
 
   return (
     <div className="w-full overflow-x-hidden">
@@ -50,16 +58,19 @@ const LandingPage = () => {
               CasaDeAnálises | Lucas FII
             </div>
             <h1 className="text-4xl font-bold md:text-5xl lg:text-6xl">
-              Seja Bem Vindo a CasaDeAnálises!{" "}
+              {isSignedIn
+                ? "Bem-vindo de volta!"
+                : "Seja Bem Vindo a CasaDeAnálises!"}{" "}
               <span className="bg-gradient-to-r from-primary to-indigo-400 bg-clip-text text-transparent">
-                VENHA APRENDER A INVESTIR COM SABEDORIA!
+                {isSignedIn
+                  ? "Vamos analisar o mercado?"
+                  : "VENHA APRENDER A INVESTIR COM SABEDORIA!"}
               </span>
             </h1>
             <p className="text-lg text-slate-300">
-              À plataforma Casa de Análises do Lucas FII! Aqui você encontra
-              análises completas e aprofundadas sobre Fundos Imobiliários
-              (FIIs), tendências do mercado, oportunidades de investimento e
-              muito mais.
+              {isSignedIn
+                ? "Continue suas análises e acompanhe as últimas atualizações do mercado. Temos novos conteúdos exclusivos para você!"
+                : "À plataforma Casa de Análises do Lucas FII! Aqui você encontra análises completas e aprofundadas sobre Fundos Imobiliários (FIIs), tendências do mercado, oportunidades de investimento e muito mais."}
             </p>
 
             {/* TODO:  <div className="flex flex-wrap gap-4">
@@ -112,7 +123,7 @@ const LandingPage = () => {
           <div className="relative h-[400px] md:h-[500px]" data-aos="fade-left">
             <div className="absolute -left-10 -top-10 h-full w-full rounded-2xl bg-gradient-to-br from-primary/20 to-indigo-500/20 blur-xl"></div>
             <Image
-              src="/login.png"
+              src={isSignedIn ? "/dashboard-preview.png" : "/login.png"}
               alt="CasaDeAnálises | Lucas FII"
               fill
               className="relative z-10 rounded-xl object-cover shadow-2xl"
@@ -123,6 +134,69 @@ const LandingPage = () => {
             <div className="absolute -bottom-4 -left-4 h-8 w-8 rounded-full bg-indigo-500"></div>
           </div>
         </div>
+
+        {isSignedIn && (
+          <div className="relative mx-auto mt-12 max-w-6xl px-4">
+            <div
+              className="grid grid-cols-1 gap-6 md:grid-cols-3"
+              data-aos="fade-up"
+            >
+              {/* Seção de Vídeos em Destaque */}
+              <div className="rounded-xl border border-white/10 bg-white/5 p-6 backdrop-blur-sm">
+                <div className="mb-4 flex items-center gap-3">
+                  <PlayCircleIcon className="h-6 w-6 text-primary" />
+                  <h3 className="text-lg font-semibold">Vídeos em Destaque</h3>
+                </div>
+                <div className="space-y-3">
+                  <div className="flex items-center gap-2 text-sm text-slate-300">
+                    <div className="h-2 w-2 rounded-full bg-primary"></div>
+                    <span>Análise do Mercado - Abril 2024</span>
+                  </div>
+                  <div className="flex items-center gap-2 text-sm text-slate-300">
+                    <div className="h-2 w-2 rounded-full bg-primary"></div>
+                    <span>Top 10 FIIs para Investir</span>
+                  </div>
+                </div>
+              </div>
+
+              {/* Seção de Análises Recentes */}
+              <div className="rounded-xl border border-white/10 bg-white/5 p-6 backdrop-blur-sm">
+                <div className="mb-4 flex items-center gap-3">
+                  <BarChart2Icon className="h-6 w-6 text-primary" />
+                  <h3 className="text-lg font-semibold">Análises Recentes</h3>
+                </div>
+                <div className="space-y-3">
+                  <div className="flex items-center gap-2 text-sm text-slate-300">
+                    <div className="h-2 w-2 rounded-full bg-primary"></div>
+                    <span>XPLG11 - Análise Completa</span>
+                  </div>
+                  <div className="flex items-center gap-2 text-sm text-slate-300">
+                    <div className="h-2 w-2 rounded-full bg-primary"></div>
+                    <span>HGLG11 - Relatório Mensal</span>
+                  </div>
+                </div>
+              </div>
+
+              {/* Seção de Eventos */}
+              <div className="rounded-xl border border-white/10 bg-white/5 p-6 backdrop-blur-sm">
+                <div className="mb-4 flex items-center gap-3">
+                  <UserIcon className="h-6 w-6 text-primary" />
+                  <h3 className="text-lg font-semibold">Próximos Eventos</h3>
+                </div>
+                <div className="space-y-3">
+                  <div className="flex items-center gap-2 text-sm text-slate-300">
+                    <div className="h-2 w-2 rounded-full bg-primary"></div>
+                    <span>Live: Análise de Mercado - 15/04</span>
+                  </div>
+                  <div className="flex items-center gap-2 text-sm text-slate-300">
+                    <div className="h-2 w-2 rounded-full bg-primary"></div>
+                    <span>Webinar: Estratégias FII - 20/04</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
 
         {/* === Estatísticas rápidas - Adiciona credibilidade === */}
 
@@ -161,72 +235,143 @@ const LandingPage = () => {
               <BarChart2Icon className="h-6 w-6 text-primary" />
             </div>
             <h2 className="mb-4 bg-gradient-to-r from-slate-900 to-slate-700 bg-clip-text text-3xl font-bold text-transparent">
-              Análise completa de FIIs
+              {isSignedIn ? "Conteúdo Exclusivo" : "Análise completa de FIIs"}
             </h2>
             <p className="mx-auto max-w-2xl text-lg text-slate-600">
-              Gerencie seus Fundos de Investimento Imobiliário com inteligência
-              artificial e tome decisões mais acertadas para seu patrimônio.
+              {isSignedIn
+                ? "Acesse nosso conteúdo premium e ferramentas exclusivas para membros."
+                : "Gerencie seus Fundos de Investimento Imobiliário com inteligência artificial e tome decisões mais acertadas para seu patrimônio."}
             </p>
           </div>
 
-          <div className="grid gap-8 md:grid-cols-3">
-            <div
-              className="group rounded-xl border border-slate-100 bg-white p-8 shadow-lg transition-all duration-300 hover:-translate-y-1 hover:border-primary/20 hover:shadow-xl"
-              data-aos="fade-up"
-              data-aos-delay="100"
-            >
-              <div className="mb-6 w-fit rounded-full bg-primary/10 p-4 transition-colors duration-300 group-hover:bg-primary/20">
-                <BarChart3Icon className="h-8 w-8 text-primary" />
+          {isSignedIn ? (
+            <div className="grid gap-8 md:grid-cols-3">
+              {/* Card de Análises Premium */}
+              <div
+                className="group rounded-xl border border-slate-100 bg-white p-8 shadow-lg transition-all duration-300 hover:-translate-y-1 hover:border-primary/20 hover:shadow-xl"
+                data-aos="fade-up"
+                data-aos-delay="100"
+              >
+                <div className="mb-6 w-fit rounded-full bg-primary/10 p-4 transition-colors duration-300 group-hover:bg-primary/20">
+                  <LineChartIcon className="h-8 w-8 text-primary" />
+                </div>
+                <h3 className="mb-3 text-xl font-bold">Análises Premium</h3>
+                <p className="text-slate-600">
+                  Acesse análises aprofundadas e exclusivas dos melhores FIIs do
+                  mercado, com recomendações detalhadas e projeções futuras.
+                </p>
+                <div className="mt-6 flex items-center font-medium text-primary">
+                  <span>Ver análises</span>
+                  <ArrowRightIcon className="ml-2 h-4 w-4 transition-transform duration-300 group-hover:translate-x-1" />
+                </div>
               </div>
-              <h3 className="mb-3 text-xl font-bold">Dashboard Completo</h3>
-              <p className="text-slate-600">
-                Visualize todos os seus investimentos em um único lugar com
-                gráficos intuitivos e análises detalhadas em tempo real.
-              </p>
-              <div className="mt-6 flex items-center font-medium text-primary">
-                <span>Saiba mais</span>
-                <ArrowRightIcon className="ml-2 h-4 w-4 transition-transform duration-300 group-hover:translate-x-1" />
-              </div>
-            </div>
 
-            <div
-              className="group rounded-xl border border-slate-100 bg-white p-8 shadow-lg transition-all duration-300 hover:-translate-y-1 hover:border-primary/20 hover:shadow-xl"
-              data-aos="fade-up"
-              data-aos-delay="200"
-            >
-              <div className="mb-6 w-fit rounded-full bg-primary/10 p-4 transition-colors duration-300 group-hover:bg-primary/20">
-                <TrendingUpIcon className="h-8 w-8 text-primary" />
+              {/* Card de Carteiras Recomendadas */}
+              <div
+                className="group rounded-xl border border-slate-100 bg-white p-8 shadow-lg transition-all duration-300 hover:-translate-y-1 hover:border-primary/20 hover:shadow-xl"
+                data-aos="fade-up"
+                data-aos-delay="200"
+              >
+                <div className="mb-6 w-fit rounded-full bg-primary/10 p-4 transition-colors duration-300 group-hover:bg-primary/20">
+                  <PieChartIcon className="h-8 w-8 text-primary" />
+                </div>
+                <h3 className="mb-3 text-xl font-bold">
+                  Carteiras Recomendadas
+                </h3>
+                <p className="text-slate-600">
+                  Acompanhe nossas carteiras modelo e receba alertas em tempo
+                  real sobre mudanças e rebalanceamentos sugeridos.
+                </p>
+                <div className="mt-6 flex items-center font-medium text-primary">
+                  <span>Ver carteiras</span>
+                  <ArrowRightIcon className="ml-2 h-4 w-4 transition-transform duration-300 group-hover:translate-x-1" />
+                </div>
               </div>
-              <h3 className="mb-3 text-xl font-bold">Análise de Tendências</h3>
-              <p className="text-slate-600">
-                Nossa IA analisa o mercado e identifica tendências para seus
-                FIIs, trazendo insights valiosos para seu investimento.
-              </p>
-              <div className="mt-6 flex items-center font-medium text-primary">
-                <span>Saiba mais</span>
-                <ArrowRightIcon className="ml-2 h-4 w-4 transition-transform duration-300 group-hover:translate-x-1" />
-              </div>
-            </div>
 
-            <div
-              className="group rounded-xl border border-slate-100 bg-white p-8 shadow-lg transition-all duration-300 hover:-translate-y-1 hover:border-primary/20 hover:shadow-xl"
-              data-aos="fade-up"
-              data-aos-delay="300"
-            >
-              <div className="mb-6 w-fit rounded-full bg-primary/10 p-4 transition-colors duration-300 group-hover:bg-primary/20">
-                <ShieldIcon className="h-8 w-8 text-primary" />
-              </div>
-              <h3 className="mb-3 text-xl font-bold">Proteção Patrimonial</h3>
-              <p className="text-slate-600">
-                Alertas inteligentes sobre riscos em sua carteira para proteger
-                seu patrimônio de oscilações do mercado imobiliário.
-              </p>
-              <div className="mt-6 flex items-center font-medium text-primary">
-                <span>Saiba mais</span>
-                <ArrowRightIcon className="ml-2 h-4 w-4 transition-transform duration-300 group-hover:translate-x-1" />
+              {/* Card de Cursos e Treinamentos */}
+              <div
+                className="group rounded-xl border border-slate-100 bg-white p-8 shadow-lg transition-all duration-300 hover:-translate-y-1 hover:border-primary/20 hover:shadow-xl"
+                data-aos="fade-up"
+                data-aos-delay="300"
+              >
+                <div className="mb-6 w-fit rounded-full bg-primary/10 p-4 transition-colors duration-300 group-hover:bg-primary/20">
+                  <PlayCircleIcon className="h-8 w-8 text-primary" />
+                </div>
+                <h3 className="mb-3 text-xl font-bold">
+                  Cursos e Treinamentos
+                </h3>
+                <p className="text-slate-600">
+                  Acesse nossa biblioteca de cursos e treinamentos exclusivos
+                  sobre análise de FIIs e estratégias de investimento.
+                </p>
+                <div className="mt-6 flex items-center font-medium text-primary">
+                  <span>Acessar cursos</span>
+                  <ArrowRightIcon className="ml-2 h-4 w-4 transition-transform duration-300 group-hover:translate-x-1" />
+                </div>
               </div>
             </div>
-          </div>
+          ) : (
+            <div className="grid gap-8 md:grid-cols-3">
+              <div
+                className="group rounded-xl border border-slate-100 bg-white p-8 shadow-lg transition-all duration-300 hover:-translate-y-1 hover:border-primary/20 hover:shadow-xl"
+                data-aos="fade-up"
+                data-aos-delay="100"
+              >
+                <div className="mb-6 w-fit rounded-full bg-primary/10 p-4 transition-colors duration-300 group-hover:bg-primary/20">
+                  <BarChart3Icon className="h-8 w-8 text-primary" />
+                </div>
+                <h3 className="mb-3 text-xl font-bold">Dashboard Completo</h3>
+                <p className="text-slate-600">
+                  Visualize todos os seus investimentos em um único lugar com
+                  gráficos intuitivos e análises detalhadas em tempo real.
+                </p>
+                <div className="mt-6 flex items-center font-medium text-primary">
+                  <span>Saiba mais</span>
+                  <ArrowRightIcon className="ml-2 h-4 w-4 transition-transform duration-300 group-hover:translate-x-1" />
+                </div>
+              </div>
+
+              <div
+                className="group rounded-xl border border-slate-100 bg-white p-8 shadow-lg transition-all duration-300 hover:-translate-y-1 hover:border-primary/20 hover:shadow-xl"
+                data-aos="fade-up"
+                data-aos-delay="200"
+              >
+                <div className="mb-6 w-fit rounded-full bg-primary/10 p-4 transition-colors duration-300 group-hover:bg-primary/20">
+                  <TrendingUpIcon className="h-8 w-8 text-primary" />
+                </div>
+                <h3 className="mb-3 text-xl font-bold">
+                  Análise de Tendências
+                </h3>
+                <p className="text-slate-600">
+                  Nossa IA analisa o mercado e identifica tendências para seus
+                  FIIs, trazendo insights valiosos para seu investimento.
+                </p>
+                <div className="mt-6 flex items-center font-medium text-primary">
+                  <span>Saiba mais</span>
+                  <ArrowRightIcon className="ml-2 h-4 w-4 transition-transform duration-300 group-hover:translate-x-1" />
+                </div>
+              </div>
+
+              <div
+                className="group rounded-xl border border-slate-100 bg-white p-8 shadow-lg transition-all duration-300 hover:-translate-y-1 hover:border-primary/20 hover:shadow-xl"
+                data-aos="fade-up"
+                data-aos-delay="300"
+              >
+                <div className="mb-6 w-fit rounded-full bg-primary/10 p-4 transition-colors duration-300 group-hover:bg-primary/20">
+                  <ShieldIcon className="h-8 w-8 text-primary" />
+                </div>
+                <h3 className="mb-3 text-xl font-bold">Proteção Patrimonial</h3>
+                <p className="text-slate-600">
+                  Alertas inteligentes sobre riscos em sua carteira para
+                  proteger seu patrimônio de oscilações do mercado imobiliário.
+                </p>
+                <div className="mt-6 flex items-center font-medium text-primary">
+                  <span>Saiba mais</span>
+                  <ArrowRightIcon className="ml-2 h-4 w-4 transition-transform duration-300 group-hover:translate-x-1" />
+                </div>
+              </div>
+            </div>
+          )}
         </div>
       </section>
 
