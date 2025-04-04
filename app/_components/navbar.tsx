@@ -46,15 +46,15 @@ const Navbar = () => {
     elements: {
       avatarBox: "w-9 h-9",
       userButtonBox: "flex items-center gap-2",
-      userButtonOuterIdentifier: "text-secondary font-medium",
+      userButtonOuterIdentifier: "text-gray-700 font-medium",
       userButtonTrigger:
         "focus:shadow-none focus:ring-2 focus:ring-primary/20 hover:opacity-80 transition-opacity",
       userButtonPopoverCard: "shadow-lg border border-gray-100 !w-[240px]",
       userButtonPopoverActions: "p-2 flex flex-col gap-1",
       userButtonPopoverActionButton:
         "flex items-center gap-2 p-2 rounded-lg hover:bg-primary/10 text-sm font-medium transition-colors",
-      userButtonPopoverActionButtonText: "text-secondary",
-      userButtonPopoverActionButtonIcon: "w-4 h-4 text-secondary",
+      userButtonPopoverActionButtonText: "text-gray-700",
+      userButtonPopoverActionButtonIcon: "w-4 h-4 text-gray-700",
     },
     layout: {
       shimmer: false,
@@ -73,8 +73,8 @@ const Navbar = () => {
       userButtonPopoverActions: "p-2 flex flex-col gap-1",
       userButtonPopoverActionButton:
         "flex items-center gap-2 p-2 rounded-lg hover:bg-primary/10 text-sm font-medium transition-colors",
-      userButtonPopoverActionButtonText: "text-secondary",
-      userButtonPopoverActionButtonIcon: "w-4 h-4 text-secondary",
+      userButtonPopoverActionButtonText: "text-gray-700",
+      userButtonPopoverActionButtonIcon: "w-4 h-4 text-gray-700",
     },
     layout: {
       shimmer: false,
