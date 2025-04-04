@@ -1,7 +1,6 @@
 "use client";
 
 import { useEffect } from "react";
-import Navbar from "../_components/navbar";
 import Footer from "../_components/footer";
 import {
   ShieldIcon,
@@ -24,8 +23,6 @@ const PrivacyPage = () => {
 
   return (
     <div className="min-h-screen bg-slate-50">
-      <Navbar />
-
       {/* Hero Section */}
       <section className="relative bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 py-20 text-white">
         <div className="absolute inset-0 bg-[url('/grid.svg')] bg-center opacity-10"></div>
