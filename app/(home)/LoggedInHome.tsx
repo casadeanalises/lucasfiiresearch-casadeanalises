@@ -17,9 +17,11 @@ import {
 } from "lucide-react";
 import AOS from "aos";
 import { useEffect, useState } from "react";
+import { useFIIData } from "../hooks/useFIIData";
 
 const LoggedInHome = () => {
   const [currentSlide, setCurrentSlide] = useState(0);
+  const { quotes, loading } = useFIIData();
 
   const carouselItems = [
     {
@@ -83,79 +85,56 @@ const LoggedInHome = () => {
               <ChevronLeftIcon className="h-5 w-5 text-slate-600" />
             </button>
 
-            <div className="flex flex-1 items-center gap-8 overflow-hidden px-4">
-              {[
-                {
-                  ticker: "FCFL11",
-                  price: "R$ 111,50",
-                  change: "-0.45",
-                  isNegative: true,
-                },
-                {
-                  ticker: "CPTS11",
-                  price: "R$ 7,24",
-                  change: "+0.42",
-                  isNegative: false,
-                },
-                {
-                  ticker: "SCPF11",
-                  price: "R$ 1,84",
-                  change: "0.00",
-                  isNegative: false,
-                },
-                {
-                  ticker: "KNOX11",
-                  price: "R$ 100,90",
-                  change: "0.00",
-                  isNegative: false,
-                },
-                {
-                  ticker: "BARI11",
-                  price: "R$ 74,57",
-                  change: "+1.46",
-                  isNegative: false,
-                },
-                {
-                  ticker: "AGXY3",
-                  price: "R$ 0,53",
-                  change: "+1.92",
-                  isNegative: false,
-                },
-                {
-                  ticker: "CYRE3",
-                  price: "R$ 24,10",
-                  change: "+1.56",
-                  isNegative: false,
-                },
-                {
-                  ticker: "BNFS11",
-                  price: "R$ 70,10",
-                  change: "0.00",
-                  isNegative: false,
-                },
-              ].map((fund, index) => (
-                <div key={index} className="flex items-center gap-2">
-                  <div>
-                    <p className="font-medium text-slate-800">{fund.ticker}</p>
-                    <div className="flex items-center gap-2">
-                      <span className="text-sm text-slate-600">
-                        {fund.price}
-                      </span>
-                      <span
-                        className={`text-sm ${
-                          fund.change === "0.00"
-                            ? "text-slate-600"
-                            : fund.isNegative
-                              ? "text-red-600"
-                              : "text-green-600"
-                        }`}
+            <div className="flex-1 overflow-hidden">
+              {loading ? (
+                <div className="flex items-center justify-center py-2">
+                  <div className="h-5 w-5 animate-spin rounded-full border-2 border-blue-600 border-t-transparent"></div>
+                  <span className="ml-2 text-sm text-slate-600">
+                    Carregando cotações...
+                  </span>
+                </div>
+              ) : (
+                <div className="relative overflow-hidden">
+                  <div className="animate-ticker flex whitespace-nowrap">
+                    {/* Duplicate the array to create a seamless loop */}
+                    {[...Array(2)].map((_, arrayIndex) => (
+                      <div
+                        key={arrayIndex}
+                        className="flex items-center gap-6 px-4"
                       >
-                        {fund.change}
-                      </span>
-                    </div>
+                        {quotes.map((fund, index) => (
+                          <div
+                            key={index}
+                            className="flex items-center gap-2 rounded-md px-3 py-1.5 transition-all hover:bg-slate-100"
+                          >
+                            <div>
+                              <p className="font-medium text-slate-800">
+                                {fund.ticker}
+                              </p>
+                              <div className="flex items-center gap-2">
+                                <span className="text-sm text-slate-600">
+                                  {fund.price}
+                                </span>
+                                <span
+                                  className={`text-sm font-medium ${
+                                    fund.change === "0.00"
+                                      ? "text-slate-600"
+                                      : fund.isNegative
+                                        ? "text-red-600"
+                                        : "text-green-600"
+                                  }`}
+                                >
+                                  {fund.change}
+                                </span>
+                              </div>
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    ))}
                   </div>
                 </div>
-              ))}
+              )}
             </div>
 
             <button className="rounded-full p-2 hover:bg-slate-100">
