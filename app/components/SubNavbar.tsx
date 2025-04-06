@@ -3,8 +3,10 @@
 import { useState } from "react";
 import Link from "next/link";
 import { ChevronDown } from "lucide-react";
+import { useAuth } from "@clerk/nextjs";
 
 const SubNavbar = () => {
+  const { isSignedIn } = useAuth();
   const [activeDropdown, setActiveDropdown] = useState<string | null>(null);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
@@ -31,11 +33,19 @@ const SubNavbar = () => {
     ],
     Research: [
       { label: "Relatório Semanal", href: "/reports" },
-      { label: "Carteira Recomendada", href: "/dashboard" },
+      { label: "Carteira Recomendada", href: "#" },
       { label: "Curso de Investimento", href: "#" },
       { label: "Fundos não recomendados", href: "#" },
       { label: "Ranking de Gestoras", href: "#" },
     ],
+    ...(isSignedIn && {
+      "Minha Conta": [
+        { label: "Minha Carteira", href: "/dashboard" },
+        { label: "Sugerir Melhorias", href: "#" },
+        { label: "Reportar Bugs", href: "#" },
+        { label: "Central de Ajuda", href: "#" },
+      ],
+    }),
   };
 
   const handleMouseEnter = (menu: string) => {
