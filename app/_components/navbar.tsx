@@ -15,6 +15,8 @@ import {
   SheetHeader,
   SheetTitle,
 } from "./ui/sheet";
+import { Search } from "lucide-react";
+import { Input } from "./ui/input";
 
 const Navbar = () => {
   const pathname = usePathname();
@@ -101,7 +103,7 @@ const Navbar = () => {
 
   const NavLinks = () => (
     <>
-      <Link
+      {/* <Link
         href="/"
         className={
           pathname === "/"
@@ -111,7 +113,7 @@ const Navbar = () => {
         onClick={() => setIsOpen(false)}
       >
         Início
-      </Link>
+      </Link> */}
 
       {/* <Link
         href="/subscription"
@@ -166,23 +168,55 @@ const Navbar = () => {
     <nav className="sticky top-0 z-50 border-b border-solid bg-white/80 backdrop-blur-md">
       {/* Layout Desktop (apenas telas grandes) */}
       <div className="hidden lg:flex lg:items-center lg:justify-between lg:px-8 lg:py-4">
-        <div className="flex items-center gap-10">
-          <Link href="/" className="flex-shrink-0">
-            <Image
-              src="/logo.png"
-              width={50}
-              height={50}
-              alt="Casa de Análises"
-              priority
-            />
-          </Link>
-
-          <div className="flex items-center gap-2">
-            <NavLinks />
+        {/* Left side */}
+        <div className="flex items-center">
+          <div className="flex items-center gap-3">
+            <Link href="/" className="flex-shrink-0">
+              <Image
+                src="/logo.png"
+                width={50}
+                height={50}
+                alt="Casa de Análises"
+                priority
+              />
+            </Link>
+            <Link href="/">
+              <span className="text-xl font-bold text-blue-600">Research</span>
+            </Link>
           </div>
         </div>
 
-        <div>
+        {/* Center - Search bar */}
+        <div className="relative flex w-96">
+          <div className="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3">
+            <Search className="h-5 w-5 text-gray-400" />
+          </div>
+          <Input
+            type="search"
+            placeholder="Busca de fundos"
+            className="w-full rounded-full border border-gray-200 bg-white pl-10 text-sm focus:ring-0 focus:ring-offset-0 focus-visible:ring-0 focus-visible:ring-offset-0"
+          />
+        </div>
+
+        {/* Right side */}
+        <div className="flex items-center gap-4">
+          <Link
+            href={isSignedIn ? "/subscription" : "/"}
+            onClick={(e) => {
+              if (!isSignedIn) {
+                e.preventDefault();
+                toast.error(
+                  "Faça login ou cadastre-se para acessar esta funcionalidade",
+                );
+              }
+            }}
+          >
+            <Button className="bg-blue-500 text-white hover:bg-blue-600">
+              <LogInIcon className="mr-2 h-4 w-4" />
+              Assine já
+            </Button>
+          </Link>
+
           {isSignedIn ? (
             <UserButton
               showName
@@ -191,7 +225,7 @@ const Navbar = () => {
             />
           ) : (
             <SignInButton>
-              <Button className="bg-primary text-white hover:bg-primary/90">
+              <Button className="bg-[#1e3a8a] text-white hover:bg-[#1e3a8a]/90">
                 <LogInIcon className="mr-2 h-4 w-4" />
                 <span>Entrar</span>
               </Button>
@@ -206,7 +240,7 @@ const Navbar = () => {
         <Sheet open={isOpen} onOpenChange={setIsOpen}>
           <SheetTrigger asChild>
             <Button variant="ghost" size="icon" className="hover:bg-primary/10">
-              <Menu className="h-6 w-6 text-secondary" />
+              <Menu className="h-6 w-6 text-gray-700" />
             </Button>
           </SheetTrigger>
           <SheetContent
@@ -219,7 +253,7 @@ const Navbar = () => {
               </SheetTitle>
             </SheetHeader>
             <div className="flex flex-col gap-3 p-4">
-              <Link
+              {/* <Link
                 href="/"
                 className={
                   pathname === "/"
@@ -229,9 +263,9 @@ const Navbar = () => {
                 onClick={() => setIsOpen(false)}
               >
                 Início
-              </Link>
+              </Link> */}
 
-              <Link
+              {/* <Link
                 href="/subscription"
                 className={
                   pathname === "/subscription"
@@ -241,7 +275,7 @@ const Navbar = () => {
                 onClick={(e) => handleRestrictedLink(e, "/subscription")}
               >
                 Assinatura
-              </Link>
+              </Link> */}
 
               {/* <Link
                 href="/reports"
@@ -255,7 +289,7 @@ const Navbar = () => {
                 Relatórios
               </Link> */}
 
-              <Link
+              {/* <Link
                 href="/dashboard"
                 className={
                   pathname === "/dashboard"
@@ -265,7 +299,7 @@ const Navbar = () => {
                 onClick={(e) => handleRestrictedLink(e, "/dashboard")}
               >
                 Dashboard
-              </Link>
+              </Link> */}
 
               {isAdmin && (
                 <Link
