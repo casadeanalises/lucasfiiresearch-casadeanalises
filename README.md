@@ -164,3 +164,26 @@ vercel deploy
 - ## 📝 Licença
 
 © 2025 Lucas Fii | CasadeAnálises. Todos os direitos reservados.
+
+## Configuração do Ambiente
+
+### Variáveis de Ambiente
+
+1. Copie o arquivo `.env.example` para `.env`:
+```bash
+cp .env.example .env
+```
+
+2. Configure as seguintes variáveis no arquivo `.env`:
+
+- `MONGODB_URI`: URL de conexão com o MongoDB
+- `NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY`: Chave pública do Clerk (autenticação)
+- `CLERK_SECRET_KEY`: Chave secreta do Clerk
+- `NEXT_PUBLIC_API_BASE_URL`: URL base da API (http://localhost:3000 para desenvolvimento)
+- `ADMIN_EMAIL`: Email do administrador do sistema
+
+### Instalação
+
+```bash
+npm install
+```

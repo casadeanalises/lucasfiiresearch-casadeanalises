@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { FileText, Settings, BarChart3, Home } from "lucide-react";
+import { FileText, Settings, BarChart3, Home, PlayCircle } from "lucide-react";
 
 export default function AdminDashboard() {
   const adminAreas = [
@@ -17,6 +17,14 @@ export default function AdminDashboard() {
       icon: <FileText className="h-8 w-8" />,
       href: "/admin/reports",
       color: "blue",
+      isNew: false,
+    },
+    {
+      title: "Vídeos da Home",
+      description: "Gerencie os vídeos exibidos na página inicial",
+      icon: <PlayCircle className="h-8 w-8" />,
+      href: "/admin/home-videos",
+      color: "red",
       isNew: false,
     },
     {
@@ -66,7 +74,9 @@ export default function AdminDashboard() {
                     ? "bg-blue-50 text-blue-600 ring-blue-500"
                     : area.color === "purple"
                       ? "bg-purple-50 text-purple-600 ring-purple-500"
-                      : "bg-gray-50 text-gray-600 ring-gray-500"
+                      : area.color === "red"
+                        ? "bg-red-50 text-red-600 ring-red-500"
+                        : "bg-gray-50 text-gray-600 ring-gray-500"
                 }`}
               >
                 {area.icon}
@@ -90,7 +100,9 @@ export default function AdminDashboard() {
                     ? "from-blue-400 to-blue-600"
                     : area.color === "purple"
                       ? "from-purple-400 to-purple-600"
-                      : "from-gray-400 to-gray-600"
+                      : area.color === "red"
+                        ? "from-red-400 to-red-600"
+                        : "from-gray-400 to-gray-600"
                 }`}
               />
             )}

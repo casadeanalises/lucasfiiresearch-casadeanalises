@@ -14,14 +14,31 @@ import {
   ArrowRightIcon,
   ChevronLeftIcon,
   ChevronRightIcon,
+  X,
 } from "lucide-react";
 import AOS from "aos";
 import { useEffect, useState } from "react";
 import { useFIIData } from "../hooks/useFIIData";
+import { Dialog, DialogContent } from "../_components/ui/dialog";
+
+interface HomeVideo {
+  _id: string;
+  videoId: string;
+  title: string;
+  thumbnail: string;
+  order: number;
+  active: boolean;
+}
 
 const LoggedInHome = () => {
   const [currentSlide, setCurrentSlide] = useState(0);
   const { quotes, loading } = useFIIData();
+  const [selectedVideo, setSelectedVideo] = useState<{
+    id: string;
+    title: string;
+  } | null>(null);
+  const [videos, setVideos] = useState<HomeVideo[]>([]);
+  const [loadingVideos, setLoadingVideos] = useState(true);
 
   const carouselItems = [
     {
@@ -63,6 +80,27 @@ const LoggedInHome = () => {
     }, 5000);
 
     return () => clearInterval(interval);
+  }, []);
+
+  useEffect(() => {
+    const fetchVideos = async () => {
+      try {
+        const response = await fetch("/api/home-videos");
+        if (!response.ok) throw new Error("Erro ao carregar vídeos");
+        const data = await response.json();
+        setVideos(
+          data
+            .filter((v: HomeVideo) => v.active)
+            .sort((a: HomeVideo, b: HomeVideo) => a.order - b.order),
+        );
+      } catch (error) {
+        console.error("Erro ao carregar vídeos:", error);
+      } finally {
+        setLoadingVideos(false);
+      }
+    };
+
+    fetchVideos();
   }, []);
 
   const nextSlide = () => {
@@ -245,50 +283,95 @@ const LoggedInHome = () => {
           Youtube / Vídeos
         </h2>
         <div className="grid grid-cols-4 gap-6">
-          {[
-            {
-              title: "#XPML11 #ALZR11 #TRXF11 BATE PAPO!",
-              thumbnail: "https://img.youtube.com/vi/cxO_bmcRSGs/mqdefault.jpg",
-            },
-            {
-              title: "FICA11 - PRESSÃO SURTE EFEITO!",
-              thumbnail: "https://img.youtube.com/vi/7jE7yJpNRk0/mqdefault.jpg",
-            },
-            {
-              title: "#HSML11 - NOSSO APETITE AUMENTOU!",
-              thumbnail: "https://img.youtube.com/vi/haoc0d4YArk/mqdefault.jpg",
-            },
-            {
-              title: "#MCCI11 - ÓTIMAS NOTÍCIAS ESSA SEMANA!",
-              thumbnail: "https://img.youtube.com/vi/09BBpgWvgTA/mqdefault.jpg",
-            },
-          ].map((video, index) => (
-            <div
-              key={index}
-              className="group overflow-hidden rounded-xl bg-white shadow-sm transition-all hover:shadow-md"
-            >
-              <div className="relative aspect-video w-full">
-                <Image
-                  src={video.thumbnail}
-                  alt={video.title}
-                  fill
-                  className="object-cover"
-                />
-                <div className="absolute inset-0 flex items-center justify-center bg-black/20 transition-opacity group-hover:opacity-0">
-                  <div className="rounded-full bg-white/90 p-2">
-                    <PlayCircleIcon className="h-6 w-6 text-red-600" />
+          {loadingVideos ? (
+            // Esqueleto de carregamento
+            Array.from({ length: 4 }).map((_, index) => (
+              <div
+                key={index}
+                className="group overflow-hidden rounded-xl bg-white shadow-sm"
+              >
+                <div className="relative aspect-video w-full animate-pulse bg-slate-200">
+                  <div className="absolute inset-0 flex items-center justify-center">
+                    <PlayCircleIcon className="h-12 w-12 text-slate-300" />
                   </div>
                 </div>
+                <div className="p-3">
+                  <div className="h-4 w-3/4 animate-pulse rounded bg-slate-200"></div>
+                </div>
               </div>
-              <div className="p-3">
-                <h3 className="line-clamp-2 text-sm font-semibold text-slate-800">
-                  {video.title}
-                </h3>
+            ))
+          ) : videos.length > 0 ? (
+            videos.map((video) => (
+              <div
+                key={video._id}
+                onClick={() =>
+                  setSelectedVideo({ id: video.videoId, title: video.title })
+                }
+                className="group cursor-pointer overflow-hidden rounded-xl bg-white shadow-sm transition-all hover:shadow-md"
+              >
+                <div className="relative aspect-video w-full">
+                  <Image
+                    src={video.thumbnail}
+                    alt={video.title}
+                    fill
+                    className="object-cover"
+                  />
+                  <div className="absolute inset-0 flex items-center justify-center bg-black/20 transition-opacity group-hover:opacity-0">
+                    <div className="rounded-full bg-white/90 p-2">
+                      <PlayCircleIcon className="h-6 w-6 text-red-600" />
+                    </div>
+                  </div>
+                </div>
+                <div className="p-3">
+                  <h3 className="line-clamp-2 text-sm font-semibold text-slate-800">
+                    {video.title}
+                  </h3>
+                </div>
               </div>
+            ))
+          ) : (
+            <div className="col-span-4 flex items-center justify-center py-12 text-slate-500">
+              Nenhum vídeo disponível no momento.
             </div>
-          ))}
+          )}
         </div>
       </div>
+
+      {/* Modal de Vídeo */}
+      <Dialog
+        open={!!selectedVideo}
+        onOpenChange={() => setSelectedVideo(null)}
+      >
+        <DialogContent className="h-[90vh] max-w-6xl overflow-hidden bg-white p-0">
+          {selectedVideo && (
+            <>
+              <button
+                onClick={() => setSelectedVideo(null)}
+                className="absolute right-4 top-4 z-50 rounded-full border border-gray-200 bg-white p-2 text-gray-600 shadow-sm transition-colors hover:text-gray-900"
+              >
+                <X className="h-4 w-4" />
+              </button>
+              <div className="flex h-full flex-col">
+                <div className="relative aspect-video w-full bg-black">
+                  <iframe
+                    width="100%"
+                    height="100%"
+                    src={`https://www.youtube.com/embed/${selectedVideo.id}?autoplay=1`}
+                    title={selectedVideo.title}
+                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                    allowFullScreen
+                  />
+                </div>
+                <div className="p-4">
+                  <h2 className="text-xl font-bold text-slate-900">
+                    {selectedVideo.title}
+                  </h2>
+                </div>
+              </div>
+            </>
+          )}
+        </DialogContent>
+      </Dialog>
 
       {/* Seção de Notícias */}
       <div className="mx-auto max-w-7xl px-6 py-8">

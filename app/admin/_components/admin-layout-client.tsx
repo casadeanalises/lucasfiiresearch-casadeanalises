@@ -2,7 +2,7 @@
 
 import { usePathname } from "next/navigation";
 import Link from "next/link";
-import { Home, FileText, BarChart3, Settings } from "lucide-react";
+import { Home, FileText, BarChart3, Settings, PlayCircle } from "lucide-react";
 
 interface AdminLayoutClientProps {
   children: React.ReactNode;
@@ -19,6 +19,12 @@ const menuItems = [
     title: "Relatórios",
     href: "/admin/reports",
     icon: <FileText className="h-5 w-5" />,
+    isNew: false,
+  },
+  {
+    title: "Vídeos da Home",
+    href: "/admin/home-videos",
+    icon: <PlayCircle className="h-5 w-5" />,
     isNew: false,
   },
   {
