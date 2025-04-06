@@ -1,4 +1,5 @@
 import Image from "next/image";
+import Link from "next/link";
 import { Button } from "../_components/ui/button";
 import {
   BarChart3Icon,
@@ -187,9 +188,11 @@ const LoggedInHome = () => {
                   </p>
                 </div>
                 <p className="text-xl">CASA DE RESEARCH 100% PRO-COTISTA!</p>
-                <Button className="w-full bg-blue-600 py-6 text-lg text-white hover:bg-blue-700">
-                  ASSINE JÁ E SEJA MEMBRO
-                </Button>
+                <Link href="/subscription" className="w-full">
+                  <Button className="w-full bg-blue-600 py-6 text-lg text-white hover:bg-blue-700">
+                    ASSINE JÁ E SEJA MEMBRO
+                  </Button>
+                </Link>
               </div>
             </div>
           </div>

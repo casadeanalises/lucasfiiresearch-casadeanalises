@@ -113,7 +113,7 @@ const Navbar = () => {
         Início
       </Link>
 
-      <Link
+      {/* <Link
         href="/subscription"
         className={
           pathname === "/subscription"
@@ -123,7 +123,7 @@ const Navbar = () => {
         onClick={(e) => handleRestrictedLink(e, "/subscription")}
       >
         Assinatura
-      </Link>
+      </Link> */}
 
       {/* <Link
         href="/reports"
