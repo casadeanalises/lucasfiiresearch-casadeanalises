@@ -42,11 +42,8 @@ const LoggedInHome = () => {
   const [loadingVideos, setLoadingVideos] = useState(true);
   const [selectedVideo, setSelectedVideo] = useState<HomeVideo | null>(null);
   const [isVideoModalOpen, setIsVideoModalOpen] = useState(false);
-  const [showAllVideos, setShowAllVideos] = useState(false);
-  const [page, setPage] = useState(1);
 
-  const INITIAL_VIDEOS_COUNT = 6;
-  const VIDEOS_PER_PAGE = 6;
+  const VIDEOS_TO_SHOW = 6; // Mostrar apenas 6 vídeos na homepage
 
   const carouselItems = [
     {
@@ -310,23 +307,14 @@ const LoggedInHome = () => {
                 <h2 className="text-xl font-semibold">Youtube / Vídeos</h2>
               </div>
 
-              {videos.length > INITIAL_VIDEOS_COUNT && (
-                <button
-                  onClick={() => setShowAllVideos((prev) => !prev)}
+              {videos.length > 0 && (
+                <Link
+                  href="/videos"
                   className="flex items-center gap-1 rounded-full bg-blue-50 px-4 py-2 text-sm font-medium text-blue-600 transition-colors hover:bg-blue-100"
                 >
-                  {showAllVideos ? (
-                    <>
-                      <span>Mostrar menos</span>
-                      <ChevronUpIcon className="h-4 w-4" />
-                    </>
-                  ) : (
-                    <>
-                      <span>Ver mais</span>
-                      <ChevronRightIcon className="h-4 w-4" />
-                    </>
-                  )}
-                </button>
+                  <span>Ver todos os vídeos</span>
+                  <ArrowRightIcon className="h-4 w-4" />
+                </Link>
               )}
             </div>
 
@@ -343,69 +331,47 @@ const LoggedInHome = () => {
               </p>
             ) : (
               <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 md:grid-cols-3 lg:grid-cols-6">
-                {videos
-                  .slice(
-                    0,
-                    showAllVideos
-                      ? page * VIDEOS_PER_PAGE
-                      : INITIAL_VIDEOS_COUNT,
-                  )
-                  .map((video) => (
-                    <div
-                      key={video._id}
-                      className="group relative cursor-pointer overflow-hidden rounded-lg bg-white shadow-sm transition-all duration-300 hover:-translate-y-1 hover:shadow-md"
-                      onClick={() => {
-                        setSelectedVideo(video);
-                        setIsVideoModalOpen(true);
-                      }}
-                    >
-                      <div className="relative aspect-video">
-                        <img
-                          src={
-                            video.thumbnail ||
-                            `https://img.youtube.com/vi/${video.videoId}/maxresdefault.jpg`
-                          }
-                          alt={video.title}
-                          className="h-full w-full object-cover transition-transform duration-300 group-hover:scale-105"
-                        />
-                        <div className="absolute inset-0 flex items-center justify-center bg-black/50 opacity-0 transition-opacity duration-300 group-hover:opacity-100">
-                          <PlayCircleIcon className="h-10 w-10 text-white" />
-                        </div>
-                      </div>
-                      <div className="p-2">
-                        <h3 className="line-clamp-2 text-xs font-semibold text-slate-800 group-hover:text-blue-600">
-                          {video.title}
-                        </h3>
+                {videos.slice(0, VIDEOS_TO_SHOW).map((video) => (
+                  <div
+                    key={video._id}
+                    className="group relative cursor-pointer overflow-hidden rounded-lg bg-white shadow-sm transition-all duration-300 hover:-translate-y-1 hover:shadow-md"
+                    onClick={() => {
+                      setSelectedVideo(video);
+                      setIsVideoModalOpen(true);
+                    }}
+                  >
+                    <div className="relative aspect-video">
+                      <img
+                        src={
+                          video.thumbnail ||
+                          `https://img.youtube.com/vi/${video.videoId}/maxresdefault.jpg`
+                        }
+                        alt={video.title}
+                        className="h-full w-full object-cover transition-transform duration-300 group-hover:scale-105"
+                      />
+                      <div className="absolute inset-0 flex items-center justify-center bg-black/50 opacity-0 transition-opacity duration-300 group-hover:opacity-100">
+                        <PlayCircleIcon className="h-10 w-10 text-white" />
                       </div>
                     </div>
-                  ))}
+                    <div className="p-2">
+                      <h3 className="line-clamp-2 text-xs font-semibold text-slate-800 group-hover:text-blue-600">
+                        {video.title}
+                      </h3>
+                    </div>
+                  </div>
+                ))}
               </div>
             )}
 
-            {showAllVideos && videos.length > page * VIDEOS_PER_PAGE && (
+            {!loadingVideos && videos.length > VIDEOS_TO_SHOW && (
               <div className="mt-6 flex justify-center">
-                <button
-                  onClick={() => setPage((prev) => prev + 1)}
-                  className="flex items-center gap-2 rounded-lg border border-blue-200 bg-white px-6 py-2.5 text-sm font-medium text-blue-600 transition-colors hover:bg-blue-50"
-                >
-                  <span>Carregar mais vídeos</span>
-                  <ChevronDownIcon className="h-4 w-4" />
-                </button>
-              </div>
-            )}
-
-            {!showAllVideos && videos.length > INITIAL_VIDEOS_COUNT && (
-              <div className="mt-6 flex justify-center">
-                <button
-                  onClick={() => {
-                    setShowAllVideos(true);
-                    setPage(1);
-                  }}
+                <Link
+                  href="/videos"
                   className="flex items-center gap-2 rounded-lg bg-blue-50 px-4 py-2 text-sm font-medium text-blue-600 transition-colors hover:bg-blue-100"
                 >
                   <span>Ver todos os {videos.length} vídeos</span>
                   <ArrowRightIcon className="h-4 w-4" />
-                </button>
+                </Link>
               </div>
             )}
           </div>
