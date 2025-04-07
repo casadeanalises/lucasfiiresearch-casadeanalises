@@ -72,6 +72,42 @@ const LoggedInHome = () => {
     },
   ];
 
+  // Dados de exemplo para os FIIs em destaque
+  const featuredFIIs = [
+    {
+      ticker: "BTLG11",
+      name: "BTG Pactual Logística",
+      price: 97.15,
+      changePercent: 1.49,
+      yield: 10.0,
+      category: "Logística",
+    },
+    {
+      ticker: "HGLG11",
+      name: "CSHG Logística",
+      price: 155.8,
+      changePercent: -0.75,
+      yield: 8.8,
+      category: "Logística",
+    },
+    {
+      ticker: "VISC11",
+      name: "Vinci Shopping Centers",
+      price: 105.9,
+      changePercent: 1.85,
+      yield: 9.8,
+      category: "Shoppings",
+    },
+    {
+      ticker: "HFOF11",
+      name: "Hedge Top FOFII",
+      price: 87.5,
+      changePercent: 0.95,
+      yield: 10.2,
+      category: "Fundos de Fundos",
+    },
+  ];
+
   useEffect(() => {
     AOS.init({
       duration: 800,
@@ -374,6 +410,79 @@ const LoggedInHome = () => {
                 </Link>
               </div>
             )}
+          </div>
+        </div>
+
+        {/* Seção de Fundos Imobiliários */}
+        <div className="col-span-12">
+          <div className="rounded-xl bg-white p-6 shadow-sm">
+            <div className="mb-6 flex items-center justify-between">
+              <div className="flex items-center gap-2">
+                <BarChart3Icon className="h-6 w-6 text-blue-600" />
+                <h2 className="text-xl font-semibold">
+                  Fundos Imobiliários em Destaque
+                </h2>
+              </div>
+
+              <Link
+                href="/fundlists"
+                className="flex items-center gap-1 rounded-full bg-blue-50 px-4 py-2 text-sm font-medium text-blue-600 transition-colors hover:bg-blue-100"
+              >
+                <span>Ver todos os fundos</span>
+                <ArrowRightIcon className="h-4 w-4" />
+              </Link>
+            </div>
+
+            <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 md:grid-cols-4">
+              {featuredFIIs.map((fii) => (
+                <Link
+                  key={fii.ticker}
+                  href={`/fundlists/${fii.ticker}`}
+                  className="group overflow-hidden rounded-lg bg-white shadow-sm transition-all hover:-translate-y-1 hover:shadow-md"
+                >
+                  <div className="bg-gradient-to-r from-blue-600 to-indigo-600 p-4">
+                    <div className="flex items-center justify-between">
+                      <span className="font-bold text-white">{fii.ticker}</span>
+                      <span className="rounded-full bg-white/20 px-2 py-0.5 text-xs text-white backdrop-blur-sm">
+                        {fii.category}
+                      </span>
+                    </div>
+                    <p className="mt-1 truncate text-sm text-blue-100">
+                      {fii.name}
+                    </p>
+                  </div>
+                  <div className="p-4">
+                    <div className="flex items-center justify-between">
+                      <div>
+                        <p className="text-sm text-gray-500">Preço</p>
+                        <p className="text-lg font-semibold">
+                          R$ {fii.price.toFixed(2)}
+                        </p>
+                      </div>
+                      <div>
+                        <p className="text-sm text-gray-500">Yield</p>
+                        <p className="text-lg font-semibold text-green-600">
+                          {fii.yield.toFixed(2)}%
+                        </p>
+                      </div>
+                    </div>
+                    <div className="mt-2 flex items-center gap-1">
+                      <span
+                        className={`text-sm font-medium ${fii.changePercent >= 0 ? "text-green-600" : "text-red-600"}`}
+                      >
+                        {fii.changePercent >= 0 ? (
+                          <TrendingUpIcon className="mr-1 inline-block h-4 w-4" />
+                        ) : (
+                          <TrendingDownIcon className="mr-1 inline-block h-4 w-4" />
+                        )}
+                        {fii.changePercent.toFixed(2)}%
+                      </span>
+                      <span className="text-xs text-gray-500">hoje</span>
+                    </div>
+                  </div>
+                </Link>
+              ))}
+            </div>
           </div>
         </div>
 

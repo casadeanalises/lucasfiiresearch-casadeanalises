@@ -3,11 +3,18 @@
 import { UserButton, SignInButton, useAuth, useUser } from "@clerk/nextjs";
 import Image from "next/image";
 import Link from "next/link";
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import { Button } from "./ui/button";
-import { LogInIcon, Menu, X, ShieldCheck } from "lucide-react";
+import {
+  LogInIcon,
+  Menu,
+  X,
+  ShieldCheck,
+  BarChart3Icon,
+  ArrowRightIcon,
+} from "lucide-react";
 import { toast } from "sonner";
-import { MouseEvent, useState, useEffect } from "react";
+import { MouseEvent, useState, useEffect, FormEvent, useRef } from "react";
 import {
   Sheet,
   SheetContent,
@@ -17,19 +24,86 @@ import {
 } from "./ui/sheet";
 import { Search } from "lucide-react";
 import { Input } from "./ui/input";
+import { fiiService, FII } from "@/app/services/fiiService";
 
 const Navbar = () => {
   const pathname = usePathname();
+  const router = useRouter();
   const { isSignedIn } = useAuth();
   const { user } = useUser();
   const [isOpen, setIsOpen] = useState(false);
   const [isAdmin, setIsAdmin] = useState(false);
+  const [searchTerm, setSearchTerm] = useState("");
+  const [searchResults, setSearchResults] = useState<FII[]>([]);
+  const [showSearchResults, setShowSearchResults] = useState(false);
+  const [isSearching, setIsSearching] = useState(false);
+  const searchRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     // Verifica se existe o cookie admin_token
     const hasAdminToken = document.cookie.includes("admin_token=");
     setIsAdmin(hasAdminToken);
   }, []);
+
+  // Fechar o dropdown quando clicar fora dele
+  useEffect(() => {
+    function handleClickOutside(event: MouseEvent) {
+      if (
+        searchRef.current &&
+        !searchRef.current.contains(event.target as Node)
+      ) {
+        setShowSearchResults(false);
+      }
+    }
+
+    document.addEventListener("mousedown", handleClickOutside as any);
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside as any);
+    };
+  }, []);
+
+  // Função para buscar FIIs em tempo real
+  useEffect(() => {
+    if (searchTerm.trim().length > 0) {
+      setIsSearching(true);
+
+      // Buscar os dados com um pequeno delay para evitar muitas chamadas
+      const timer = setTimeout(async () => {
+        try {
+          // Usar o serviço para buscar FIIs correspondentes
+          const results = await fiiService.searchFIIs(searchTerm);
+
+          setSearchResults(results);
+          setShowSearchResults(true);
+        } catch (error) {
+          console.error("Erro ao buscar FIIs:", error);
+        } finally {
+          setIsSearching(false);
+        }
+      }, 300);
+
+      return () => clearTimeout(timer);
+    } else {
+      setSearchResults([]);
+      setShowSearchResults(false);
+    }
+  }, [searchTerm]);
+
+  const handleSearch = (e: FormEvent) => {
+    e.preventDefault();
+    if (searchTerm.trim()) {
+      router.push(`/fundlists?search=${encodeURIComponent(searchTerm)}`);
+      setShowSearchResults(false);
+    } else {
+      router.push("/fundlists");
+    }
+  };
+
+  const navigateToFII = (ticker: string) => {
+    router.push(`/fundlists/${ticker}`);
+    setSearchTerm("");
+    setShowSearchResults(false);
+  };
 
   const desktopAppearance = {
     elements: {
@@ -90,53 +164,18 @@ const Navbar = () => {
 
   const NavLinks = () => (
     <>
-      {/* <Link
-        href="/"
+      <Link
+        href="/fundlists"
         className={
-          pathname === "/"
+          pathname === "/fundlists" || pathname.startsWith("/fundlists/")
             ? "flex items-center gap-2 rounded-lg bg-gradient-to-r from-blue-600 to-indigo-600 px-4 py-3 font-bold text-white shadow-sm transition-all duration-200"
             : "flex items-center gap-2 rounded-lg px-4 py-3 text-gray-600 transition-all duration-200 hover:bg-gradient-to-r hover:from-blue-600 hover:to-indigo-600 hover:text-white hover:shadow-sm"
         }
         onClick={() => setIsOpen(false)}
       >
-        Início
-      </Link> */}
-
-      {/* <Link
-        href="/subscription"
-        className={
-          pathname === "/subscription"
-            ? "flex items-center gap-2 rounded-lg bg-gradient-to-r from-blue-600 to-indigo-600 px-4 py-3 font-bold text-white shadow-sm transition-all duration-200"
-            : "flex items-center gap-2 rounded-lg px-4 py-3 text-gray-600 transition-all duration-200 hover:bg-gradient-to-r hover:from-blue-600 hover:to-indigo-600 hover:text-white hover:shadow-sm"
-        }
-        onClick={(e) => handleRestrictedLink(e, "/subscription")}
-      >
-        Assinatura
-      </Link> */}
-
-      {/* <Link
-        href="/reports"
-        className={
-          pathname === "/reports"
-            ? "flex items-center gap-2 rounded-lg bg-gradient-to-r from-blue-600 to-indigo-600 px-4 py-3 font-bold text-white shadow-sm transition-all duration-200"
-            : "flex items-center gap-2 rounded-lg px-4 py-3 text-gray-600 transition-all duration-200 hover:bg-gradient-to-r hover:from-blue-600 hover:to-indigo-600 hover:text-white hover:shadow-sm"
-        }
-        onClick={(e) => handleRestrictedLink(e, "/reports")}
-      >
-        Relatórios
-      </Link> */}
-
-      {/* <Link
-        href="/dashboard"
-        className={
-          pathname === "/dashboard"
-            ? "flex items-center gap-2 rounded-lg bg-gradient-to-r from-blue-600 to-indigo-600 px-4 py-3 font-bold text-white shadow-sm transition-all duration-200"
-            : "flex items-center gap-2 rounded-lg px-4 py-3 text-gray-600 transition-all duration-200 hover:bg-gradient-to-r hover:from-blue-600 hover:to-indigo-600 hover:text-white hover:shadow-sm"
-        }
-        onClick={(e) => handleRestrictedLink(e, "/dashboard")}
-      >
-        Dashboard
-      </Link> */}
+        <BarChart3Icon className="h-5 w-5" />
+        FIIs
+      </Link>
 
       {isAdmin && (
         <Link
@@ -159,7 +198,7 @@ const Navbar = () => {
       {/* Layout Desktop (apenas telas grandes) */}
       <div className="hidden lg:flex lg:items-center lg:justify-between lg:px-8 lg:py-4">
         {/* Left side */}
-        <div className="flex items-center">
+        <div className="flex items-center gap-6">
           <div className="flex items-center gap-3">
             <Link href="/" className="flex-shrink-0">
               <Image
@@ -174,18 +213,116 @@ const Navbar = () => {
               <span className="text-xl font-bold text-blue-600">Research</span>
             </Link>
           </div>
+
+          {/* <Link
+            href="/fundlists"
+            className={
+              pathname === "/fundlists" || pathname.startsWith("/fundlists/")
+                ? "flex items-center gap-2 font-medium text-blue-600"
+                : "flex items-center gap-2 font-medium text-gray-600 hover:text-blue-600"
+            }
+          >
+            <BarChart3Icon className="h-5 w-5" />
+            Fundos Imobiliários
+          </Link> */}
         </div>
 
         {/* Center - Search bar */}
-        <div className="relative flex w-96">
-          <div className="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3">
-            <Search className="h-5 w-5 text-gray-400" />
-          </div>
-          <Input
-            type="search"
-            placeholder="Busca de fundos"
-            className="w-full rounded-full border border-gray-200 bg-white pl-10 text-sm focus:ring-0 focus:ring-offset-0 focus-visible:ring-0 focus-visible:ring-offset-0"
-          />
+        <div className="relative flex w-96" ref={searchRef}>
+          <form onSubmit={handleSearch} className="w-full">
+            <div className="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3">
+              <Search className="h-5 w-5 text-gray-400" />
+            </div>
+            <Input
+              type="search"
+              placeholder="Buscar FIIs por ticker ou nome..."
+              className="w-full rounded-full border border-gray-200 bg-white pl-10 text-sm focus:ring-0 focus:ring-offset-0 focus-visible:ring-0 focus-visible:ring-offset-0"
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              onFocus={() => {
+                if (searchResults.length > 0) {
+                  setShowSearchResults(true);
+                }
+              }}
+            />
+          </form>
+
+          {/* Dropdown de resultados da busca */}
+          {showSearchResults && (
+            <div className="absolute top-full mt-2 w-full rounded-xl border border-gray-200 bg-white shadow-lg">
+              {isSearching ? (
+                <div className="flex items-center justify-center p-4">
+                  <div className="h-5 w-5 animate-spin rounded-full border-2 border-blue-600 border-t-transparent"></div>
+                  <span className="ml-2 text-sm text-gray-600">
+                    Buscando...
+                  </span>
+                </div>
+              ) : searchResults.length === 0 ? (
+                <div className="p-4 text-center text-sm text-gray-500">
+                  Nenhum FII encontrado
+                </div>
+              ) : (
+                <>
+                  <div className="divide-y divide-gray-100">
+                    {searchResults.slice(0, 5).map((fii) => (
+                      <div
+                        key={fii.id}
+                        className="flex cursor-pointer items-center justify-between p-3 hover:bg-gray-50"
+                        onClick={() => navigateToFII(fii.ticker)}
+                      >
+                        <div className="flex items-center gap-2">
+                          <div className="flex h-8 w-8 items-center justify-center rounded-md bg-blue-100">
+                            <BarChart3Icon className="h-4 w-4 text-blue-600" />
+                          </div>
+                          <div>
+                            <div className="flex items-center gap-3">
+                              <span className="font-medium text-gray-900">
+                                {fii.ticker}
+                              </span>
+                              <span className="rounded-full bg-blue-50 px-2 py-0.5 text-xs text-blue-700">
+                                {fii.category}
+                              </span>
+                            </div>
+                            <p className="text-xs text-gray-500">{fii.name}</p>
+                          </div>
+                        </div>
+                        <div className="flex flex-col items-end">
+                          <span className="font-medium">
+                            R$ {fii.price.toFixed(2)}
+                          </span>
+                          <span
+                            className={`flex items-center text-xs font-medium ${
+                              fii.changePercent >= 0
+                                ? "text-green-600"
+                                : "text-red-600"
+                            }`}
+                          >
+                            {fii.changePercent.toFixed(2)}%
+                          </span>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                  {searchResults.length > 5 && (
+                    <div
+                      className="flex cursor-pointer items-center justify-center border-t border-gray-100 p-2"
+                      onClick={() => {
+                        router.push(
+                          `/fundlists?search=${encodeURIComponent(searchTerm)}`,
+                        );
+                        setShowSearchResults(false);
+                      }}
+                    >
+                      <span className="text-sm font-medium text-blue-600">
+                        Ver mais resultados
+                      </span>
+                      <ArrowRightIcon className="ml-1 h-4 w-4" />
+                    </div>
+                  )}
+                </>
+              )}
+            </div>
+          )}
         </div>
 
         {/* Right side */}
@@ -225,7 +362,6 @@ const Navbar = () => {
       </div>
 
       {/* === Layout Mobile e Tablet === */}
-
       <div className="flex items-center justify-between px-4 py-4 lg:hidden">
         <Sheet open={isOpen} onOpenChange={setIsOpen}>
           <SheetTrigger asChild>
@@ -243,82 +379,33 @@ const Navbar = () => {
               </SheetTitle>
             </SheetHeader>
             <div className="flex flex-col gap-3 p-4">
-              {/* <Link
-                href="/"
-                className={
-                  pathname === "/"
-                    ? "flex items-center gap-2 rounded-lg bg-gradient-to-r from-blue-600 to-indigo-600 px-4 py-3 font-bold text-white shadow-sm transition-all duration-200"
-                    : "flex items-center gap-2 rounded-lg px-4 py-3 text-gray-600 transition-all duration-200 hover:bg-gradient-to-r hover:from-blue-600 hover:to-indigo-600 hover:text-white hover:shadow-sm"
-                }
-                onClick={() => setIsOpen(false)}
-              >
-                Início
-              </Link> */}
-
-              {/* <Link
-                href="/subscription"
-                className={
-                  pathname === "/subscription"
-                    ? "flex items-center gap-2 rounded-lg bg-gradient-to-r from-blue-600 to-indigo-600 px-4 py-3 font-bold text-white shadow-sm transition-all duration-200"
-                    : "flex items-center gap-2 rounded-lg px-4 py-3 text-gray-600 transition-all duration-200 hover:bg-gradient-to-r hover:from-blue-600 hover:to-indigo-600 hover:text-white hover:shadow-sm"
-                }
-                onClick={(e) => handleRestrictedLink(e, "/subscription")}
-              >
-                Assinatura
-              </Link> */}
-
-              {/* <Link
-                href="/reports"
-                className={
-                  pathname === "/reports"
-                    ? "flex items-center gap-2 rounded-lg bg-gradient-to-r from-blue-600 to-indigo-600 px-4 py-3 font-bold text-white shadow-sm transition-all duration-200"
-                    : "flex items-center gap-2 rounded-lg px-4 py-3 text-gray-600 transition-all duration-200 hover:bg-gradient-to-r hover:from-blue-600 hover:to-indigo-600 hover:text-white hover:shadow-sm"
-                }
-                onClick={(e) => handleRestrictedLink(e, "/reports")}
-              >
-                Relatórios
-              </Link> */}
-
-              {/* <Link
-                href="/dashboard"
-                className={
-                  pathname === "/dashboard"
-                    ? "flex items-center gap-2 rounded-lg bg-gradient-to-r from-blue-600 to-indigo-600 px-4 py-3 font-bold text-white shadow-sm transition-all duration-200"
-                    : "flex items-center gap-2 rounded-lg px-4 py-3 text-gray-600 transition-all duration-200 hover:bg-gradient-to-r hover:from-blue-600 hover:to-indigo-600 hover:text-white hover:shadow-sm"
-                }
-                onClick={(e) => handleRestrictedLink(e, "/dashboard")}
-              >
-                Dashboard
-              </Link> */}
-
-              {isAdmin && (
-                <Link
-                  href="/admin"
-                  className="flex items-center gap-2 text-gray-600"
-                  onClick={() => setIsOpen(false)}
-                >
-                  <ShieldCheck className="h-5 w-5" />
-                  Admin
-                </Link>
-              )}
+              <NavLinks />
             </div>
           </SheetContent>
         </Sheet>
 
-        <Link
-          href="/"
-          className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2"
-        >
-          <Image
-            src="/logo.png"
-            width={50}
-            height={50}
-            alt="Casa de Análises"
-            priority
-          />
-        </Link>
+        <div className="flex flex-1 items-center justify-center">
+          <Link href="/" className="flex items-center gap-2">
+            <Image
+              src="/logo.png"
+              width={40}
+              height={40}
+              alt="Casa de Análises"
+              priority
+            />
+            <span className="text-lg font-bold text-blue-600">Research</span>
+          </Link>
+        </div>
 
-        <div className="relative">
+        <div className="flex items-center gap-2">
+          {/* Busca para dispositivos móveis */}
+          <Link
+            href="/fundlists"
+            className="flex h-10 w-10 items-center justify-center rounded-full bg-gray-100"
+          >
+            <Search className="h-5 w-5 text-gray-500" />
+          </Link>
+
           {isSignedIn ? (
             <UserButton
               afterSignOutUrl="/"
@@ -328,10 +415,9 @@ const Navbar = () => {
             <SignInButton>
               <Button
                 size="icon"
-                variant="ghost"
-                className="hover:bg-primary/10"
+                className="h-10 w-10 rounded-full bg-[#1e3a8a] text-white hover:bg-[#1e3a8a]/90"
               >
-                <LogInIcon className="h-6 w-6 text-secondary" />
+                <LogInIcon className="h-5 w-5" />
               </Button>
             </SignInButton>
           )}

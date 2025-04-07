@@ -12,7 +12,7 @@ const SubNavbar = () => {
 
   const menuItems = {
     Fundos: [
-      { label: "Lista de Fundos", href: "#" },
+      { label: "Lista de Fundos", href: "/fundlists" },
       { label: "Comparador de Fundos", href: "#" },
       { label: "Radar de Fundos", href: "#" },
       { label: "Posições Vendidas", href: "#" },
