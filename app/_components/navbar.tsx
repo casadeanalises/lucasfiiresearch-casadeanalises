@@ -24,7 +24,8 @@ import {
 } from "./ui/sheet";
 import { Search } from "lucide-react";
 import { Input } from "./ui/input";
-import { fiiService, FII } from "@/app/services/fiiService";
+import { fiiService } from "@/app/services/fiiService";
+import { FII } from "@/app/types/FII";
 
 const Navbar = () => {
   const pathname = usePathname();

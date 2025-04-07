@@ -24,8 +24,9 @@ import {
 import { Input } from "@/app/_components/ui/input";
 import { Button } from "@/app/_components/ui/button";
 import { fiiService } from "@/app/services/fiiService";
-import { FII } from "@/app/services/fiiService";
+import { FII } from "@/app/types/FII";
 import { formatCurrency, formatPercent } from "@/app/utils/formatters";
+import { toast } from "react-hot-toast";
 
 // Tipos para ordenação
 type SortOption = "ticker" | "price" | "dividend" | "dividendYield";
@@ -43,9 +44,15 @@ export default function FundListsPage() {
   const [selectedCategory, setSelectedCategory] = useState("");
   const [lastUpdateTime, setLastUpdateTime] = useState<Date | null>(null);
   const [currentPage, setCurrentPage] = useState(1);
-  const [itemsPerPage, setItemsPerPage] = useState(50);
+  const [itemsPerPage, setItemsPerPage] = useState(100);
   const [sortBy, setSortBy] = useState<SortOption>("ticker");
   const [sortDirection, setSortDirection] = useState<SortDirection>("asc");
+  const [totalFiis, setTotalFiis] = useState(0);
+  const [avgDividendYield, setAvgDividendYield] = useState(0);
+  const [mostCommonCategory, setMostCommonCategory] = useState<string | null>(
+    null,
+  );
+  const [error, setError] = useState<string | null>(null);
 
   const categories = [
     "Todos",
@@ -85,78 +92,143 @@ export default function FundListsPage() {
   const fetchFunds = useCallback(async () => {
     try {
       setLoading(true);
+      console.log("Buscando FIIs...");
       const data = await fiiService.getAllFIIs();
+      console.log(`FIIs carregados: ${data.length}`);
 
-      setFunds(data);
-
-      // Se houver termo de busca inicial, aplicar o filtro automaticamente
-      if (initialSearchTerm) {
-        const term = initialSearchTerm.toLowerCase();
-        const filtered = data.filter(
-          (fund) =>
-            fund.ticker.toLowerCase().includes(term) ||
-            fund.name.toLowerCase().includes(term),
-        );
-        setFilteredFunds(filtered);
-      } else {
+      if (data && data.length > 0) {
+        setFunds(data);
         setFilteredFunds(data);
-      }
+        setLastUpdateTime(new Date());
+        setTotalFiis(data.length);
 
-      setLastUpdateTime(new Date());
+        // Calcula o dividend yield médio
+        const totalDY = data.reduce(
+          (sum, fii) => sum + (fii.dividendYield || 0),
+          0,
+        );
+        setAvgDividendYield(totalDY / data.length);
+
+        // Encontra a categoria mais comum
+        if (data.length > 0) {
+          const categoryCounts = data.reduce(
+            (counts: Record<string, number>, fii) => {
+              const category = fii.category || "Não categorizado";
+              counts[category] = (counts[category] || 0) + 1;
+              return counts;
+            },
+            {},
+          );
+
+          let maxCount = 0;
+          let maxCategory = null;
+
+          for (const [category, count] of Object.entries(categoryCounts)) {
+            if (count > maxCount) {
+              maxCount = count;
+              maxCategory = category;
+            }
+          }
+
+          setMostCommonCategory(maxCategory);
+        }
+      } else {
+        console.error("Nenhum FII encontrado");
+        setFunds([]);
+        setFilteredFunds([]);
+      }
     } catch (error) {
       console.error("Erro ao carregar os fundos:", error);
+      setFunds([]);
+      setFilteredFunds([]);
+      setError("Falha ao carregar os dados. Por favor, tente novamente.");
     } finally {
       setLoading(false);
     }
-  }, [initialSearchTerm]);
+  }, []);
 
   // Função para atualizar dados em tempo real
   const refreshData = useCallback(async () => {
     try {
       setIsUpdating(true);
-      const updatedFunds = await fiiService.getRealTimeUpdates();
+      console.log("Atualizando dados...");
+      const data = await fiiService.getAllFIIs();
+      console.log(`Dados atualizados: ${data.length} FIIs`);
 
-      setFunds(updatedFunds);
+      if (data && data.length > 0) {
+        setFunds(data);
 
-      // Re-aplicar os filtros atuais aos dados atualizados
-      let filtered = [...updatedFunds];
+        // Re-aplicar filtros atuais
+        let filtered = [...data];
+        if (searchTerm) {
+          const term = searchTerm.toLowerCase();
+          filtered = filtered.filter(
+            (fund) =>
+              fund.ticker.toLowerCase().includes(term) ||
+              fund.name.toLowerCase().includes(term),
+          );
+        }
+        if (selectedCategory && selectedCategory !== "Todos") {
+          filtered = filtered.filter(
+            (fund) => fund.category === selectedCategory,
+          );
+        }
 
-      if (searchTerm) {
-        const term = searchTerm.toLowerCase();
-        filtered = filtered.filter(
-          (fund) =>
-            fund.ticker.toLowerCase().includes(term) ||
-            fund.name.toLowerCase().includes(term),
+        setFilteredFunds(filtered);
+        setLastUpdateTime(new Date());
+        setTotalFiis(data.length);
+
+        // Calcula o dividend yield médio
+        const totalDY = data.reduce(
+          (sum, fii) => sum + (fii.dividendYield || 0),
+          0,
         );
-      }
+        setAvgDividendYield(totalDY / data.length);
 
-      if (selectedCategory && selectedCategory !== "Todos") {
-        filtered = filtered.filter(
-          (fund) => fund.category === selectedCategory,
-        );
-      }
+        // Encontra a categoria mais comum
+        if (data.length > 0) {
+          const categoryCounts = data.reduce(
+            (counts: Record<string, number>, fii) => {
+              const category = fii.category || "Não categorizado";
+              counts[category] = (counts[category] || 0) + 1;
+              return counts;
+            },
+            {},
+          );
 
-      setFilteredFunds(filtered);
-      setLastUpdateTime(new Date());
+          let maxCount = 0;
+          let maxCategory = null;
+
+          for (const [category, count] of Object.entries(categoryCounts)) {
+            if (count > maxCount) {
+              maxCount = count;
+              maxCategory = category;
+            }
+          }
+
+          setMostCommonCategory(maxCategory);
+        }
+      }
     } catch (error) {
       console.error("Erro ao atualizar dados:", error);
+      setError("Falha ao carregar os dados. Por favor, tente novamente.");
     } finally {
       setIsUpdating(false);
     }
   }, [searchTerm, selectedCategory]);
 
-  // Carregar os fundos na montagem do componente
+  // Efeito para carregar os dados iniciais
   useEffect(() => {
     fetchFunds();
   }, [fetchFunds]);
 
-  // Atualização automática a cada 1 minuto
+  // Efeito para atualizar os dados a cada minuto
   useEffect(() => {
-    const intervalId = setInterval(() => {
+    const interval = setInterval(() => {
       refreshData();
-    }, 60000); // 60 segundos
+    }, 60000);
 
-    return () => clearInterval(intervalId);
+    return () => clearInterval(interval);
   }, [refreshData]);
 
   // Filtragem de fundos
@@ -167,7 +239,7 @@ export default function FundListsPage() {
     if (searchTerm) {
       const term = searchTerm.toLowerCase();
       result = result.filter(
-        (fund) =>
+        (fund: FII) =>
           fund.ticker.toLowerCase().includes(term) ||
           fund.name.toLowerCase().includes(term),
       );
@@ -175,7 +247,7 @@ export default function FundListsPage() {
 
     // Filtrar por categoria
     if (selectedCategory && selectedCategory !== "Todos") {
-      result = result.filter((fund) => fund.category === selectedCategory);
+      result = result.filter((fund: FII) => fund.category === selectedCategory);
     }
 
     setFilteredFunds(result);
@@ -200,7 +272,7 @@ export default function FundListsPage() {
   // Aplicar filtro e ordenação
   const filteredFundsSorted = useMemo(() => {
     return funds
-      .filter((fund) => {
+      .filter((fund: FII) => {
         const matchesSearch =
           searchTerm === "" ||
           fund.ticker.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -209,7 +281,7 @@ export default function FundListsPage() {
           selectedCategory === "" || fund.category === selectedCategory;
         return matchesSearch && matchesCategory;
       })
-      .sort((a, b) => {
+      .sort((a: FII, b: FII) => {
         if (sortBy === "ticker") {
           return sortDirection === "asc"
             ? a.ticker.localeCompare(b.ticker)
@@ -329,16 +401,18 @@ export default function FundListsPage() {
             </span>
           </div>
 
-          <Button
-            onClick={refreshData}
-            disabled={isUpdating}
-            size="sm"
-            variant="outline"
-            className="border-gray-300 bg-white text-xs hover:bg-slate-50"
-          >
-            <RefreshCwIcon className="mr-1 h-3 w-3" />
-            Atualizar agora
-          </Button>
+          <div className="flex gap-2">
+            <Button
+              onClick={refreshData}
+              disabled={isUpdating}
+              size="sm"
+              variant="outline"
+              className="border-gray-300 bg-white text-xs hover:bg-slate-50"
+            >
+              <RefreshCwIcon className="mr-1 h-3 w-3" />
+              Atualizar agora
+            </Button>
+          </div>
         </div>
 
         {/* Contador e estatísticas */}
@@ -348,7 +422,7 @@ export default function FundListsPage() {
               <h3 className="mb-1 text-sm text-gray-500">
                 Total de FIIs listados
               </h3>
-              <p className="text-2xl font-bold text-gray-800">{funds.length}</p>
+              <p className="text-2xl font-bold text-gray-800">{totalFiis}</p>
               <p className="mt-1 text-xs text-gray-500">
                 Atualizado em tempo real
               </p>
@@ -369,25 +443,7 @@ export default function FundListsPage() {
                 Categoria mais comum
               </h3>
               <p className="text-2xl font-bold text-gray-800">
-                {(() => {
-                  const categories: Record<string, number> = {};
-                  filteredFunds.forEach((fund) => {
-                    categories[fund.category] =
-                      (categories[fund.category] || 0) + 1;
-                  });
-
-                  let maxCategory = "";
-                  let maxCount = 0;
-
-                  Object.entries(categories).forEach(([category, count]) => {
-                    if (count > maxCount) {
-                      maxCount = count;
-                      maxCategory = category;
-                    }
-                  });
-
-                  return maxCategory || "N/A";
-                })()}
+                {mostCommonCategory || "N/A"}
               </p>
               <p className="mt-1 text-xs text-gray-500">
                 Nos resultados atuais
@@ -399,15 +455,7 @@ export default function FundListsPage() {
                 Dividend Yield médio
               </h3>
               <p className="text-2xl font-bold text-green-600">
-                {filteredFunds.length > 0
-                  ? (
-                      filteredFunds.reduce(
-                        (sum, fund) => sum + fund.dividendYield,
-                        0,
-                      ) / filteredFunds.length
-                    ).toFixed(2)
-                  : 0}
-                %
+                {formatPercent(avgDividendYield)}
               </p>
               <p className="mt-1 text-xs text-gray-500">
                 Média dos FIIs filtrados
@@ -434,6 +482,27 @@ export default function FundListsPage() {
           <div className="flex items-center justify-center py-12">
             <div className="h-8 w-8 animate-spin rounded-full border-2 border-blue-600 border-t-transparent"></div>
             <span className="ml-2 text-gray-600">Carregando fundos...</span>
+          </div>
+        ) : error ? (
+          <div className="mb-4 border-l-4 border-red-500 bg-red-50 p-4">
+            <div className="flex">
+              <div className="flex-shrink-0">
+                <svg
+                  className="h-5 w-5 text-red-500"
+                  viewBox="0 0 20 20"
+                  fill="currentColor"
+                >
+                  <path
+                    fillRule="evenodd"
+                    d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z"
+                    clipRule="evenodd"
+                  />
+                </svg>
+              </div>
+              <div className="ml-3">
+                <p className="text-sm text-red-700">{error}</p>
+              </div>
+            </div>
           </div>
         ) : filteredFunds.length === 0 ? (
           <div className="rounded-xl bg-white p-12 text-center shadow-sm">
@@ -506,6 +575,12 @@ export default function FundListsPage() {
                       >
                         Categoria
                       </th>
+                      <th
+                        scope="col"
+                        className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-700"
+                      >
+                        Gestor
+                      </th>
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-gray-200 bg-white">
@@ -548,6 +623,9 @@ export default function FundListsPage() {
                         <td className="px-6 py-4 text-gray-700">
                           {fund.category}
                         </td>
+                        <td className="px-6 py-4 text-gray-700">
+                          {fund.manager || "Não disponível"}
+                        </td>
                       </tr>
                     ))}
                   </tbody>
@@ -567,9 +645,10 @@ export default function FundListsPage() {
                     }}
                     className="rounded-md border border-gray-300 bg-white p-1.5 text-sm text-gray-700"
                   >
-                    <option value={20}>20 por página</option>
                     <option value={50}>50 por página</option>
                     <option value={100}>100 por página</option>
+                    <option value={200}>200 por página</option>
+                    <option value={500}>500 por página</option>
                   </select>
 
                   <span className="text-sm text-gray-600">

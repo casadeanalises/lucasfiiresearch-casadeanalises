@@ -70,22 +70,30 @@ export function formatNumber(value: number): string {
  */
 export function formatDate(
   dateString: string,
-  format: "short" | "long" = "short",
+  format: "short" | "long" | "month" = "short",
 ): string {
   try {
     const date = new Date(dateString);
 
-    const options: Intl.DateTimeFormatOptions =
-      format === "long"
-        ? {
-            day: "2-digit",
-            month: "2-digit",
-            year: "numeric",
-          }
-        : {
-            day: "2-digit",
-            month: "2-digit",
-          };
+    let options: Intl.DateTimeFormatOptions;
+
+    if (format === "long") {
+      options = {
+        day: "2-digit",
+        month: "2-digit",
+        year: "numeric",
+      };
+    } else if (format === "month") {
+      options = {
+        month: "short",
+        year: "numeric",
+      };
+    } else {
+      options = {
+        day: "2-digit",
+        month: "2-digit",
+      };
+    }
 
     return date.toLocaleDateString("pt-BR", options);
   } catch (error) {
