@@ -129,6 +129,144 @@ vercel deploy
 - [React Hook Form](https://react-hook-form.com/) - Gerenciamento de formulários
 - [Zod](https://zod.dev/) - Validação de schema TypeScript
 
+`
+├── .eslintignore
+├── .eslintrc.json
+├── .gitignore
+├── .husky
+    ├── commit-msg
+    └── pre-commit
+├── .lintstagedrc.json
+├── .prettierrc.json
+├── README.md
+├── app
+    ├── (home)
+    │   └── page.tsx
+    ├── _actions
+    │   └── upsert-transaction
+    │   │   ├── index.ts
+    │   │   └── schema.ts
+    ├── _components
+    │   ├── add-transaction-button.tsx
+    │   ├── footer.tsx
+    │   ├── money-input.tsx
+    │   ├── navbar.tsx
+    │   ├── ui
+    │   │   ├── alert-dialog.tsx
+    │   │   ├── badge.tsx
+    │   │   ├── button.tsx
+    │   │   ├── calendar.tsx
+    │   │   ├── card.tsx
+    │   │   ├── chart.tsx
+    │   │   ├── data-table.tsx
+    │   │   ├── date-picker.tsx
+    │   │   ├── dialog.tsx
+    │   │   ├── form.tsx
+    │   │   ├── input.tsx
+    │   │   ├── label.tsx
+    │   │   ├── popover.tsx
+    │   │   ├── progress.tsx
+    │   │   ├── scroll-area.tsx
+    │   │   ├── select.tsx
+    │   │   ├── sonner.tsx
+    │   │   ├── table.tsx
+    │   │   └── tooltip.tsx
+    │   └── upsert-transaction-dialog.tsx
+    ├── _constants
+    │   └── transactions.ts
+    ├── _data
+    │   ├── can-user-add-transaction
+    │   │   └── index.ts
+    │   ├── get-current-month-transactions
+    │   │   └── index.ts
+    │   └── get-dashboard
+    │   │   ├── index.ts
+    │   │   └── types.ts
+    ├── _lib
+    │   ├── prisma.ts
+    │   └── utils.ts
+    ├── _utils
+    │   └── currency.ts
+    ├── api
+    │   ├── webhook
+    │   │   └── route.ts
+    │   └── webhooks
+    │   │   └── stripe
+    │   │       └── route.ts
+    ├── dashboard
+    │   ├── _actions
+    │   │   └── generate-ai-report
+    │   │   │   ├── index.ts
+    │   │   │   └── schema.ts
+    │   ├── _components
+    │   │   ├── ai-report-button.tsx
+    │   │   ├── expenses-per-category.tsx
+    │   │   ├── last-transactions.tsx
+    │   │   ├── percentage-item.tsx
+    │   │   ├── summary-card.tsx
+    │   │   ├── summary-cards.tsx
+    │   │   ├── time-select.tsx
+    │   │   └── transactions-pie-chart.tsx
+    │   └── page.tsx
+    ├── favicon.ico
+    ├── globals.css
+    ├── layout.tsx
+    ├── reports
+    │   ├── _actions
+    │   │   └── delete-transaction
+    │   │   │   ├── index.ts
+    │   │   │   └── schema.ts
+    │   ├── _columns
+    │   │   └── index.tsx
+    │   ├── _components
+    │   │   ├── delete-transaction-button.tsx
+    │   │   ├── edit-transaction-button.tsx
+    │   │   └── type-badge.tsx
+    │   └── page.tsx
+    ├── subscription
+    │   ├── _actions
+    │   │   └── create-stripe-checkout
+    │   │   │   └── index.ts
+    │   ├── _components
+    │   │   ├── acquire-plan-button.tsx
+    │   │   └── subscription-toast.tsx
+    │   └── page.tsx
+    └── webhook
+    │   └── route.ts
+├── components.json
+├── docker-compose.yml
+├── middleware.ts
+├── next.config.mjs
+├── package-lock.json
+├── package.json
+├── postcss.config.mjs
+├── prisma
+    ├── migrations
+    │   ├── 20241030145404_init_db
+    │   │   └── migration.sql
+    │   ├── 20241030180457_add_user_id_to_transaction
+    │   │   └── migration.sql
+    │   └── migration_lock.toml
+    └── schema.prisma
+├── public
+    ├── bank-slip.svg
+    ├── bank-transfer.svg
+    ├── credit-card.svg
+    ├── debit-card.svg
+    ├── file.svg
+    ├── globe.svg
+    ├── login.png
+    ├── logo.svg
+    ├── money.svg
+    ├── next.svg
+    ├── other.svg
+    ├── pix.svg
+    ├── vercel.svg
+    └── window.svg
+├── tailwind.config.ts
+└── tsconfig.json
+`
+
 ### Hospedagem e Deploy
 
 - [Vercel](https://vercel.com/) - Plataforma de hospedagem
