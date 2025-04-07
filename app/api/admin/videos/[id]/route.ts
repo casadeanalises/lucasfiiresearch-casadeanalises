@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import { connectDB } from "@/lib/mongoose";
-import Video from "@/app/models/Video";
+import HomeVideo from "@/app/models/HomeVideo";
 import { cookies } from "next/headers";
 import { verifyJWT } from "@/lib/auth";
 
@@ -39,7 +39,7 @@ export async function PUT(
     await connectDB();
 
     // Atualiza o vídeo
-    const video = await Video.findByIdAndUpdate(
+    const video = await HomeVideo.findByIdAndUpdate(
       params.id,
       {
         title,
@@ -97,7 +97,7 @@ export async function DELETE(
     await connectDB();
 
     // Deleta o vídeo
-    const video = await Video.findByIdAndDelete(params.id);
+    const video = await HomeVideo.findByIdAndDelete(params.id);
 
     if (!video) {
       return NextResponse.json(

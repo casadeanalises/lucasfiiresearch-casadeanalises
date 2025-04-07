@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import { connectDB } from "@/lib/mongoose";
-import Video from "@/app/models/Video";
+import HomeVideo from "@/app/models/HomeVideo";
 import { cookies } from "next/headers";
 import { verifyJWT } from "@/lib/auth";
 
@@ -26,7 +26,7 @@ export async function GET() {
     await connectDB();
 
     // Busca todos os vídeos ordenados por ordem
-    const videos = await Video.find().sort({ order: 1, createdAt: -1 });
+    const videos = await HomeVideo.find().sort({ order: 1, createdAt: -1 });
 
     return NextResponse.json({ videos });
   } catch (error) {
@@ -55,7 +55,7 @@ export async function POST(request: Request) {
     // Gera a URL da thumbnail usando o ID do vídeo
     const thumbnail = `https://img.youtube.com/vi/${videoId}/maxresdefault.jpg`;
 
-    const video = await Video.create({
+    const video = await HomeVideo.create({
       title,
       description,
       videoId,
