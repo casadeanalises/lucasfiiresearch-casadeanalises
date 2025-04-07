@@ -15,6 +15,8 @@ import {
   ChevronLeftIcon,
   ChevronRightIcon,
   X,
+  ChevronUpIcon,
+  ChevronDownIcon,
 } from "lucide-react";
 import AOS from "aos";
 import { useEffect, useState } from "react";
@@ -40,6 +42,11 @@ const LoggedInHome = () => {
   const [loadingVideos, setLoadingVideos] = useState(true);
   const [selectedVideo, setSelectedVideo] = useState<HomeVideo | null>(null);
   const [isVideoModalOpen, setIsVideoModalOpen] = useState(false);
+  const [showAllVideos, setShowAllVideos] = useState(false);
+  const [page, setPage] = useState(1);
+
+  const INITIAL_VIDEOS_COUNT = 6;
+  const VIDEOS_PER_PAGE = 6;
 
   const carouselItems = [
     {
@@ -302,6 +309,25 @@ const LoggedInHome = () => {
                 <PlayCircleIcon className="h-6 w-6 text-blue-600" />
                 <h2 className="text-xl font-semibold">Youtube / Vídeos</h2>
               </div>
+
+              {videos.length > INITIAL_VIDEOS_COUNT && (
+                <button
+                  onClick={() => setShowAllVideos((prev) => !prev)}
+                  className="flex items-center gap-1 rounded-full bg-blue-50 px-4 py-2 text-sm font-medium text-blue-600 transition-colors hover:bg-blue-100"
+                >
+                  {showAllVideos ? (
+                    <>
+                      <span>Mostrar menos</span>
+                      <ChevronUpIcon className="h-4 w-4" />
+                    </>
+                  ) : (
+                    <>
+                      <span>Ver mais</span>
+                      <ChevronRightIcon className="h-4 w-4" />
+                    </>
+                  )}
+                </button>
+              )}
             </div>
 
             {loadingVideos ? (
@@ -316,46 +342,70 @@ const LoggedInHome = () => {
                 Nenhum vídeo disponível
               </p>
             ) : (
-              <div className="grid grid-cols-1 gap-6 md:grid-cols-3 lg:grid-cols-4">
-                {videos.map((video) => (
-                  <div
-                    key={video._id}
-                    className="group relative cursor-pointer overflow-hidden rounded-lg bg-white shadow-sm transition-all duration-300 hover:-translate-y-1 hover:shadow-xl"
-                    onClick={() => {
-                      setSelectedVideo(video);
-                      setIsVideoModalOpen(true);
-                    }}
-                  >
-                    <div className="relative aspect-video">
-                      <img
-                        src={
-                          video.thumbnail ||
-                          `https://img.youtube.com/vi/${video.videoId}/maxresdefault.jpg`
-                        }
-                        alt={video.title}
-                        className="h-full w-full object-cover transition-transform duration-300 group-hover:scale-105"
-                      />
-                      <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent opacity-0 transition-opacity duration-300 group-hover:opacity-100">
-                        <div className="absolute bottom-0 left-0 right-0 p-4">
-                          <span className="inline-flex items-center rounded-full bg-blue-600/90 px-2.5 py-1 text-xs font-medium text-white backdrop-blur-sm">
-                            <PlayCircleIcon className="mr-1 h-3 w-3" />
-                            Assistir agora
-                          </span>
+              <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 md:grid-cols-3 lg:grid-cols-6">
+                {videos
+                  .slice(
+                    0,
+                    showAllVideos
+                      ? page * VIDEOS_PER_PAGE
+                      : INITIAL_VIDEOS_COUNT,
+                  )
+                  .map((video) => (
+                    <div
+                      key={video._id}
+                      className="group relative cursor-pointer overflow-hidden rounded-lg bg-white shadow-sm transition-all duration-300 hover:-translate-y-1 hover:shadow-md"
+                      onClick={() => {
+                        setSelectedVideo(video);
+                        setIsVideoModalOpen(true);
+                      }}
+                    >
+                      <div className="relative aspect-video">
+                        <img
+                          src={
+                            video.thumbnail ||
+                            `https://img.youtube.com/vi/${video.videoId}/maxresdefault.jpg`
+                          }
+                          alt={video.title}
+                          className="h-full w-full object-cover transition-transform duration-300 group-hover:scale-105"
+                        />
+                        <div className="absolute inset-0 flex items-center justify-center bg-black/50 opacity-0 transition-opacity duration-300 group-hover:opacity-100">
+                          <PlayCircleIcon className="h-10 w-10 text-white" />
                         </div>
                       </div>
+                      <div className="p-2">
+                        <h3 className="line-clamp-2 text-xs font-semibold text-slate-800 group-hover:text-blue-600">
+                          {video.title}
+                        </h3>
+                      </div>
                     </div>
-                    <div className="p-3">
-                      <h3 className="line-clamp-2 text-sm font-semibold text-slate-800 group-hover:text-blue-600">
-                        {video.title}
-                      </h3>
-                      {video.description && (
-                        <p className="mt-1 line-clamp-2 text-xs text-slate-500">
-                          {video.description}
-                        </p>
-                      )}
-                    </div>
-                  </div>
-                ))}
+                  ))}
+              </div>
+            )}
+
+            {showAllVideos && videos.length > page * VIDEOS_PER_PAGE && (
+              <div className="mt-6 flex justify-center">
+                <button
+                  onClick={() => setPage((prev) => prev + 1)}
+                  className="flex items-center gap-2 rounded-lg border border-blue-200 bg-white px-6 py-2.5 text-sm font-medium text-blue-600 transition-colors hover:bg-blue-50"
+                >
+                  <span>Carregar mais vídeos</span>
+                  <ChevronDownIcon className="h-4 w-4" />
+                </button>
+              </div>
+            )}
+
+            {!showAllVideos && videos.length > INITIAL_VIDEOS_COUNT && (
+              <div className="mt-6 flex justify-center">
+                <button
+                  onClick={() => {
+                    setShowAllVideos(true);
+                    setPage(1);
+                  }}
+                  className="flex items-center gap-2 rounded-lg bg-blue-50 px-4 py-2 text-sm font-medium text-blue-600 transition-colors hover:bg-blue-100"
+                >
+                  <span>Ver todos os {videos.length} vídeos</span>
+                  <ArrowRightIcon className="h-4 w-4" />
+                </button>
               </div>
             )}
           </div>
