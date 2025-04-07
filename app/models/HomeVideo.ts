@@ -10,15 +10,17 @@ const homeVideoSchema = new Schema(
       type: String,
       required: [true, "Por favor, insira uma descrição"],
     },
-    url: {
-      type: String,
-      required: [true, "Por favor, insira a URL do vídeo"],
-    },
     videoId: {
       type: String,
+      required: [true, "Por favor, insira o ID do vídeo"],
+    },
+    url: {
+      type: String,
+      required: false,
     },
     thumbnail: {
       type: String,
+      required: false,
     },
     order: {
       type: Number,
@@ -34,49 +36,21 @@ const homeVideoSchema = new Schema(
   },
 );
 
-// Middleware para extrair o ID do vídeo da URL do YouTube
-homeVideoSchema.pre("save", function (next) {
-  console.log("Executando middleware pre-save...");
-  console.log("URL do vídeo:", this.url);
-
-  if (this.url) {
-    const regExp =
-      /^.*(youtu.be\/|v\/|u\/\w\/|embed\/|watch\?v=|&v=)([^#&?]*).*/;
-    const match = this.url.match(regExp);
-    console.log("Match do regex:", match);
-
-    if (match && match[2].length === 11) {
-      this.videoId = match[2];
-      this.thumbnail = `https://img.youtube.com/vi/${match[2]}/maxresdefault.jpg`;
-      console.log("ID do vídeo extraído:", this.videoId);
-      console.log("Thumbnail gerada:", this.thumbnail);
-    } else {
-      console.log("URL do YouTube inválida");
-    }
+// Middleware para gerar URL e thumbnail antes de validar
+homeVideoSchema.pre("validate", function (next) {
+  if (this.videoId) {
+    this.url = `https://www.youtube.com/watch?v=${this.videoId}`;
+    this.thumbnail = `https://img.youtube.com/vi/${this.videoId}/maxresdefault.jpg`;
   }
   next();
 });
 
-// Também executar o middleware no update
+// Remover middleware de save e update
+homeVideoSchema.pre("save", function (next) {
+  next();
+});
+
 homeVideoSchema.pre("findOneAndUpdate", function (next) {
-  console.log("Executando middleware pre-update...");
-  const update = this.getUpdate() as any;
-
-  if (update?.url) {
-    const regExp =
-      /^.*(youtu.be\/|v\/|u\/\w\/|embed\/|watch\?v=|&v=)([^#&?]*).*/;
-    const match = update.url.match(regExp);
-    console.log("Match do regex (update):", match);
-
-    if (match && match[2].length === 11) {
-      update.videoId = match[2];
-      update.thumbnail = `https://img.youtube.com/vi/${match[2]}/maxresdefault.jpg`;
-      console.log("ID do vídeo extraído (update):", update.videoId);
-      console.log("Thumbnail gerada (update):", update.thumbnail);
-    } else {
-      console.log("URL do YouTube inválida (update)");
-    }
-  }
   next();
 });
 

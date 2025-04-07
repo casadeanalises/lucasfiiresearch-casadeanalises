@@ -25,13 +25,23 @@ async function isAdmin() {
 // GET - Listar todos os vídeos
 export async function GET() {
   try {
+    console.log("Iniciando busca de vídeos públicos...");
+
     await connectDB();
-    const videos = await HomeVideo.find().sort({ order: 1 });
-    return NextResponse.json(videos);
+    console.log("Conectado ao MongoDB");
+
+    // Busca todos os vídeos ordenados por ordem (para admin, mostra todos)
+    const videos = await HomeVideo.find()
+      .sort({ order: 1, createdAt: -1 })
+      .lean();
+
+    console.log("Vídeos encontrados:", videos);
+
+    return NextResponse.json({ videos: videos || [] });
   } catch (error) {
     console.error("Erro ao buscar vídeos:", error);
     return NextResponse.json(
-      { error: "Erro ao buscar vídeos" },
+      { videos: [], message: "Erro ao buscar vídeos" },
       { status: 500 },
     );
   }
@@ -41,35 +51,51 @@ export async function GET() {
 export async function POST(req: NextRequest) {
   try {
     if (!(await isAdmin())) {
-      return NextResponse.json({ error: "Não autorizado" }, { status: 401 });
+      return NextResponse.json({ message: "Não autorizado" }, { status: 401 });
+    }
+
+    const data = await req.json();
+    console.log("Dados recebidos:", data);
+
+    const { title, description, videoId } = data;
+
+    if (!title || !description || !videoId) {
+      return NextResponse.json(
+        { message: "Título, descrição e ID do vídeo são obrigatórios" },
+        { status: 400 },
+      );
     }
 
     await connectDB();
-    const data = await req.json();
 
-    // Extrair ID do vídeo da URL do YouTube
-    let videoId = data.videoId;
-    if (videoId.includes("youtube.com") || videoId.includes("youtu.be")) {
-      videoId = videoId.split("v=")[1] || videoId.split("/").pop();
-      if (videoId.includes("?")) {
-        videoId = videoId.split("?")[0];
-      }
-    }
+    // Gerar a URL da thumbnail usando o ID do vídeo
+    const thumbnail = `https://img.youtube.com/vi/${videoId}/maxresdefault.jpg`;
 
-    // Gerar thumbnail se não fornecida
-    const thumbnail =
-      data.thumbnail || `https://img.youtube.com/vi/${videoId}/mqdefault.jpg`;
-
+    // Criar o vídeo com os campos obrigatórios
     const video = await HomeVideo.create({
-      ...data,
+      title,
+      description,
       videoId,
       thumbnail,
+      order: data.order || 0,
+      active: data.active ?? true,
     });
 
-    return NextResponse.json(video);
+    console.log("Vídeo criado:", video);
+
+    return NextResponse.json(
+      {
+        message: "Vídeo adicionado com sucesso",
+        video,
+      },
+      { status: 201 },
+    );
   } catch (error) {
     console.error("Erro ao criar vídeo:", error);
-    return NextResponse.json({ error: "Erro ao criar vídeo" }, { status: 500 });
+    return NextResponse.json(
+      { message: "Erro ao criar vídeo" },
+      { status: 500 },
+    );
   }
 }
 
@@ -77,29 +103,46 @@ export async function POST(req: NextRequest) {
 export async function PUT(req: NextRequest) {
   try {
     if (!(await isAdmin())) {
-      return NextResponse.json({ error: "Não autorizado" }, { status: 401 });
+      return NextResponse.json({ message: "Não autorizado" }, { status: 401 });
+    }
+
+    const data = await req.json();
+    console.log("Dados recebidos para atualização:", data);
+
+    const { id, order } = data;
+
+    if (!id || order === undefined) {
+      return NextResponse.json(
+        { message: "ID e ordem são obrigatórios" },
+        { status: 400 },
+      );
     }
 
     await connectDB();
-    const data = await req.json();
-    const { id, ...updateData } = data;
 
-    const video = await HomeVideo.findByIdAndUpdate(id, updateData, {
-      new: true,
-    });
+    const video = await HomeVideo.findByIdAndUpdate(
+      id,
+      { order },
+      { new: true },
+    );
 
     if (!video) {
       return NextResponse.json(
-        { error: "Vídeo não encontrado" },
+        { message: "Vídeo não encontrado" },
         { status: 404 },
       );
     }
 
-    return NextResponse.json(video);
+    console.log("Vídeo atualizado:", video);
+
+    return NextResponse.json({
+      message: "Vídeo atualizado com sucesso",
+      video,
+    });
   } catch (error) {
     console.error("Erro ao atualizar vídeo:", error);
     return NextResponse.json(
-      { error: "Erro ao atualizar vídeo" },
+      { message: "Erro ao atualizar vídeo" },
       { status: 500 },
     );
   }
@@ -109,31 +152,39 @@ export async function PUT(req: NextRequest) {
 export async function DELETE(req: NextRequest) {
   try {
     if (!(await isAdmin())) {
-      return NextResponse.json({ error: "Não autorizado" }, { status: 401 });
+      return NextResponse.json({ message: "Não autorizado" }, { status: 401 });
     }
 
     const { searchParams } = new URL(req.url);
     const id = searchParams.get("id");
 
     if (!id) {
-      return NextResponse.json({ error: "ID não fornecido" }, { status: 400 });
+      return NextResponse.json(
+        { message: "ID não fornecido" },
+        { status: 400 },
+      );
     }
 
     await connectDB();
+
     const video = await HomeVideo.findByIdAndDelete(id);
 
     if (!video) {
       return NextResponse.json(
-        { error: "Vídeo não encontrado" },
+        { message: "Vídeo não encontrado" },
         { status: 404 },
       );
     }
 
-    return NextResponse.json({ message: "Vídeo removido com sucesso" });
+    console.log("Vídeo removido:", id);
+
+    return NextResponse.json({
+      message: "Vídeo removido com sucesso",
+    });
   } catch (error) {
     console.error("Erro ao remover vídeo:", error);
     return NextResponse.json(
-      { error: "Erro ao remover vídeo" },
+      { message: "Erro ao remover vídeo" },
       { status: 500 },
     );
   }

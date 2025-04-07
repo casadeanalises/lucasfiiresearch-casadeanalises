@@ -22,12 +22,14 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/app/_components/ui/dialog";
-import { PlayCircle, Plus, Trash2, X } from "lucide-react";
+import { PlayCircle, Plus, Trash2, X, Loader2 } from "lucide-react";
 
 interface HomeVideo {
   _id: string;
-  videoId: string;
   title: string;
+  description: string;
+  url: string;
+  videoId: string;
   thumbnail: string;
   order: number;
   active: boolean;
@@ -44,20 +46,27 @@ export default function HomeVideosAdminClient({
   const [loading, setLoading] = useState(true);
   const [showAddDialog, setShowAddDialog] = useState(false);
   const [newVideo, setNewVideo] = useState({
-    videoId: "",
     title: "",
+    description: "",
+    videoId: "",
   });
+  const [error, setError] = useState<string | null>(null);
 
   // Carregar vídeos
   const fetchVideos = async () => {
     try {
+      setLoading(true);
       const response = await fetch("/api/home-videos");
-      if (!response.ok) throw new Error("Erro ao carregar vídeos");
       const data = await response.json();
-      setVideos(data);
+
+      if (!response.ok) {
+        throw new Error(data.message || "Erro ao carregar vídeos");
+      }
+
+      setVideos(Array.isArray(data.videos) ? data.videos : []);
     } catch (error) {
       console.error("Erro ao carregar vídeos:", error);
-      toast.error("Erro ao carregar vídeos");
+      setError("Erro ao carregar vídeos. Por favor, tente novamente.");
     } finally {
       setLoading(false);
     }
@@ -80,7 +89,7 @@ export default function HomeVideosAdminClient({
 
       await fetchVideos();
       setShowAddDialog(false);
-      setNewVideo({ videoId: "", title: "" });
+      setNewVideo({ title: "", description: "", videoId: "" });
       toast.success("Vídeo adicionado com sucesso!");
     } catch (error) {
       console.error("Erro ao adicionar vídeo:", error);
@@ -151,14 +160,14 @@ export default function HomeVideosAdminClient({
                 Adicionar Novo Vídeo
               </DialogTitle>
               <DialogDescription className="text-gray-600">
-                Adicione um novo vídeo à página inicial. Cole o ID ou URL do
-                vídeo do YouTube.
+                Adicione um novo vídeo à página inicial. Cole o ID do vídeo do
+                YouTube.
               </DialogDescription>
             </DialogHeader>
             <div className="grid gap-4 py-4">
               <div className="grid gap-2">
                 <Label htmlFor="videoId" className="text-gray-700">
-                  ID ou URL do Vídeo
+                  ID do Vídeo
                 </Label>
                 <Input
                   id="videoId"
@@ -166,9 +175,12 @@ export default function HomeVideosAdminClient({
                   onChange={(e) =>
                     setNewVideo({ ...newVideo, videoId: e.target.value })
                   }
-                  placeholder="Ex: dQw4w9WgXcQ ou https://youtube.com/watch?v=dQw4w9WgXcQ"
+                  placeholder="Ex: dQw4w9WgXcQ"
                   className="border-gray-300 bg-white"
                 />
+                <p className="text-sm text-gray-500">
+                  Cole apenas o ID do vídeo do YouTube (a parte após v= na URL)
+                </p>
               </div>
               <div className="grid gap-2">
                 <Label htmlFor="title" className="text-gray-700">
@@ -184,17 +196,37 @@ export default function HomeVideosAdminClient({
                   className="border-gray-300 bg-white"
                 />
               </div>
+              <div className="grid gap-2">
+                <Label htmlFor="description" className="text-gray-700">
+                  Descrição
+                </Label>
+                <Input
+                  id="description"
+                  value={newVideo.description}
+                  onChange={(e) =>
+                    setNewVideo({ ...newVideo, description: e.target.value })
+                  }
+                  placeholder="Descrição do vídeo"
+                  className="border-gray-300 bg-white"
+                />
+              </div>
             </div>
             <DialogFooter>
               <Button
                 variant="outline"
-                onClick={() => setShowAddDialog(false)}
+                onClick={() => {
+                  setShowAddDialog(false);
+                  setNewVideo({ title: "", description: "", videoId: "" });
+                }}
                 className="bg-white"
               >
                 Cancelar
               </Button>
               <Button
                 onClick={handleAddVideo}
+                disabled={
+                  !newVideo.title || !newVideo.description || !newVideo.videoId
+                }
                 className="bg-blue-600 text-white hover:bg-blue-700"
               >
                 Adicionar
@@ -206,10 +238,13 @@ export default function HomeVideosAdminClient({
 
       {/* Lista de vídeos */}
       {loading ? (
-        <div className="flex items-center justify-center py-8">
-          <div className="h-8 w-8 animate-spin rounded-full border-4 border-blue-600 border-t-transparent"></div>
-          <span className="ml-2">Carregando vídeos...</span>
+        <div className="flex items-center justify-center p-8">
+          <Loader2 className="h-6 w-6 animate-spin" />
         </div>
+      ) : error ? (
+        <div className="p-8 text-center text-red-500">{error}</div>
+      ) : videos.length === 0 ? (
+        <div className="p-8 text-center">Nenhum vídeo cadastrado.</div>
       ) : (
         <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
           {videos.map((video) => (
