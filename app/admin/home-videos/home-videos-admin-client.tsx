@@ -158,14 +158,29 @@ export default function HomeVideosAdminClient() {
       if (editingVideo) {
         await handleUpdateVideo(editingVideo._id, formData);
       } else {
-        await handleAddVideo();
+        // Enviar diretamente o formData
+        const response = await fetch("/api/home-videos", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          credentials: "include",
+          body: JSON.stringify(formData),
+        });
+
+        if (!response.ok) {
+          const errorData = await response.json();
+          throw new Error(errorData.message || "Erro ao adicionar vídeo");
+        }
+
+        toast.success("Vídeo adicionado com sucesso!");
+        await fetchVideos();
       }
+
       setIsModalOpen(false);
       setEditingVideo(null);
       setFormData({ title: "", description: "", videoId: "" });
-    } catch (error) {
+    } catch (error: any) {
       console.error("Erro ao salvar vídeo:", error);
-      toast.error("Erro ao salvar vídeo");
+      toast.error(error.message || "Erro ao salvar vídeo");
     } finally {
       setIsSubmitting(false);
     }

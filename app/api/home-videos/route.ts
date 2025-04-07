@@ -2,20 +2,36 @@ import { NextResponse, NextRequest } from "next/server";
 import { currentUser } from "@clerk/nextjs/server";
 import connectDB from "@/app/lib/mongodb";
 import HomeVideo from "@/app/models/HomeVideo";
+import { cookies } from "next/headers";
+import { verifyJWT } from "@/lib/auth";
 
 // Função auxiliar para verificar se o usuário é admin
 async function isAdmin() {
   try {
+    // Primeiro tenta com Clerk
     const user = await currentUser();
-    if (!user) return false;
+    if (user) {
+      const adminEmail = process.env.ADMIN_EMAIL;
+      if (!adminEmail) return false;
 
-    const adminEmail = process.env.ADMIN_EMAIL;
-    if (!adminEmail) return false;
+      const userEmail = user.primaryEmailAddress?.emailAddress;
+      if (!userEmail) return false;
 
-    const userEmail = user.primaryEmailAddress?.emailAddress;
-    if (!userEmail) return false;
+      if (userEmail.toLowerCase() === adminEmail.toLowerCase()) {
+        return true;
+      }
+    }
 
-    return userEmail.toLowerCase() === adminEmail.toLowerCase();
+    // Se não funcionar, tenta com cookie de admin
+    const cookieStore = cookies();
+    const token = cookieStore.get("admin_token")?.value;
+
+    if (token) {
+      const payload = await verifyJWT(token);
+      return !!payload;
+    }
+
+    return false;
   } catch (error) {
     console.error("Erro ao verificar admin:", error);
     return false;
@@ -60,8 +76,16 @@ export async function POST(req: NextRequest) {
     const { title, description, videoId } = data;
 
     if (!title || !description || !videoId) {
+      const missingFields = [];
+      if (!title) missingFields.push("título");
+      if (!description) missingFields.push("descrição");
+      if (!videoId) missingFields.push("ID do vídeo");
+
       return NextResponse.json(
-        { message: "Título, descrição e ID do vídeo são obrigatórios" },
+        {
+          message: `Campos obrigatórios ausentes: ${missingFields.join(", ")}`,
+          missingFields,
+        },
         { status: 400 },
       );
     }

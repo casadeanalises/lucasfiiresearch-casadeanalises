@@ -1,25 +1,23 @@
 import { NextResponse } from "next/server";
 import { connectDB } from "@/lib/mongoose";
 import Admin from "@/app/models/Admin";
-import jwt from "jsonwebtoken";
-import { cookies } from "next/headers";
-
-const JWT_SECRET = process.env.JWT_SECRET || "your-secret-key";
+import { getAuthPayload } from "@/lib/auth";
 
 export async function POST(request: Request) {
   try {
-    // Verifica o token do admin atual
-    const token = cookies().get("admin_token")?.value;
+    // Verifica o token do admin atual usando a nova função
+    const payload = await getAuthPayload();
 
-    if (!token) {
-      return NextResponse.json({ message: "Não autorizado" }, { status: 401 });
-    }
-
-    try {
-      // Verifica se o token é válido
-      jwt.verify(token, JWT_SECRET);
-    } catch (error) {
-      return NextResponse.json({ message: "Token inválido" }, { status: 401 });
+    if (!payload) {
+      console.log("Erro de autenticação: Token não encontrado ou inválido");
+      return NextResponse.json(
+        {
+          message:
+            "Não autorizado. Por favor, faça login novamente ou use a página de Restaurar Autenticação.",
+          code: "auth_failed",
+        },
+        { status: 401 },
+      );
     }
 
     // Pega os dados do novo admin

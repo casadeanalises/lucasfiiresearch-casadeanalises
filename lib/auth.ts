@@ -1,4 +1,5 @@
 import * as jose from "jose";
+import { cookies } from "next/headers";
 
 // Chave secreta para assinar os tokens JWT (convertida para Uint8Array para jose)
 const secretKey = new TextEncoder().encode(
@@ -24,6 +25,31 @@ export async function verifyJWT(token: string) {
   }
 }
 
+// Função para verificar se o usuário está autenticado
+export async function isAuthenticated() {
+  const cookieStore = cookies();
+  const token = cookieStore.get(COOKIE_OPTIONS.name)?.value;
+
+  if (!token) {
+    return false;
+  }
+
+  const payload = await verifyJWT(token);
+  return !!payload;
+}
+
+// Função para obter o payload do token
+export async function getAuthPayload() {
+  const cookieStore = cookies();
+  const token = cookieStore.get(COOKIE_OPTIONS.name)?.value;
+
+  if (!token) {
+    return null;
+  }
+
+  return await verifyJWT(token);
+}
+
 // Configurações do cookie
 export const COOKIE_OPTIONS = {
   name: "admin_token",
@@ -31,4 +57,5 @@ export const COOKIE_OPTIONS = {
   secure: process.env.NODE_ENV === "production",
   sameSite: "lax" as const,
   maxAge: 60 * 60 * 24, // 24 horas
+  path: "/",
 };

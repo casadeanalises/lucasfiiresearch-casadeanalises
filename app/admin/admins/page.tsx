@@ -26,14 +26,18 @@ export default function AdminsPage() {
 
   const fetchAdmins = async () => {
     try {
-      const response = await fetch("/api/admin/list");
+      const response = await fetch("/api/admin/list", {
+        credentials: "include",
+      });
       const data = await response.json();
 
-      if (!response.ok) throw new Error(data.message);
+      if (!response.ok) {
+        throw new Error(data.message || "Erro ao carregar administradores");
+      }
 
       setAdmins(data.admins);
-    } catch (err) {
-      setError("Erro ao carregar administradores");
+    } catch (err: any) {
+      setError(err.message || "Erro ao carregar administradores");
       console.error(err);
     } finally {
       setLoading(false);
@@ -46,19 +50,24 @@ export default function AdminsPage() {
     try {
       const response = await fetch("/api/admin/create", {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: {
+          "Content-Type": "application/json",
+        },
+        credentials: "include",
         body: JSON.stringify(newAdminData),
       });
 
       const data = await response.json();
 
-      if (!response.ok) throw new Error(data.message);
+      if (!response.ok) {
+        throw new Error(data.message || "Erro ao adicionar administrador");
+      }
 
       setShowAddModal(false);
       setNewAdminData({ email: "", password: "" });
       fetchAdmins();
-    } catch (err) {
-      setError("Erro ao adicionar administrador");
+    } catch (err: any) {
+      setError(err.message || "Erro ao adicionar administrador");
       console.error(err);
     }
   };

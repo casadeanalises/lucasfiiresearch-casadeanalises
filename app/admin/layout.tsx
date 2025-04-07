@@ -117,6 +117,62 @@ export default function AdminLayout({
             </span>
             Gerenciar Admins
           </Link>
+          {/* Botão de Logout */}
+          <div className="mt-8 border-t pt-4">
+            <Link
+              href="/admin/fix-auth"
+              className="mb-2 flex w-full items-center px-4 py-2 text-gray-600 hover:bg-blue-50 hover:text-blue-700"
+            >
+              <span className="mr-2">
+                <svg
+                  className="h-5 w-5"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M8 11V7a4 4 0 118 0m-4 8v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2z"
+                  />
+                </svg>
+              </span>
+              Restaurar Autenticação
+            </Link>
+
+            <button
+              onClick={async () => {
+                try {
+                  await fetch("/api/admin/logout", {
+                    method: "POST",
+                    credentials: "include",
+                  });
+                  window.location.href = "/admin/login";
+                } catch (error) {
+                  console.error("Erro ao fazer logout:", error);
+                }
+              }}
+              className="flex w-full items-center px-4 py-2 text-red-600 hover:bg-red-50 hover:text-red-700"
+            >
+              <span className="mr-2">
+                <svg
+                  className="h-5 w-5"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"
+                  />
+                </svg>
+              </span>
+              Sair
+            </button>
+          </div>
         </nav>
       </div>
 
