@@ -138,7 +138,7 @@ const BACKUP_FIIS: FII[] = [
     id: "GGRC11",
     ticker: "GGRC11",
     name: "GGR Covepi Renda FII",
-    price: 115.68,
+    price: 9.5,
     changePercent: -0.5,
     dividend: 1.1,
     dividendYield: 0.95,
@@ -466,6 +466,21 @@ const BACKUP_FIIS: FII[] = [
     description:
       "Iridium Recebíveis Imobiliários é um FII de papel com foco em CRIs de alta qualidade.",
   },
+  {
+    id: "ALZR11",
+    ticker: "ALZR11",
+    name: "Alianza Trust Renda Imobiliária FII",
+    price: 95.88,
+    changePercent: 0.18,
+    dividend: 0.96,
+    dividendYield: 0.84,
+    patrimony: 950000000,
+    pvp: 0.97,
+    category: "Logística",
+    manager: "Alianza Gestão de Recursos",
+    description:
+      "Alianza Trust Renda Imobiliária é um fundo focado em propriedades corporativas com contratos atípicos de longo prazo.",
+  },
 ];
 
 // Dados extras para completar o total de 484 FIIs
@@ -576,7 +591,23 @@ export class FIIService {
 
   async searchFIIs(term: string): Promise<FII[]> {
     const fiis = await this.getAllFIIs();
-    const searchTerm = term.toLowerCase();
+
+    if (!term || term.trim() === "") {
+      return fiis;
+    }
+
+    const searchTerm = term.toLowerCase().trim();
+
+    // Primeiro, procura por correspondências exatas de ticker para priorizar
+    const exactTickerMatches = fiis.filter(
+      (fii) => fii.ticker.toLowerCase() === searchTerm,
+    );
+
+    if (exactTickerMatches.length > 0) {
+      return exactTickerMatches;
+    }
+
+    // Busca por correspondências parciais
     return fiis.filter(
       (fii) =>
         fii.ticker.toLowerCase().includes(searchTerm) ||
@@ -673,8 +704,33 @@ export class FIIService {
     }
   }
 
+  private saveToLocalStorage(key: string, data: any) {
+    try {
+      localStorage.setItem(key, JSON.stringify(data));
+    } catch (error) {
+      console.error("Erro ao salvar no localStorage:", error);
+    }
+  }
+
+  private loadFromLocalStorage(key: string): any {
+    try {
+      const data = localStorage.getItem(key);
+      return data ? JSON.parse(data) : null;
+    } catch (error) {
+      console.error("Erro ao carregar do localStorage:", error);
+      return null;
+    }
+  }
+
   async getAllFIIs(): Promise<FII[]> {
     try {
+      // Tenta carregar do localStorage primeiro
+      const cachedData = this.loadFromLocalStorage("allFiis");
+      if (cachedData) {
+        console.log("Carregando FIIs do localStorage");
+        return cachedData;
+      }
+
       // Se estivermos usando dados de backup, retorne a lista completa de FIIs
       if (this.useBackupData) {
         const completos = [...BACKUP_FIIS, ...gerarFIIsAdicionais()];
@@ -747,6 +803,9 @@ export class FIIService {
         description: `${fii.name || fii.stock} é um fundo imobiliário listado na B3.`,
       }));
 
+      // Salva os dados no localStorage
+      this.saveToLocalStorage("allFiis", fiis);
+
       // Se a API não retornar 484 FIIs, completar com mais dados fictícios
       if (fiis.length < 484) {
         const faltam = 484 - fiis.length;
@@ -791,84 +850,39 @@ export class FIIService {
 
   async getFIIDetails(ticker: string): Promise<FIIDetails | null> {
     try {
-      // Primeiro verifica se estamos usando dados de backup
-      // ou se o ticker existe especificamente no backup
+      // Primeiro tenta carregar do localStorage
+      const cachedData = this.loadFromLocalStorage("allFiis");
+      if (cachedData) {
+        const fii = cachedData.find((f: FII) => f.ticker === ticker);
+        if (fii) {
+          console.log(`Carregando detalhes do ${ticker} do localStorage`);
+          return {
+            ...fii,
+            priceHistory: [], // Adicione histórico real se necessário
+            dividendHistory: [], // Adicione histórico real se necessário
+            composition: [],
+            lastUpdate: new Date().toISOString(),
+            assetValue: fii.price,
+            lastDividend: fii.dividend,
+            liquidPatrimony: fii.patrimony,
+            dailyLiquidity: fii.price * 100000,
+            marketValue: fii.patrimony * 0.9,
+          };
+        }
+      }
+
+      // Se não encontrado no localStorage, usa dados de backup ou API
       const backupFII = BACKUP_FIIS.find((f) => f.ticker === ticker);
 
       if (this.useBackupData || backupFII) {
-        this.useBackupData = true; // Garante que usaremos os dados de backup para os próximos pedidos também
+        this.useBackupData = true;
         console.log(`Usando dados de backup para ${ticker}`);
 
         if (!backupFII) {
           console.error(`FII ${ticker} não encontrado nos dados de backup`);
-          // Se não encontrar o FII específico, use o primeiro da lista como fallback
-          const defaultFII = BACKUP_FIIS[0];
-          if (!defaultFII) return null;
-
-          // Criar uma cópia do FII padrão e alterar o ticker e nome
-          const fallbackFII = {
-            ...defaultFII,
-            id: ticker,
-            ticker: ticker,
-            name: `FII ${ticker}`,
-            description: `${ticker} é um fundo imobiliário listado na B3.`,
-          };
-
-          // Gera históricos fictícios para demonstração
-          const priceHistory = [];
-          const dividendHistory = [];
-          const today = new Date();
-
-          // Histórico de preços dos últimos 365 dias
-          for (let i = 365; i >= 0; i--) {
-            const date = new Date();
-            date.setDate(today.getDate() - i);
-
-            // Gera uma variação aleatória para o preço
-            const randomVariation = Math.random() * 0.1 - 0.05; // -5% a +5%
-            const price = fallbackFII.price * (1 + randomVariation);
-
-            priceHistory.push({
-              date: date.toISOString().split("T")[0],
-              price: Number(price.toFixed(2)),
-            });
-          }
-
-          // Histórico de dividendos dos últimos 12 meses
-          for (let i = 11; i >= 0; i--) {
-            const date = new Date();
-            date.setMonth(today.getMonth() - i);
-
-            dividendHistory.push({
-              month: date.toISOString().split("T")[0],
-              value: Number(
-                (fallbackFII.dividend * (0.9 + Math.random() * 0.2)).toFixed(2),
-              ),
-            });
-          }
-
-          const details: FIIDetails = {
-            ...fallbackFII,
-            priceHistory,
-            dividendHistory,
-            composition: [
-              { label: "CRIs", value: 30, color: "#4C51BF" },
-              { label: "FIIs", value: 25, color: "#38A169" },
-              { label: "Imóveis", value: 35, color: "#D69E2E" },
-              { label: "Caixa", value: 10, color: "#718096" },
-            ],
-            lastUpdate: new Date().toISOString(),
-            assetValue: fallbackFII.price,
-            lastDividend: fallbackFII.dividend,
-            liquidPatrimony: fallbackFII.patrimony,
-            dailyLiquidity: fallbackFII.price * 100000,
-            marketValue: fallbackFII.patrimony * 0.9,
-          };
-
-          return details;
+          return null;
         }
 
-        // Gera históricos fictícios para demonstração
         const priceHistory = await this.getPriceHistoryByPeriod(ticker, "1y");
 
         const dividendHistory = [];
@@ -907,6 +921,7 @@ export class FIIService {
         return details;
       }
 
+      // Se não encontrado no localStorage ou backup, busca na API
       const endpoint = BRAPI_API.FII_ENDPOINT.replace("{ticker}", ticker);
       const url = `${BRAPI_API.BASE_URL}${endpoint}`;
 
