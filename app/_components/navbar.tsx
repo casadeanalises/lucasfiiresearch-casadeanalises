@@ -26,23 +26,10 @@ const Navbar = () => {
   const [isAdmin, setIsAdmin] = useState(false);
 
   useEffect(() => {
-    const checkAdmin = async () => {
-      if (isSignedIn && user) {
-        try {
-          const response = await fetch("/api/check-admin");
-          const data = await response.json();
-          setIsAdmin(data.isAdmin);
-        } catch (error) {
-          console.error("Erro ao verificar status de admin:", error);
-          setIsAdmin(false);
-        }
-      } else {
-        setIsAdmin(false);
-      }
-    };
-
-    checkAdmin();
-  }, [isSignedIn, user]);
+    // Verifica se existe o cookie admin_token
+    const hasAdminToken = document.cookie.includes("admin_token=");
+    setIsAdmin(hasAdminToken);
+  }, []);
 
   const desktopAppearance = {
     elements: {
@@ -163,6 +150,9 @@ const Navbar = () => {
       )}
     </>
   );
+
+  // Se estiver na página de login admin, não mostra a navbar
+  if (pathname === "/admin/login") return null;
 
   return (
     <nav className="sticky top-0 z-50 border-b border-solid bg-white/80 backdrop-blur-md">

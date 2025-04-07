@@ -23,7 +23,7 @@ import {
 import Footer from "../_components/footer";
 import AOS from "aos";
 import "aos/dist/aos.css";
-import LoggedInHome from "./LoggedInHome";
+import { LoggedInHome } from "./LoggedInHome";
 
 const LandingPage = () => {
   const { isSignedIn } = useAuth();
