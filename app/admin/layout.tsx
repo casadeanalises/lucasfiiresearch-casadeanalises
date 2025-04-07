@@ -70,9 +70,11 @@ export default function AdminLayout({
             Relatórios
           </Link>
           <Link
-            href="/admin/videos"
+            href="/admin/home-videos"
             className={`flex items-center px-4 py-2 text-gray-700 hover:bg-blue-50 hover:text-blue-900 ${
-              pathname === "/admin/videos" ? "bg-blue-50 text-blue-900" : ""
+              pathname === "/admin/home-videos"
+                ? "bg-blue-50 text-blue-900"
+                : ""
             }`}
           >
             <span className="mr-2">

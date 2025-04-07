@@ -23,6 +23,9 @@ import {
   DialogTrigger,
 } from "@/app/_components/ui/dialog";
 import { PlayCircle, Plus, Trash2, X, Loader2 } from "lucide-react";
+import { Image } from "@/app/_components/ui/image";
+import { Textarea } from "@/app/_components/ui/textarea";
+import { PencilIcon, TrashIcon, PlusIcon } from "@heroicons/react/24/outline";
 
 interface HomeVideo {
   _id: string;
@@ -35,13 +38,7 @@ interface HomeVideo {
   active: boolean;
 }
 
-interface HomeVideosAdminClientProps {
-  adminEmail: string;
-}
-
-export default function HomeVideosAdminClient({
-  adminEmail,
-}: HomeVideosAdminClientProps) {
+export default function HomeVideosAdminClient() {
   const [videos, setVideos] = useState<HomeVideo[]>([]);
   const [loading, setLoading] = useState(true);
   const [showAddDialog, setShowAddDialog] = useState(false);
@@ -51,6 +48,14 @@ export default function HomeVideosAdminClient({
     videoId: "",
   });
   const [error, setError] = useState<string | null>(null);
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [editingVideo, setEditingVideo] = useState<HomeVideo | null>(null);
+  const [formData, setFormData] = useState({
+    title: "",
+    description: "",
+    videoId: "",
+  });
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   // Carregar vídeos
   const fetchVideos = async () => {
@@ -135,183 +140,183 @@ export default function HomeVideosAdminClient({
     }
   };
 
-  return (
-    <div>
-      {/* Header com informações do admin */}
-      <Card className="mb-8">
-        <CardHeader>
-          <CardTitle>Área Administrativa</CardTitle>
-          <CardDescription>Administrador: {adminEmail}</CardDescription>
-        </CardHeader>
-      </Card>
+  const handleEdit = (video: HomeVideo) => {
+    setEditingVideo(video);
+    setFormData({
+      title: video.title,
+      description: video.description,
+      videoId: video.videoId,
+    });
+    setIsModalOpen(true);
+  };
 
-      {/* Botão de adicionar vídeo */}
-      <div className="mb-6">
-        <Dialog open={showAddDialog} onOpenChange={setShowAddDialog}>
-          <DialogTrigger asChild>
-            <Button>
-              <Plus className="mr-2 h-4 w-4" />
-              Adicionar Vídeo
-            </Button>
-          </DialogTrigger>
-          <DialogContent className="bg-white">
-            <DialogHeader>
-              <DialogTitle className="text-gray-900">
-                Adicionar Novo Vídeo
-              </DialogTitle>
-              <DialogDescription className="text-gray-600">
-                Adicione um novo vídeo à página inicial. Cole o ID do vídeo do
-                YouTube.
-              </DialogDescription>
-            </DialogHeader>
-            <div className="grid gap-4 py-4">
-              <div className="grid gap-2">
-                <Label htmlFor="videoId" className="text-gray-700">
-                  ID do Vídeo
-                </Label>
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setIsSubmitting(true);
+
+    try {
+      if (editingVideo) {
+        await handleUpdateVideo(editingVideo._id, formData);
+      } else {
+        await handleAddVideo();
+      }
+      setIsModalOpen(false);
+      setEditingVideo(null);
+      setFormData({ title: "", description: "", videoId: "" });
+    } catch (error) {
+      console.error("Erro ao salvar vídeo:", error);
+      toast.error("Erro ao salvar vídeo");
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
+  return (
+    <div className="space-y-6">
+      {/* Cabeçalho */}
+      <div className="flex items-center justify-between">
+        <div>
+          <h1 className="text-2xl font-bold text-gray-900">
+            Gerenciar Vídeos da Página Inicial
+          </h1>
+          <p className="mt-1 text-sm text-gray-500">
+            Adicione e gerencie os vídeos que aparecem na página inicial
+          </p>
+        </div>
+
+        <button
+          onClick={() => {
+            setIsModalOpen(true);
+            setEditingVideo(null);
+            setFormData({ title: "", description: "", videoId: "" });
+          }}
+          className="inline-flex items-center gap-2 rounded-lg bg-blue-600 px-4 py-2.5 text-sm font-medium text-white transition-colors hover:bg-blue-700"
+        >
+          <PlusIcon className="h-5 w-5" />
+          Adicionar Vídeo
+        </button>
+      </div>
+
+      {/* Grid de Vídeos */}
+      <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+        {videos.map((video) => (
+          <div
+            key={video._id}
+            className="group relative overflow-hidden rounded-xl border bg-white shadow-sm transition-all hover:shadow-md"
+          >
+            {/* Thumbnail com Overlay de Play */}
+            <div className="relative aspect-video">
+              <Image
+                src={video.thumbnail}
+                alt={video.title}
+                fill
+                className="object-cover"
+              />
+              <div className="absolute inset-0 flex items-center justify-center bg-black/30 opacity-0 transition-opacity group-hover:opacity-100">
+                <PlayCircle className="h-12 w-12 text-white" />
+              </div>
+            </div>
+
+            {/* Informações do Vídeo */}
+            <div className="p-4">
+              <h3 className="font-medium text-gray-900">{video.title}</h3>
+              <p className="mt-1 line-clamp-2 text-sm text-gray-500">
+                {video.description}
+              </p>
+
+              <div className="mt-4 flex items-center justify-between">
+                <span className="text-xs text-gray-500">
+                  ID: {video.videoId}
+                </span>
+                <div className="flex items-center gap-2">
+                  <button
+                    onClick={() => handleEdit(video)}
+                    className="rounded-lg p-2 text-gray-500 hover:bg-gray-100 hover:text-gray-700"
+                  >
+                    <PencilIcon className="h-5 w-5" />
+                  </button>
+                  <button
+                    onClick={() => handleDeleteVideo(video._id)}
+                    className="rounded-lg p-2 text-red-500 hover:bg-red-50 hover:text-red-700"
+                  >
+                    <TrashIcon className="h-5 w-5" />
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        ))}
+      </div>
+
+      {/* Modal de Adicionar/Editar Vídeo */}
+      <Dialog open={isModalOpen} onOpenChange={setIsModalOpen}>
+        <DialogContent className="sm:max-w-[425px]">
+          <DialogHeader>
+            <DialogTitle>
+              {editingVideo ? "Editar Vídeo" : "Adicionar Novo Vídeo"}
+            </DialogTitle>
+            <DialogDescription>
+              {editingVideo
+                ? "Modifique as informações do vídeo abaixo"
+                : "Preencha as informações do vídeo abaixo"}
+            </DialogDescription>
+          </DialogHeader>
+
+          <form onSubmit={handleSubmit} className="space-y-4">
+            <div className="space-y-4">
+              <div>
+                <Label htmlFor="videoId">ID do Vídeo do YouTube</Label>
                 <Input
                   id="videoId"
-                  value={newVideo.videoId}
+                  value={formData.videoId}
                   onChange={(e) =>
-                    setNewVideo({ ...newVideo, videoId: e.target.value })
+                    setFormData({ ...formData, videoId: e.target.value })
                   }
                   placeholder="Ex: dQw4w9WgXcQ"
-                  className="border-gray-300 bg-white"
                 />
-                <p className="text-sm text-gray-500">
-                  Cole apenas o ID do vídeo do YouTube (a parte após v= na URL)
-                </p>
               </div>
-              <div className="grid gap-2">
-                <Label htmlFor="title" className="text-gray-700">
-                  Título
-                </Label>
+
+              <div>
+                <Label htmlFor="title">Título</Label>
                 <Input
                   id="title"
-                  value={newVideo.title}
+                  value={formData.title}
                   onChange={(e) =>
-                    setNewVideo({ ...newVideo, title: e.target.value })
+                    setFormData({ ...formData, title: e.target.value })
                   }
-                  placeholder="Título do vídeo"
-                  className="border-gray-300 bg-white"
+                  placeholder="Digite o título do vídeo"
                 />
               </div>
-              <div className="grid gap-2">
-                <Label htmlFor="description" className="text-gray-700">
-                  Descrição
-                </Label>
-                <Input
+
+              <div>
+                <Label htmlFor="description">Descrição</Label>
+                <Textarea
                   id="description"
-                  value={newVideo.description}
+                  value={formData.description}
                   onChange={(e) =>
-                    setNewVideo({ ...newVideo, description: e.target.value })
+                    setFormData({ ...formData, description: e.target.value })
                   }
-                  placeholder="Descrição do vídeo"
-                  className="border-gray-300 bg-white"
+                  placeholder="Digite uma breve descrição do vídeo"
+                  rows={3}
                 />
               </div>
             </div>
+
             <DialogFooter>
-              <Button
-                variant="outline"
-                onClick={() => {
-                  setShowAddDialog(false);
-                  setNewVideo({ title: "", description: "", videoId: "" });
-                }}
-                className="bg-white"
-              >
-                Cancelar
-              </Button>
-              <Button
-                onClick={handleAddVideo}
-                disabled={
-                  !newVideo.title || !newVideo.description || !newVideo.videoId
-                }
-                className="bg-blue-600 text-white hover:bg-blue-700"
-              >
-                Adicionar
+              <Button type="submit" disabled={isSubmitting}>
+                {isSubmitting ? (
+                  <>
+                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                    Salvando...
+                  </>
+                ) : (
+                  "Salvar"
+                )}
               </Button>
             </DialogFooter>
-          </DialogContent>
-        </Dialog>
-      </div>
-
-      {/* Lista de vídeos */}
-      {loading ? (
-        <div className="flex items-center justify-center p-8">
-          <Loader2 className="h-6 w-6 animate-spin" />
-        </div>
-      ) : error ? (
-        <div className="p-8 text-center text-red-500">{error}</div>
-      ) : videos.length === 0 ? (
-        <div className="p-8 text-center">Nenhum vídeo cadastrado.</div>
-      ) : (
-        <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-          {videos.map((video) => (
-            <Card key={video._id}>
-              <CardHeader className="relative">
-                <Button
-                  variant="destructive"
-                  size="icon"
-                  className="absolute right-4 top-4 z-10"
-                  onClick={() => handleDeleteVideo(video._id)}
-                >
-                  <Trash2 className="h-4 w-4" />
-                </Button>
-                <div className="relative aspect-video overflow-hidden rounded-lg">
-                  <img
-                    src={video.thumbnail}
-                    alt={video.title}
-                    className="h-full w-full object-cover"
-                  />
-                  <div className="absolute inset-0 flex items-center justify-center bg-black/20">
-                    <PlayCircle className="h-12 w-12 text-white" />
-                  </div>
-                </div>
-              </CardHeader>
-              <CardContent>
-                <div className="mb-4">
-                  <h3 className="font-semibold">{video.title}</h3>
-                  <p className="text-sm text-gray-500">ID: {video.videoId}</p>
-                </div>
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center space-x-2">
-                    <Switch
-                      checked={video.active}
-                      onCheckedChange={(checked: boolean) =>
-                        handleUpdateVideo(video._id, { active: checked })
-                      }
-                    />
-                    <Label>Ativo</Label>
-                  </div>
-                  <div className="flex items-center space-x-2">
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      onClick={() =>
-                        handleUpdateVideo(video._id, { order: video.order - 1 })
-                      }
-                      disabled={video.order === 0}
-                    >
-                      ↑
-                    </Button>
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      onClick={() =>
-                        handleUpdateVideo(video._id, { order: video.order + 1 })
-                      }
-                      disabled={video.order === videos.length - 1}
-                    >
-                      ↓
-                    </Button>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-          ))}
-        </div>
-      )}
+          </form>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }

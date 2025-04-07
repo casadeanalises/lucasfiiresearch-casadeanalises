@@ -635,21 +635,6 @@ const ReportsAdminClient = ({
         <h2 className="text-xl font-semibold text-blue-800">
           Área Administrativa
         </h2>
-        <div className="flex items-center space-x-2 rounded-lg bg-blue-50 px-4 py-2 text-sm text-blue-700">
-          <svg
-            xmlns="http://www.w3.org/2000/svg"
-            className="h-5 w-5"
-            viewBox="0 0 20 20"
-            fill="currentColor"
-          >
-            <path
-              fillRule="evenodd"
-              d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-6-3a2 2 0 11-4 0 2 2 0 014 0zm-2 4a5 5 0 00-4.546 2.916A5.986 5.986 0 005 10a6 6 0 0012 0c0-.358-.035-.708-.104-1.047A5 5 0 0010 11z"
-              clipRule="evenodd"
-            />
-          </svg>
-          <span>Administrador: {adminEmail}</span>
-        </div>
       </div>
 
       {/* Tabs para alternar entre PDFs e vídeos */}
