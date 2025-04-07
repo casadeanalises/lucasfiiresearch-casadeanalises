@@ -5,45 +5,62 @@ import Link from "next/link";
 import { ChevronDown } from "lucide-react";
 import { useAuth } from "@clerk/nextjs";
 
+// Definindo a interface para os itens de menu
+interface MenuItem {
+  label: string;
+  href: string;
+  beta?: boolean;
+}
+
 const SubNavbar = () => {
   const { isSignedIn } = useAuth();
   const [activeDropdown, setActiveDropdown] = useState<string | null>(null);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
-  const menuItems = {
+  const menuItems: Record<string, MenuItem[]> = {
     Fundos: [
       { label: "Lista de Fundos", href: "/fundlists" },
-      { label: "Comparador de Fundos", href: "#" },
-      { label: "Radar de Fundos", href: "#" },
-      { label: "Posições Vendidas", href: "#" },
+      { label: "Comparador de Fundos", href: "#", beta: true },
+      { label: "Radar de Fundos", href: "#", beta: true },
+      { label: "Posições Vendidas", href: "#", beta: true },
     ],
     "Dados de Mercado": [
-      { label: "Agenda da Semana", href: "#" },
-      { label: "Boletim Focus", href: "#" },
-      { label: "Selic", href: "#" },
-      { label: "IPCA", href: "#" },
-      { label: "IGP-M", href: "#" },
-      { label: "Juros Futuros", href: "#" },
-      { label: "Títulos Públicos", href: "#" },
-      { label: "IFIX", href: "#" },
-      { label: "Índices de Mercado", href: "#" },
-      { label: "Dólar", href: "#" },
-      { label: "Resultado Fiscal", href: "#" },
-      { label: "Emissão primária CRI / CRA / Deb. Incentivada", href: "#" },
+      { label: "Agenda da Semana", href: "#", beta: true },
+      { label: "Boletim Focus", href: "#", beta: true },
+      { label: "Selic", href: "#", beta: true },
+      { label: "IPCA", href: "#", beta: true },
+      { label: "IGP-M", href: "#", beta: true },
+      { label: "Juros Futuros", href: "#", beta: true },
+      { label: "Títulos Públicos", href: "#", beta: true },
+      { label: "IFIX", href: "#", beta: true },
+      { label: "Índices de Mercado", href: "#", beta: true },
+      { label: "Dólar", href: "#", beta: true },
+      { label: "Resultado Fiscal", href: "#", beta: true },
+      {
+        label: "Emissão primária CRI / CRA / Deb. Incentivada",
+        href: "#",
+        beta: true,
+      },
     ],
     Research: [
       { label: "Relatório Semanal", href: "/reports" },
-      { label: "Carteira Recomendada", href: "#" },
-      { label: "Curso de Investimento", href: "#" },
-      { label: "Fundos não recomendados", href: "#" },
-      { label: "Ranking de Gestoras", href: "#" },
+      { label: "Carteira Recomendada", href: "#", beta: true },
+      { label: "Curso de Investimento", href: "#", beta: true },
+      { label: "Fundos não recomendados", href: "#", beta: true },
+      { label: "Ranking de Gestoras", href: "#", beta: true },
+    ],
+    Personalização: [
+      { label: "Tema do Sistema", href: "#", beta: true },
+      { label: "Página Inicial", href: "#", beta: true },
+      { label: "Configurar Widgets", href: "#", beta: true },
+      { label: "Layout de Dados", href: "#", beta: true },
     ],
     ...(isSignedIn && {
       "Minha Conta": [
         { label: "Minha Carteira", href: "/dashboard" },
-        { label: "Sugerir Melhorias", href: "#" },
-        { label: "Reportar Bugs", href: "#" },
-        { label: "Central de Ajuda", href: "#" },
+        { label: "Sugerir Melhorias", href: "#", beta: true },
+        { label: "Reportar Bugs", href: "#", beta: true },
+        { label: "Central de Ajuda", href: "#", beta: true },
       ],
     }),
   };
@@ -93,7 +110,14 @@ const SubNavbar = () => {
                         href={item.href}
                         className="block px-4 py-2 text-sm text-gray-300 hover:bg-gray-700 hover:text-white"
                       >
-                        {item.label}
+                        <div className="flex items-center justify-between">
+                          {item.label}
+                          {item.beta && (
+                            <span className="ml-2 rounded-md bg-indigo-600 px-2 py-0.5 text-xs text-white">
+                              Beta
+                            </span>
+                          )}
+                        </div>
                       </Link>
                     ))}
                   </div>
@@ -144,7 +168,14 @@ const SubNavbar = () => {
                           href={item.href}
                           className="block px-4 py-2 text-sm text-gray-300 hover:bg-gray-700 hover:text-white"
                         >
-                          {item.label}
+                          <div className="flex items-center justify-between">
+                            {item.label}
+                            {item.beta && (
+                              <span className="ml-2 rounded-md bg-indigo-600 px-2 py-0.5 text-xs text-white">
+                                Beta
+                              </span>
+                            )}
+                          </div>
                         </Link>
                       ))}
                     </div>
