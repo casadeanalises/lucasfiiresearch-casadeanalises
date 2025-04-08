@@ -248,10 +248,14 @@ export default function FundListsPage() {
 
     // Filtrar por categoria
     if (selectedCategory && selectedCategory !== "Todos") {
-      result = result.filter((fund: FII) => fund.category === selectedCategory);
+      result = result.filter(
+        (fund: FII) =>
+          fund.category?.toLowerCase() === selectedCategory.toLowerCase(),
+      );
     }
 
     setFilteredFunds(result);
+    setCurrentPage(1); // Resetar para primeira página ao filtrar
   }, [funds, searchTerm, selectedCategory]);
 
   // Quando os filtros mudam, voltar para a primeira página
@@ -270,42 +274,8 @@ export default function FundListsPage() {
     return uniqueCategories.sort();
   }, [funds]);
 
-  // Aplicar filtro e ordenação
-  const filteredFundsSorted = useMemo(() => {
-    return funds
-      .filter((fund: FII) => {
-        const matchesSearch =
-          searchTerm === "" ||
-          fund.ticker.toLowerCase().includes(searchTerm.toLowerCase()) ||
-          fund.name.toLowerCase().includes(searchTerm.toLowerCase());
-        const matchesCategory =
-          selectedCategory === "" || fund.category === selectedCategory;
-        return matchesSearch && matchesCategory;
-      })
-      .sort((a: FII, b: FII) => {
-        if (sortBy === "ticker") {
-          return sortDirection === "asc"
-            ? a.ticker.localeCompare(b.ticker)
-            : b.ticker.localeCompare(a.ticker);
-        } else if (sortBy === "price") {
-          return sortDirection === "asc"
-            ? a.price - b.price
-            : b.price - a.price;
-        } else if (sortBy === "dividend") {
-          return sortDirection === "asc"
-            ? a.dividend - b.dividend
-            : b.dividend - a.dividend;
-        } else if (sortBy === "dividendYield") {
-          return sortDirection === "asc"
-            ? a.dividendYield - b.dividendYield
-            : b.dividendYield - a.dividendYield;
-        }
-        return 0;
-      });
-  }, [funds, searchTerm, selectedCategory, sortBy, sortDirection]);
-
   // Paginação
-  const paginatedFunds = filteredFundsSorted.slice(
+  const paginatedFunds = filteredFunds.slice(
     (currentPage - 1) * itemsPerPage,
     currentPage * itemsPerPage,
   );
@@ -331,203 +301,322 @@ export default function FundListsPage() {
   };
 
   return (
-    <div className="container mx-auto px-4 py-8">
-      <div className="space-y-6">
-        {/* Lista de FIIs */}
-        <div className="rounded-xl bg-white shadow-lg">
-          <div className="overflow-x-auto">
-            <table className="w-full">
-              <thead className="bg-gray-50">
-                <tr>
-                  <th
-                    scope="col"
-                    className="cursor-pointer px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-700 hover:bg-gray-100"
-                    onClick={() => handleSort("ticker")}
-                  >
-                    <div className="flex items-center">
-                      <span>Ticker / Nome</span>
-                      {renderSortArrow("ticker")}
+    <div className="flex min-h-screen flex-col bg-white">
+      <div className="flex-1">
+        {/* Área de Busca e Filtros */}
+        <div className="border-b border-gray-200 py-8">
+          <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+            <div className="flex flex-col gap-6">
+              {/* Título e Estatísticas */}
+              <div className="flex flex-col gap-2">
+                <h1 className="text-2xl font-bold text-gray-900">
+                  Lista de Fundos Imobiliários
+                </h1>
+                <div className="flex flex-wrap gap-4">
+                  <div className="flex items-center gap-2">
+                    <div className="rounded-full bg-blue-50 p-2">
+                      <TrendingUpIcon className="h-4 w-4 text-blue-600" />
                     </div>
-                  </th>
-                  <th
-                    scope="col"
-                    className="cursor-pointer px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-700 hover:bg-gray-100"
-                    onClick={() => handleSort("price")}
-                  >
-                    <div className="flex items-center">
-                      <span>Preço</span>
-                      {renderSortArrow("price")}
+                    <div>
+                      <p className="text-sm text-gray-500">Total de FIIs</p>
+                      <p className="font-semibold text-gray-900">{totalFiis}</p>
                     </div>
-                  </th>
-                  <th
-                    scope="col"
-                    className="cursor-pointer px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-700 hover:bg-gray-100"
-                    onClick={() => handleSort("dividend")}
-                  >
-                    <div className="flex items-center">
-                      <span>Dividendo</span>
-                      {renderSortArrow("dividend")}
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <div className="rounded-full bg-green-50 p-2">
+                      <BarChart3Icon className="h-4 w-4 text-green-600" />
                     </div>
-                  </th>
-                  <th
-                    scope="col"
-                    className="cursor-pointer px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-700 hover:bg-gray-100"
-                    onClick={() => handleSort("dividendYield")}
-                  >
-                    <div className="flex items-center">
-                      <span>Yield</span>
-                      {renderSortArrow("dividendYield")}
+                    <div>
+                      <p className="text-sm text-gray-500">DY Médio</p>
+                      <p className="font-semibold text-gray-900">
+                        {formatPercent(avgDividendYield)}
+                      </p>
                     </div>
-                  </th>
-                  <th
-                    scope="col"
-                    className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-700"
-                  >
-                    Categoria
-                  </th>
-                  <th
-                    scope="col"
-                    className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-700"
-                  >
-                    Gestor
-                  </th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-gray-200 bg-white">
-                {paginatedFunds.map((fund) => (
-                  <tr key={fund.id} className="hover:bg-gray-50">
-                    <td className="px-6 py-4">
-                      <Link
-                        href={`/fundlists/${fund.ticker}`}
-                        className="block"
-                      >
-                        <div className="font-medium text-blue-600">
-                          {fund.ticker}
-                        </div>
-                        <div className="max-w-[240px] truncate text-sm text-gray-700">
-                          {fund.name}
-                        </div>
-                      </Link>
-                    </td>
-                    <td className="px-6 py-4 text-gray-900">
-                      <div>{formatCurrency(fund.price)}</div>
-                      <div
-                        className={`flex items-center text-xs ${fund.changePercent >= 0 ? "text-green-600" : "text-red-600"}`}
-                      >
-                        {fund.changePercent >= 0 ? (
-                          <ArrowUp className="mr-1 h-3 w-3" />
-                        ) : (
-                          <ArrowDown className="mr-1 h-3 w-3" />
-                        )}
-                        <span>
-                          {formatPercent(Math.abs(fund.changePercent))}
-                        </span>
+                  </div>
+                  {mostCommonCategory && (
+                    <div className="flex items-center gap-2">
+                      <div className="rounded-full bg-purple-50 p-2">
+                        <FilterIcon className="h-4 w-4 text-purple-600" />
                       </div>
-                    </td>
-                    <td className="px-6 py-4 text-gray-900">
-                      {formatCurrency(fund.dividend)}
-                    </td>
-                    <td className="px-6 py-4 font-medium text-green-600">
-                      {formatPercent(fund.dividendYield)}
-                    </td>
-                    <td className="px-6 py-4 text-gray-700">{fund.category}</td>
-                    <td className="px-6 py-4 text-gray-700">
-                      {fund.manager || "Não disponível"}
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
+                      <div>
+                        <p className="text-sm text-gray-500">
+                          Categoria Principal
+                        </p>
+                        <p className="font-semibold text-gray-900">
+                          {mostCommonCategory}
+                        </p>
+                      </div>
+                    </div>
+                  )}
+                </div>
+              </div>
+
+              {/* Busca e Filtros */}
+              <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+                <div className="relative max-w-md flex-1">
+                  <SearchIcon className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-400" />
+                  <Input
+                    type="text"
+                    placeholder="Buscar por código ou nome..."
+                    value={searchTerm}
+                    onChange={(e) => setSearchTerm(e.target.value)}
+                    className="border-gray-200 bg-white pl-10"
+                  />
+                </div>
+                <div className="flex items-center gap-4">
+                  <select
+                    value={selectedCategory}
+                    onChange={(e) => setSelectedCategory(e.target.value)}
+                    className="rounded-lg border border-gray-200 bg-white px-4 py-2 text-sm text-gray-700 focus:outline-none"
+                  >
+                    {categories.map((category) => (
+                      <option
+                        key={category}
+                        value={category}
+                        className="bg-white text-gray-700"
+                      >
+                        {category}
+                      </option>
+                    ))}
+                  </select>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={refreshData}
+                    disabled={isUpdating}
+                    className="flex items-center gap-2 border-gray-200 bg-white text-gray-700 hover:bg-gray-50"
+                  >
+                    <RefreshCwIcon
+                      className={`h-4 w-4 ${isUpdating ? "animate-spin" : ""}`}
+                    />
+                    Atualizar
+                  </Button>
+                </div>
+              </div>
+
+              {/* Última Atualização */}
+              {lastUpdateTime && (
+                <p className="text-sm text-gray-500">
+                  Última atualização: {formatLastUpdate()}
+                </p>
+              )}
+            </div>
           </div>
         </div>
 
-        {/* Paginação */}
-        {filteredFunds.length > itemsPerPage && (
-          <div className="mt-6 flex items-center justify-between">
-            <div className="flex items-center gap-2">
-              <select
-                value={itemsPerPage}
-                onChange={(e) => {
-                  setItemsPerPage(Number(e.target.value));
-                  setCurrentPage(1); // Voltar para a primeira página ao mudar itens por página
-                }}
-                className="rounded-md border border-gray-300 bg-white p-1.5 text-sm text-gray-700"
-              >
-                <option value={50}>50 por página</option>
-                <option value={100}>100 por página</option>
-                <option value={200}>200 por página</option>
-                <option value={500}>500 por página</option>
-              </select>
-
-              <span className="text-sm text-gray-600">
-                Mostrando {(currentPage - 1) * itemsPerPage + 1}-
-                {Math.min(currentPage * itemsPerPage, filteredFunds.length)}
-                de {filteredFunds.length}
-              </span>
+        {/* Conteúdo Principal */}
+        <div className="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
+          {error ? (
+            <div className="rounded-lg bg-red-50 p-4 text-red-700">{error}</div>
+          ) : loading ? (
+            <div className="flex items-center justify-center py-12">
+              <div className="h-8 w-8 animate-spin rounded-full border-4 border-blue-600 border-t-transparent"></div>
             </div>
+          ) : (
+            <>
+              {/* Tabela de FIIs */}
+              <div className="overflow-x-auto rounded-lg border border-gray-200 bg-white shadow">
+                <div className="overflow-x-auto">
+                  <table className="w-full">
+                    <thead className="bg-gray-50">
+                      <tr>
+                        <th
+                          scope="col"
+                          className="cursor-pointer px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-700 hover:bg-gray-100"
+                          onClick={() => handleSort("ticker")}
+                        >
+                          <div className="flex items-center">
+                            <span>Ticker / Nome</span>
+                            {renderSortArrow("ticker")}
+                          </div>
+                        </th>
+                        <th
+                          scope="col"
+                          className="cursor-pointer px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-700 hover:bg-gray-100"
+                          onClick={() => handleSort("price")}
+                        >
+                          <div className="flex items-center">
+                            <span>Preço</span>
+                            {renderSortArrow("price")}
+                          </div>
+                        </th>
+                        <th
+                          scope="col"
+                          className="cursor-pointer px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-700 hover:bg-gray-100"
+                          onClick={() => handleSort("dividend")}
+                        >
+                          <div className="flex items-center">
+                            <span>Dividendo</span>
+                            {renderSortArrow("dividend")}
+                          </div>
+                        </th>
+                        <th
+                          scope="col"
+                          className="cursor-pointer px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-700 hover:bg-gray-100"
+                          onClick={() => handleSort("dividendYield")}
+                        >
+                          <div className="flex items-center">
+                            <span>Yield</span>
+                            {renderSortArrow("dividendYield")}
+                          </div>
+                        </th>
+                        <th
+                          scope="col"
+                          className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-700"
+                        >
+                          Categoria
+                        </th>
+                        <th
+                          scope="col"
+                          className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-700"
+                        >
+                          Gestor
+                        </th>
+                      </tr>
+                    </thead>
+                    <tbody className="divide-y divide-gray-200 bg-white">
+                      {paginatedFunds.map((fund) => (
+                        <tr key={fund.id} className="hover:bg-gray-50">
+                          <td className="px-6 py-4">
+                            <Link
+                              href={`/fundlists/${fund.ticker}`}
+                              className="block"
+                            >
+                              <div className="font-medium text-blue-600">
+                                {fund.ticker}
+                              </div>
+                              <div className="max-w-[240px] truncate text-sm text-gray-700">
+                                {fund.name}
+                              </div>
+                            </Link>
+                          </td>
+                          <td className="px-6 py-4 text-gray-900">
+                            <div>{formatCurrency(fund.price)}</div>
+                            <div
+                              className={`flex items-center text-xs ${fund.changePercent >= 0 ? "text-green-600" : "text-red-600"}`}
+                            >
+                              {fund.changePercent >= 0 ? (
+                                <ArrowUp className="mr-1 h-3 w-3" />
+                              ) : (
+                                <ArrowDown className="mr-1 h-3 w-3" />
+                              )}
+                              <span>
+                                {formatPercent(Math.abs(fund.changePercent))}
+                              </span>
+                            </div>
+                          </td>
+                          <td className="px-6 py-4 text-gray-900">
+                            {formatCurrency(fund.dividend)}
+                          </td>
+                          <td className="px-6 py-4 font-medium text-green-600">
+                            {formatPercent(fund.dividendYield)}
+                          </td>
+                          <td className="px-6 py-4 text-gray-700">
+                            {fund.category}
+                          </td>
+                          <td className="px-6 py-4 text-gray-700">
+                            {fund.manager || "Não disponível"}
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              </div>
 
-            <div className="flex items-center gap-1">
-              <button
-                onClick={() => changePage(1)}
-                disabled={currentPage === 1}
-                className="rounded-md border border-gray-300 bg-white px-2 py-1 text-sm text-gray-700 disabled:opacity-50"
-              >
-                &laquo;
-              </button>
-              <button
-                onClick={() => changePage(currentPage - 1)}
-                disabled={currentPage === 1}
-                className="rounded-md border border-gray-300 bg-white px-2 py-1 text-sm text-gray-700 disabled:opacity-50"
-              >
-                &lsaquo;
-              </button>
+              {/* Paginação */}
+              {filteredFunds.length > itemsPerPage && (
+                <div className="mt-6 flex items-center justify-between">
+                  <div className="flex items-center gap-2">
+                    <select
+                      value={itemsPerPage}
+                      onChange={(e) => {
+                        setItemsPerPage(Number(e.target.value));
+                        setCurrentPage(1); // Voltar para a primeira página ao mudar itens por página
+                      }}
+                      className="rounded-md border border-gray-300 bg-white p-1.5 text-sm text-gray-700"
+                    >
+                      <option value={50}>50 por página</option>
+                      <option value={100}>100 por página</option>
+                      <option value={200}>200 por página</option>
+                      <option value={500}>500 por página</option>
+                    </select>
 
-              {/* Botões de página */}
-              {Array.from({ length: Math.min(5, totalPages) }, (_, i) => {
-                // Calcular quais números de página mostrar
-                let pageNum;
-                if (totalPages <= 5) {
-                  pageNum = i + 1;
-                } else if (currentPage <= 3) {
-                  pageNum = i + 1;
-                } else if (currentPage >= totalPages - 2) {
-                  pageNum = totalPages - 4 + i;
-                } else {
-                  pageNum = currentPage - 2 + i;
-                }
+                    <span className="text-sm text-gray-600">
+                      Mostrando {(currentPage - 1) * itemsPerPage + 1}-
+                      {Math.min(
+                        currentPage * itemsPerPage,
+                        filteredFunds.length,
+                      )}
+                      de {filteredFunds.length}
+                    </span>
+                  </div>
 
-                return (
-                  <button
-                    key={pageNum}
-                    onClick={() => changePage(pageNum)}
-                    className={`rounded-md px-3 py-1 text-sm ${
-                      currentPage === pageNum
-                        ? "bg-blue-600 text-white"
-                        : "border border-gray-300 bg-white text-gray-700 hover:bg-gray-100"
-                    }`}
-                  >
-                    {pageNum}
-                  </button>
-                );
-              })}
+                  <div className="flex items-center gap-1">
+                    <button
+                      onClick={() => changePage(1)}
+                      disabled={currentPage === 1}
+                      className="rounded-md border border-gray-300 bg-white px-2 py-1 text-sm text-gray-700 disabled:opacity-50"
+                    >
+                      &laquo;
+                    </button>
+                    <button
+                      onClick={() => changePage(currentPage - 1)}
+                      disabled={currentPage === 1}
+                      className="rounded-md border border-gray-300 bg-white px-2 py-1 text-sm text-gray-700 disabled:opacity-50"
+                    >
+                      &lsaquo;
+                    </button>
 
-              <button
-                onClick={() => changePage(currentPage + 1)}
-                disabled={currentPage === totalPages}
-                className="rounded-md border border-gray-300 bg-white px-2 py-1 text-sm text-gray-700 disabled:opacity-50"
-              >
-                &rsaquo;
-              </button>
-              <button
-                onClick={() => changePage(totalPages)}
-                disabled={currentPage === totalPages}
-                className="rounded-md border border-gray-300 bg-white px-2 py-1 text-sm text-gray-700 disabled:opacity-50"
-              >
-                &raquo;
-              </button>
-            </div>
-          </div>
-        )}
+                    {/* Botões de página */}
+                    {Array.from({ length: Math.min(5, totalPages) }, (_, i) => {
+                      // Calcular quais números de página mostrar
+                      let pageNum;
+                      if (totalPages <= 5) {
+                        pageNum = i + 1;
+                      } else if (currentPage <= 3) {
+                        pageNum = i + 1;
+                      } else if (currentPage >= totalPages - 2) {
+                        pageNum = totalPages - 4 + i;
+                      } else {
+                        pageNum = currentPage - 2 + i;
+                      }
+
+                      return (
+                        <button
+                          key={pageNum}
+                          onClick={() => changePage(pageNum)}
+                          className={`rounded-md px-3 py-1 text-sm ${
+                            currentPage === pageNum
+                              ? "bg-blue-600 text-white"
+                              : "border border-gray-300 bg-white text-gray-700 hover:bg-gray-100"
+                          }`}
+                        >
+                          {pageNum}
+                        </button>
+                      );
+                    })}
+
+                    <button
+                      onClick={() => changePage(currentPage + 1)}
+                      disabled={currentPage === totalPages}
+                      className="rounded-md border border-gray-300 bg-white px-2 py-1 text-sm text-gray-700 disabled:opacity-50"
+                    >
+                      &rsaquo;
+                    </button>
+                    <button
+                      onClick={() => changePage(totalPages)}
+                      disabled={currentPage === totalPages}
+                      className="rounded-md border border-gray-300 bg-white px-2 py-1 text-sm text-gray-700 disabled:opacity-50"
+                    >
+                      &raquo;
+                    </button>
+                  </div>
+                </div>
+              )}
+            </>
+          )}
+        </div>
       </div>
       <Footer />
     </div>

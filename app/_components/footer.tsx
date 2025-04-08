@@ -80,12 +80,12 @@ const Footer = () => {
             >
               Privacidade
             </Link>
-            <Link
+            {/* Em Breve <Link
               href="/contact"
               className="text-sm text-slate-500 hover:text-primary"
             >
               Contato
-            </Link>
+            </Link> */}
           </div>
         </div>
 
@@ -95,8 +95,9 @@ const Footer = () => {
               © {new Date().getFullYear()} Lucas FII Research L&L Consultoria
               Financeira, CNPJ: 99.999.999/9999-99
             </p>
-            <p className="text-xs text-slate-400">site v1.0.0</p>
           </div>
+
+          <p className="text-xs text-slate-500">Site: v0.1.0</p>
 
           <span className="text-xs text-slate-400">
             Desenvolvido por{" "}
