@@ -424,51 +424,49 @@ export default function FIIPortfolio() {
     colors: ["#3182CE", "#38A169", "#E53E3E", "#DD6B20", "#805AD5", "#D53F8C"],
     tooltip: {
       enabled: true,
-      shared: true,
-      intersect: false,
       custom: function ({ series, seriesIndex, dataPointIndex, w }) {
-        if (!w.globals.labels[dataPointIndex]) return "";
-
-        const label = w.globals.labels[dataPointIndex].split(" (")[0];
-        const value = series[seriesIndex][dataPointIndex];
-        const total = calculateTotalValue();
-        const sectorValue = (value / 100) * total;
+        const setor = w.globals.labels[seriesIndex].split(" (")[0];
+        const percentual = Number(series[seriesIndex]);
+        const valor = sectorAllocation[seriesIndex].valor;
 
         return `
           <div style="
-            background: linear-gradient(135deg, rgba(255,255,255,0.95) 0%, rgba(249,250,251,0.95) 100%);
-            padding: 16px;
-            border-radius: 12px;
-            box-shadow: 0 8px 16px rgba(0,0,0,0.12);
-            border: 2px solid rgba(59, 130, 246, 0.2);
-            min-width: 220px;
-            backdrop-filter: blur(8px);
+            background: white;
+            padding: 12px;
+            border-radius: 8px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            min-width: 180px;
           ">
             <div style="
-              font-size: 18px;
-              font-weight: 700;
-              color: #1E40AF;
-              margin-bottom: 12px;
-              border-bottom: 2px solid rgba(59, 130, 246, 0.2);
-              padding-bottom: 8px;
+              font-size: 16px;
+              font-weight: 600;
+              color: #1a365d;
+              margin-bottom: 8px;
+              border-bottom: 1px solid #e2e8f0;
+              padding-bottom: 4px;
             ">
-              ${label}
+              ${setor}
             </div>
-            <div style="margin-top: 8px;">
+            <div style="
+              display: flex;
+              flex-direction: column;
+              gap: 4px;
+            ">
               <div style="
-                color: #2563EB;
-                font-size: 16px;
-                margin-bottom: 8px;
-                font-weight: 600;
+                display: flex;
+                justify-content: space-between;
+                font-size: 14px;
               ">
-                <span style="color: #4B5563; font-weight: 500;">Alocação:</span> ${value.toFixed(2)}%
+                <span style="color: #4a5568;">Alocação:</span>
+                <span style="font-weight: 600; color: #2d3748;">${typeof percentual === "number" ? percentual.toFixed(2) : "0.00"}%</span>
               </div>
               <div style="
-                color: #059669;
-                font-size: 16px;
-                font-weight: 600;
+                display: flex;
+                justify-content: space-between;
+                font-size: 14px;
               ">
-                <span style="color: #4B5563; font-weight: 500;">Valor:</span> ${formatCurrency(sectorValue)}
+                <span style="color: #4a5568;">Valor:</span>
+                <span style="font-weight: 600; color: #2d3748;">R$ ${valor.toLocaleString("pt-BR", { minimumFractionDigits: 2 })}</span>
               </div>
             </div>
           </div>
@@ -482,9 +480,9 @@ export default function FIIPortfolio() {
           size: "55%",
           background: "transparent",
           labels: {
-            show: true,
+            show: false,
             name: {
-              show: true,
+              show: false,
               fontSize: "20px",
               fontFamily: "sans-serif",
               fontWeight: 700,
@@ -495,7 +493,7 @@ export default function FIIPortfolio() {
               },
             },
             value: {
-              show: true,
+              show: false,
               fontSize: "26px",
               fontFamily: "sans-serif",
               fontWeight: 800,
@@ -506,9 +504,9 @@ export default function FIIPortfolio() {
               },
             },
             total: {
-              show: true,
+              show: false,
               label: "Total da Carteira",
-              color: "#1E293B",
+              color: "#FFFFFF",
               fontSize: "22px",
               fontWeight: 800,
               formatter: () => formatCurrency(calculateTotalValue()),
@@ -527,7 +525,7 @@ export default function FIIPortfolio() {
       },
     },
     dataLabels: {
-      enabled: true,
+      enabled: false,
       formatter: function (val: any, opts: any) {
         if (!opts?.w?.globals?.labels?.[opts.dataPointIndex]) return "";
 
@@ -771,38 +769,10 @@ export default function FIIPortfolio() {
                   pie: {
                     expandOnClick: true,
                     donut: {
-                      size: "60%",
+                      size: "55%",
                       background: "transparent",
                       labels: {
-                        show: true,
-                        name: {
-                          show: true,
-                          fontSize: "20px",
-                          fontFamily: "sans-serif",
-                          fontWeight: 800,
-                          color: "#FFFFFF",
-                          offsetY: -10,
-                        },
-                        value: {
-                          show: true,
-                          fontSize: "24px",
-                          fontFamily: "sans-serif",
-                          fontWeight: 800,
-                          color: "#FFFFFF",
-                          offsetY: 5,
-                          formatter: function (val: any) {
-                            return typeof val === "number"
-                              ? `${val.toFixed(2)}%`
-                              : "0%";
-                          },
-                        },
-                        total: {
-                          show: true,
-                          label: "Total da Carteira",
-                          fontSize: "22px",
-                          fontWeight: 800,
-                          color: "#1E293B",
-                        },
+                        show: false,
                       },
                     },
                   },
@@ -816,102 +786,65 @@ export default function FIIPortfolio() {
                     barHeight: "70%",
                   },
                 },
-                dataLabels: {
-                  enabled: true,
-                  formatter: function (val: any, opts: any) {
-                    const label = portfolio[opts.dataPointIndex]?.fii.codigo;
-                    if (!label || typeof val !== "number") return "";
-                    return `${label}\n${val.toFixed(2)}%`;
-                  },
-                  style: {
-                    fontSize: "16px",
-                    fontFamily: "sans-serif",
-                    fontWeight: 800,
-                    colors: ["#FFFFFF"],
-                  },
-                  background: {
-                    enabled: true,
-                    foreColor: "#FFFFFF",
-                    padding: 8,
-                    borderRadius: 6,
-                    borderWidth: 0,
-                    opacity: 0.9,
-                    dropShadow: {
-                      enabled: true,
-                      top: 2,
-                      left: 2,
-                      blur: 4,
-                      color: "rgba(0,0,0,0.7)",
-                      opacity: 0.6,
-                    },
-                  },
-                  textAnchor: "middle",
-                  distributed: true,
-                },
-                stroke: {
-                  width: 2,
-                  colors: ["#FFFFFF"],
-                },
                 tooltip: {
                   enabled: true,
-                  shared: true,
-                  intersect: false,
                   custom: function ({
                     series,
                     seriesIndex,
                     dataPointIndex,
                     w,
                   }) {
-                    const fii = portfolio[dataPointIndex]?.fii;
+                    const index =
+                      compositionChartView === "pie"
+                        ? seriesIndex
+                        : dataPointIndex;
+                    const fii = portfolio[index]?.fii;
                     if (!fii) return "";
 
-                    const value =
-                      portfolio[dataPointIndex].quantidade * fii.preco;
+                    const value = portfolio[index].quantidade * fii.preco;
                     const total = calculateTotalValue();
-                    const percentage = (value / total) * 100;
+                    const percentage = Number(
+                      ((value / total) * 100).toFixed(2),
+                    );
 
                     return `
                       <div style="
-                        background: linear-gradient(135deg, rgba(255,255,255,0.95) 0%, rgba(249,250,251,0.95) 100%);
-                        padding: 16px;
-                        border-radius: 12px;
-                        box-shadow: 0 8px 16px rgba(0,0,0,0.12);
-                        border: 2px solid rgba(59, 130, 246, 0.2);
-                        min-width: 220px;
+                        background: white;
+                        padding: 12px;
+                        border-radius: 8px;
+                        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+                        min-width: 180px;
                       ">
                         <div style="
-                          font-size: 18px;
-                          font-weight: 700;
-                          color: #1E293B;
-                          margin-bottom: 12px;
-                          border-bottom: 2px solid rgba(59, 130, 246, 0.2);
-                          padding-bottom: 8px;
+                          font-size: 16px;
+                          font-weight: 600;
+                          color: #1a365d;
+                          margin-bottom: 8px;
+                          border-bottom: 1px solid #e2e8f0;
+                          padding-bottom: 4px;
                         ">
                           ${fii.codigo}
                         </div>
-                        <div style="margin-top: 8px;">
+                        <div style="
+                          display: flex;
+                          flex-direction: column;
+                          gap: 4px;
+                        ">
                           <div style="
-                            color: #1E293B;
-                            font-size: 16px;
-                            margin-bottom: 8px;
-                            font-weight: 600;
+                            display: flex;
+                            justify-content: space-between;
+                            font-size: 14px;
                           ">
-                            <span style="color: #64748B;">Quantidade:</span> ${portfolio[dataPointIndex].quantidade} cotas
+                            <span style="color: #4a5568;">Alocação:</span>
+                            <span style="font-weight: 600; color: #2d3748;">${percentage.toFixed(2)}%</span>
                           </div>
                           <div style="
-                            color: #1E293B;
-                            font-size: 16px;
-                            margin-bottom: 8px;
-                            font-weight: 600;
+                            display: flex;
+                            justify-content: space-between;
+                            font-size: 14px;
                           ">
-                            <span style="color: #64748B;">Alocação:</span> ${percentage.toFixed(2)}%
-                          </div>
-                          <div style="
-                            color: #1E293B;
-                            font-size: 16px;
-                            font-weight: 600;
-                          ">
-                            <span style="color: #64748B;">Valor:</span> ${formatCurrency(value)}
+                            <span style="color: #4a5568;">Valor:</span>
+                            <span style="font-weight: 600; color: #2d3748;">R$ ${value.toLocaleString("pt-BR", { minimumFractionDigits: 2 })}</span>
                           </div>
                         </div>
                       </div>
@@ -929,16 +862,24 @@ export default function FIIPortfolio() {
                   "#14B8A6",
                 ],
               }}
-              series={[
-                {
-                  name: "Valor Total",
-                  data: portfolio.map((item) => {
-                    const value = item.quantidade * item.fii.preco;
-                    const total = calculateTotalValue();
-                    return Number(((value / total) * 100).toFixed(2));
-                  }),
-                },
-              ]}
+              series={
+                compositionChartView === "pie"
+                  ? portfolio.map((item) => {
+                      const value = item.quantidade * item.fii.preco;
+                      const total = calculateTotalValue();
+                      return Number(((value / total) * 100).toFixed(2));
+                    })
+                  : [
+                      {
+                        name: "Valor Total",
+                        data: portfolio.map((item) => {
+                          const value = item.quantidade * item.fii.preco;
+                          const total = calculateTotalValue();
+                          return Number(((value / total) * 100).toFixed(2));
+                        }),
+                      },
+                    ]
+              }
               type={compositionChartView}
               height={350}
             />
