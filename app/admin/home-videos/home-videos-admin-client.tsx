@@ -265,60 +265,76 @@ export default function HomeVideosAdminClient() {
 
       {/* Modal de Adicionar/Editar Vídeo */}
       <Dialog open={isModalOpen} onOpenChange={setIsModalOpen}>
-        <DialogContent className="sm:max-w-[425px]">
+        <DialogContent className="bg-white sm:max-w-[425px]">
           <DialogHeader>
-            <DialogTitle>
-              {editingVideo ? "Editar Vídeo" : "Adicionar Novo Vídeo"}
+            <DialogTitle className="text-xl font-semibold text-gray-900">
+              Adicionar Novo Vídeo
             </DialogTitle>
-            <DialogDescription>
-              {editingVideo
-                ? "Modifique as informações do vídeo abaixo"
-                : "Preencha as informações do vídeo abaixo"}
+            <DialogDescription className="text-gray-600">
+              Preencha as informações do vídeo abaixo
             </DialogDescription>
           </DialogHeader>
 
           <form onSubmit={handleSubmit} className="space-y-4">
-            <div className="space-y-4">
-              <div>
-                <Label htmlFor="videoId">ID do Vídeo do YouTube</Label>
-                <Input
-                  id="videoId"
-                  value={formData.videoId}
-                  onChange={(e) =>
-                    setFormData({ ...formData, videoId: e.target.value })
-                  }
-                  placeholder="Ex: dQw4w9WgXcQ"
-                />
-              </div>
+            <div className="space-y-2">
+              <Label htmlFor="videoId" className="text-gray-700">
+                ID do Vídeo do YouTube
+              </Label>
+              <Input
+                id="videoId"
+                placeholder="Ex: dQw4w9WgXcQ"
+                value={formData.videoId}
+                onChange={(e) =>
+                  setFormData({ ...formData, videoId: e.target.value })
+                }
+                className="border-gray-300 bg-white text-gray-900 focus:border-blue-500"
+              />
+            </div>
 
-              <div>
-                <Label htmlFor="title">Título</Label>
-                <Input
-                  id="title"
-                  value={formData.title}
-                  onChange={(e) =>
-                    setFormData({ ...formData, title: e.target.value })
-                  }
-                  placeholder="Digite o título do vídeo"
-                />
-              </div>
+            <div className="space-y-2">
+              <Label htmlFor="title" className="text-gray-700">
+                Título
+              </Label>
+              <Input
+                id="title"
+                placeholder="Digite o título do vídeo"
+                value={formData.title}
+                onChange={(e) =>
+                  setFormData({ ...formData, title: e.target.value })
+                }
+                className="border-gray-300 bg-white text-gray-900 focus:border-blue-500"
+              />
+            </div>
 
-              <div>
-                <Label htmlFor="description">Descrição</Label>
-                <Textarea
-                  id="description"
-                  value={formData.description}
-                  onChange={(e) =>
-                    setFormData({ ...formData, description: e.target.value })
-                  }
-                  placeholder="Digite uma breve descrição do vídeo"
-                  rows={3}
-                />
-              </div>
+            <div className="space-y-2">
+              <Label htmlFor="description" className="text-gray-700">
+                Descrição
+              </Label>
+              <Textarea
+                id="description"
+                placeholder="Digite uma breve descrição do vídeo"
+                value={formData.description}
+                onChange={(e) =>
+                  setFormData({ ...formData, description: e.target.value })
+                }
+                className="min-h-[100px] border-gray-300 bg-white text-gray-900 focus:border-blue-500"
+              />
             </div>
 
             <DialogFooter>
-              <Button type="submit" disabled={isSubmitting}>
+              <Button
+                type="button"
+                variant="outline"
+                onClick={() => setIsModalOpen(false)}
+                className="border-gray-300 bg-white text-gray-700 hover:bg-gray-50"
+              >
+                Cancelar
+              </Button>
+              <Button
+                type="submit"
+                disabled={isSubmitting}
+                className="bg-blue-500 text-white hover:bg-blue-600"
+              >
                 {isSubmitting ? (
                   <>
                     <Loader2 className="mr-2 h-4 w-4 animate-spin" />

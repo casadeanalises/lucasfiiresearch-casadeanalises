@@ -1,6 +1,6 @@
 import { NextResponse, NextRequest } from "next/server";
 import { currentUser } from "@clerk/nextjs/server";
-import connectDB from "@/app/lib/mongodb";
+import { connectToDatabase } from "@/app/lib/mongodb";
 import HomeVideo from "@/app/models/HomeVideo";
 import { cookies } from "next/headers";
 import { verifyJWT } from "@/lib/auth";
@@ -43,7 +43,7 @@ export async function GET() {
   try {
     console.log("Iniciando busca de vídeos públicos...");
 
-    await connectDB();
+    await connectToDatabase();
     console.log("Conectado ao MongoDB");
 
     // Busca todos os vídeos ordenados por ordem (para admin, mostra todos)
@@ -90,7 +90,7 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    await connectDB();
+    await connectToDatabase();
 
     // Gerar a URL da thumbnail usando o ID do vídeo
     const thumbnail = `https://img.youtube.com/vi/${videoId}/maxresdefault.jpg`;
@@ -142,7 +142,7 @@ export async function PUT(req: NextRequest) {
       );
     }
 
-    await connectDB();
+    await connectToDatabase();
 
     const video = await HomeVideo.findByIdAndUpdate(
       id,
@@ -189,7 +189,7 @@ export async function DELETE(req: NextRequest) {
       );
     }
 
-    await connectDB();
+    await connectToDatabase();
 
     const video = await HomeVideo.findByIdAndDelete(id);
 
