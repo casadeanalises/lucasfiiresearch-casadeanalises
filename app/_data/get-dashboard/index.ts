@@ -1,5 +1,5 @@
 import { auth } from "@clerk/nextjs/server";
-import connectDB from "@/app/lib/mongodb";
+import { connectToDatabase } from "@/app/lib/mongodb";
 import Transaction, { TransactionType } from "@/app/models/Transaction";
 
 export async function getDashboard(month?: string) {
@@ -16,7 +16,7 @@ export async function getDashboard(month?: string) {
     };
   }
 
-  await connectDB();
+  await connectToDatabase();
 
   const currentDate = new Date();
   const currentYear = currentDate.getFullYear();

@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useCallback } from "react";
 import dynamic from "next/dynamic";
+import { ApexOptions } from "apexcharts";
 
 // Importar o componente de gráfico de forma dinâmica para evitar problemas com SSR
 const Chart = dynamic(() => import("react-apexcharts"), { ssr: false });
@@ -36,9 +37,7 @@ interface ChartSeries {
 }
 
 interface ChartData {
-  // Utilizamos Record para um tipo mais flexível que se adapta ao ApexCharts
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  options: Record<string, any>;
+  options: ApexOptions;
   series: ChartSeries[];
 }
 

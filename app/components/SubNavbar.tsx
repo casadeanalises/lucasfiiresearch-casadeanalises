@@ -61,7 +61,7 @@ const SubNavbar = () => {
 
     ...(isSignedIn && {
       "Minha Conta": [
-        { label: "Minha Carteira", href: "/dashboard", beta: true },
+        { label: "Minha Carteira", href: "/mywallet", beta: true },
         { label: "Sugerir Melhorias", href: "#", soon: true },
         { label: "Reportar Bugs", href: "#", soon: true },
         { label: "Central de Ajuda", href: "#", soon: true },
