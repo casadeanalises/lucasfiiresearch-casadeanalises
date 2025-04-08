@@ -193,6 +193,8 @@ export function PDFList() {
                     <a
                       href={pdf.url}
                       download
+                      target="_blank"
+                      rel="noopener noreferrer"
                       className="rounded-full bg-blue-50 p-2 text-blue-600 hover:bg-blue-100"
                     >
                       <Download className="h-4 w-4" />

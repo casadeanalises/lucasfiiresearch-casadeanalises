@@ -309,9 +309,9 @@ const ContentManager: React.FC<ContentManagerProps> = ({
         <DialogContent className="h-[80vh] max-w-4xl p-0">
           <button
             onClick={() => setSelectedPdf(null)}
-            className="absolute right-4 top-4 z-50 rounded-full bg-white/10 p-2 transition-colors hover:bg-white/20"
+            className="absolute right-4 top-4 z-50 rounded-full bg-white p-2 text-gray-700 shadow-md transition-colors hover:bg-gray-100"
           >
-            <X className="h-4 w-4" />
+            <X className="h-5 w-5" />
           </button>
           {selectedPdf && selectedPdf.url && (
             <PdfViewer url={selectedPdf.url} title={selectedPdf.title} />

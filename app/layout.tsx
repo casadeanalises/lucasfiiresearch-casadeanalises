@@ -22,6 +22,9 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
+      <head>
+        {/* Preload para fontes e outros recursos essenciais pode ficar aqui */}
+      </head>
       <body className={`${mulish.className} dark antialiased`}>
         <ClerkProvider
           appearance={{
