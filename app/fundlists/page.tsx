@@ -27,6 +27,7 @@ import { fiiService } from "@/app/services/fiiService";
 import { FII } from "@/app/types/FII";
 import { formatCurrency, formatPercent } from "@/app/utils/formatters";
 import { toast } from "react-hot-toast";
+import Footer from "../_components/footer";
 
 // Tipos para ordenação
 type SortOption = "ticker" | "price" | "dividend" | "dividendYield";
@@ -723,6 +724,7 @@ export default function FundListsPage() {
           </>
         )}
       </div>
+      <Footer />
     </div>
   );
 }

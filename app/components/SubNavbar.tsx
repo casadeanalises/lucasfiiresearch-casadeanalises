@@ -10,6 +10,7 @@ interface MenuItem {
   label: string;
   href: string;
   beta?: boolean;
+  soon?: boolean;
 }
 
 const SubNavbar = () => {
@@ -19,48 +20,52 @@ const SubNavbar = () => {
 
   const menuItems: Record<string, MenuItem[]> = {
     Fundos: [
-      { label: "Lista de Fundos", href: "/fundlists" },
-      { label: "Comparador de Fundos", href: "#", beta: true },
-      { label: "Radar de Fundos", href: "#", beta: true },
-      { label: "Posições Vendidas", href: "#", beta: true },
+      { label: "Lista de Fundos", href: "/fundlists", beta: true },
+      { label: "Comparador de Fundos", href: "#", soon: true },
+      { label: "Radar de Fundos", href: "#", soon: true },
+      { label: "Posições Vendidas", href: "#", soon: true },
     ],
+
     "Dados de Mercado": [
-      { label: "Agenda da Semana", href: "#", beta: true },
-      { label: "Boletim Focus", href: "#", beta: true },
-      { label: "Selic", href: "#", beta: true },
-      { label: "IPCA", href: "#", beta: true },
-      { label: "IGP-M", href: "#", beta: true },
-      { label: "Juros Futuros", href: "#", beta: true },
-      { label: "Títulos Públicos", href: "#", beta: true },
-      { label: "IFIX", href: "#", beta: true },
-      { label: "Índices de Mercado", href: "#", beta: true },
-      { label: "Dólar", href: "#", beta: true },
-      { label: "Resultado Fiscal", href: "#", beta: true },
+      { label: "Agenda da Semana", href: "#", soon: true },
+      { label: "Boletim Focus", href: "#", soon: true },
+      { label: "Selic", href: "#", soon: true },
+      { label: "IPCA", href: "#", soon: true },
+      { label: "IGP-M", href: "#", soon: true },
+      { label: "Juros Futuros", href: "#", soon: true },
+      { label: "Títulos Públicos", href: "#", soon: true },
+      { label: "IFIX", href: "#", soon: true },
+      { label: "Índices de Mercado", href: "#", soon: true },
+      { label: "Dólar", href: "#", soon: true },
+      { label: "Resultado Fiscal", href: "#", soon: true },
       {
         label: "Emissão primária CRI / CRA / Deb. Incentivada",
         href: "#",
-        beta: true,
+        soon: true,
       },
     ],
+
     Research: [
-      { label: "Relatório Semanal", href: "/reports" },
-      { label: "Carteira Recomendada", href: "#", beta: true },
-      { label: "Curso de Investimento", href: "#", beta: true },
-      { label: "Fundos não recomendados", href: "#", beta: true },
-      { label: "Ranking de Gestoras", href: "#", beta: true },
+      { label: "Relatório Semanal", href: "/reports", beta: true },
+      { label: "Carteira Recomendada", href: "#", soon: true },
+      { label: "Curso de Investimento", href: "#", soon: true },
+      { label: "Fundos não recomendados", href: "#", soon: true },
+      { label: "Ranking de Gestoras", href: "#", soon: true },
     ],
-    Personalização: [
-      { label: "Tema do Sistema", href: "#", beta: true },
-      { label: "Página Inicial", href: "#", beta: true },
-      { label: "Configurar Widgets", href: "#", beta: true },
-      { label: "Layout de Dados", href: "#", beta: true },
-    ],
+
+    // Personalização: [
+    //   { label: "Página Inicial", href: "#", beta: true, soon: true },
+    //   { label: "Configurar Widgets", href: "#", beta: true, soon: true },
+    //   { label: "Layout de Dados", href: "#", beta: true, soon: true },
+    // ],
+
     ...(isSignedIn && {
       "Minha Conta": [
-        { label: "Minha Carteira", href: "/dashboard" },
-        { label: "Sugerir Melhorias", href: "#", beta: true },
-        { label: "Reportar Bugs", href: "#", beta: true },
-        { label: "Central de Ajuda", href: "#", beta: true },
+        { label: "Minha Carteira", href: "/dashboard", beta: true },
+        { label: "Sugerir Melhorias", href: "#", soon: true },
+        { label: "Reportar Bugs", href: "#", soon: true },
+        { label: "Central de Ajuda", href: "#", soon: true },
+        { label: "Tema do Site", href: "#", soon: true },
       ],
     }),
   };
@@ -112,11 +117,18 @@ const SubNavbar = () => {
                       >
                         <div className="flex items-center justify-between">
                           {item.label}
-                          {item.beta && (
-                            <span className="ml-2 rounded-md bg-indigo-600 px-2 py-0.5 text-xs text-white">
-                              Beta
-                            </span>
-                          )}
+                          <div className="flex items-center gap-1">
+                            {item.beta && (
+                              <span className="rounded-md bg-indigo-600 px-2 py-0.5 text-xs text-white">
+                                Beta
+                              </span>
+                            )}
+                            {item.soon && (
+                              <span className="rounded-md bg-amber-500 px-2 py-0.5 text-xs text-white">
+                                Em breve
+                              </span>
+                            )}
+                          </div>
                         </div>
                       </Link>
                     ))}
@@ -170,11 +182,18 @@ const SubNavbar = () => {
                         >
                           <div className="flex items-center justify-between">
                             {item.label}
-                            {item.beta && (
-                              <span className="ml-2 rounded-md bg-indigo-600 px-2 py-0.5 text-xs text-white">
-                                Beta
-                              </span>
-                            )}
+                            <div className="flex items-center gap-1">
+                              {item.beta && (
+                                <span className="rounded-md bg-indigo-600 px-2 py-0.5 text-xs text-white">
+                                  Beta
+                                </span>
+                              )}
+                              {item.soon && (
+                                <span className="rounded-md bg-amber-500 px-2 py-0.5 text-xs text-white">
+                                  Em breve
+                                </span>
+                              )}
+                            </div>
                           </div>
                         </Link>
                       ))}

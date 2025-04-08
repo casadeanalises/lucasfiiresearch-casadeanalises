@@ -31,14 +31,17 @@ import { formatCurrency, formatDate } from "../utils/formatters";
 
 // Interface para os vídeos
 interface HomeVideo {
-  id: number;
-  url: string;
+  _id: string;
+  videoId: string;
   title: string;
-  thumbnail: string;
   description: string;
+  thumbnail: string;
+  url: string;
   date: string;
   active: boolean;
   order: number;
+  createdAt: string;
+  updatedAt: string;
 }
 
 // Componente para a página de vídeos
@@ -79,57 +82,47 @@ export default function VideosPage() {
   const fetchVideos = async () => {
     setLoading(true);
     try {
-      // Em um ambiente real, faríamos uma requisição à API
       const response = await fetch("/api/videos");
 
-      // Como estamos usando dados mockados, vamos criar alguns vídeos
-      const mockVideos = Array.from({ length: 24 }, (_, i) => {
-        // Distribuir os vídeos ao longo dos últimos 3 anos
-        const year = 2023 - Math.floor(i / 8);
-        const month = i % 12;
-        const day = Math.floor(Math.random() * 28) + 1;
+      if (!response.ok) {
+        throw new Error("Erro ao carregar vídeos");
+      }
 
-        const date = new Date(year, month, day);
+      const data = await response.json();
 
-        return {
-          id: i + 1,
-          url: `https://www.youtube.com/watch?v=example${i}`,
-          title: `Análise de FIIs - ${monthNames[month]} de ${year}`,
-          thumbnail: `https://picsum.photos/id/${i * 10 + 100}/640/360`,
-          description: `Análise dos principais fundos imobiliários do mês de ${monthNames[month]} de ${year}`,
-          date: date.toISOString(),
-          active: true,
-          order: i,
-        };
-      });
+      if (!data.videos || !Array.isArray(data.videos)) {
+        throw new Error("Formato de resposta inválido");
+      }
 
       // Ordenar por data (mais recente primeiro)
-      mockVideos.sort(
-        (a, b) => new Date(b.date).getTime() - new Date(a.date).getTime(),
-      );
+      const sortedVideos = data.videos
+        .filter((video: HomeVideo) => video.active)
+        .sort((a: HomeVideo, b: HomeVideo) => {
+          const dateA = new Date(a.createdAt || "");
+          const dateB = new Date(b.createdAt || "");
+          return dateB.getTime() - dateA.getTime();
+        });
 
-      setVideos(mockVideos);
-      setFilteredVideos(mockVideos);
+      setVideos(sortedVideos);
 
-      // Extrair anos e meses disponíveis dos vídeos
+      // Extrair anos e meses disponíveis dos vídeos reais
       const years = [
         ...new Set(
-          mockVideos.map((video) =>
-            new Date(video.date).getFullYear().toString(),
+          sortedVideos.map((video: HomeVideo) =>
+            new Date(video.createdAt).getFullYear().toString(),
           ),
         ),
-      ];
+      ] as string[];
       setAvailableYears(years);
 
       const months = [
         ...new Set(
-          mockVideos.map((video) => {
-            const date = new Date(video.date);
-            return `${date.getMonth()}`;
+          sortedVideos.map((video: HomeVideo) => {
+            const date = new Date(video.createdAt);
+            return date.getMonth().toString();
           }),
         ),
-      ];
-
+      ] as string[];
       setAvailableMonths(months);
     } catch (error) {
       console.error("Erro ao buscar vídeos:", error);
@@ -154,15 +147,15 @@ export default function VideosPage() {
       const term = searchTerm.toLowerCase();
       filtered = filtered.filter(
         (video) =>
-          video.title.toLowerCase().includes(term) ||
-          video.description.toLowerCase().includes(term),
+          (video.title?.toLowerCase() || "").includes(term) ||
+          (video.description?.toLowerCase() || "").includes(term),
       );
     }
 
     // Filtrar por ano
     if (selectedYear) {
       filtered = filtered.filter((video) => {
-        const videoYear = new Date(video.date).getFullYear().toString();
+        const videoYear = new Date(video.createdAt).getFullYear().toString();
         return videoYear === selectedYear;
       });
     }
@@ -170,7 +163,7 @@ export default function VideosPage() {
     // Filtrar por mês
     if (selectedMonth !== null) {
       filtered = filtered.filter((video) => {
-        const videoMonth = new Date(video.date).getMonth().toString();
+        const videoMonth = new Date(video.createdAt).getMonth().toString();
         return videoMonth === selectedMonth;
       });
     }
@@ -192,7 +185,7 @@ export default function VideosPage() {
     // Contagem de vídeos por ano
     const yearCounts: Record<string, number> = {};
     videos.forEach((video) => {
-      const year = new Date(video.date).getFullYear().toString();
+      const year = new Date(video.createdAt).getFullYear().toString();
       yearCounts[year] = (yearCounts[year] || 0) + 1;
     });
 
@@ -206,7 +199,7 @@ export default function VideosPage() {
     // Contagem de vídeos por mês
     const monthCounts: Record<string, number> = {};
     videos.forEach((video) => {
-      const month = new Date(video.date).getMonth();
+      const month = new Date(video.createdAt).getMonth();
       monthCounts[month] = (monthCounts[month] || 0) + 1;
     });
 
@@ -541,55 +534,71 @@ export default function VideosPage() {
           <div className="h-12 w-12 animate-spin rounded-full border-b-2 border-t-2 border-blue-500"></div>
         </div>
       ) : filteredVideos.length > 0 ? (
-        <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">
+        <div className="grid grid-cols-1 gap-8 md:grid-cols-2 lg:grid-cols-3">
           {filteredVideos.map((video) => (
             <div
-              key={video.id}
-              className="transform overflow-hidden rounded-lg bg-white shadow transition hover:scale-[1.02] hover:shadow-lg dark:bg-slate-800"
+              key={video._id}
+              className="group relative overflow-hidden rounded-2xl bg-gradient-to-br from-slate-50 to-white shadow-md transition-all duration-300 hover:-translate-y-2 hover:shadow-xl dark:from-slate-900 dark:to-slate-800"
             >
-              <div className="relative">
+              {/* Thumbnail com overlay */}
+              <div className="relative aspect-video overflow-hidden">
                 <img
                   src={video.thumbnail}
                   alt={video.title}
-                  className="h-48 w-full object-cover"
+                  className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-110"
                 />
+                {/* Gradiente overlay */}
+                <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent opacity-0 transition-opacity duration-300 group-hover:opacity-100" />
+
+                {/* Botão play */}
                 <button
                   onClick={() => setSelectedVideo(video)}
-                  className="absolute inset-0 flex items-center justify-center bg-black bg-opacity-30 transition hover:bg-opacity-50"
+                  className="absolute inset-0 flex items-center justify-center"
                 >
-                  <div className="flex h-14 w-14 items-center justify-center rounded-full bg-red-600 text-white">
-                    <Play className="h-6 w-6" />
+                  <div className="flex h-16 w-16 items-center justify-center rounded-full bg-white/10 backdrop-blur-sm transition-all duration-300 group-hover:scale-110 group-hover:bg-white/20">
+                    <Play className="h-8 w-8 text-white drop-shadow-lg" />
                   </div>
                 </button>
+
+                {/* Badge de data */}
+                <div className="absolute right-3 top-3">
+                  <div className="rounded-full bg-black/30 px-3 py-1 text-xs font-medium text-white backdrop-blur-md">
+                    {formatVideoDate(video.createdAt)}
+                  </div>
+                </div>
               </div>
 
-              <div className="p-4">
-                <h3 className="mb-1 line-clamp-2 text-lg font-semibold">
+              {/* Conteúdo do card */}
+              <div className="relative p-5">
+                {/* Linha decorativa */}
+                <div className="absolute left-0 top-0 h-1 w-full bg-gradient-to-r from-blue-500 to-purple-500 opacity-0 transition-opacity duration-300 group-hover:opacity-100" />
+
+                <h3 className="mb-3 line-clamp-2 text-lg font-bold text-gray-900 transition-colors group-hover:text-blue-600 dark:text-white dark:group-hover:text-blue-400">
                   {video.title}
                 </h3>
-                <p className="mb-2 text-sm text-gray-500 dark:text-gray-400">
-                  {formatVideoDate(video.date)}
-                </p>
-                <p className="mb-3 line-clamp-2 text-gray-600 dark:text-gray-300">
+
+                <p className="mb-4 line-clamp-2 text-sm leading-relaxed text-gray-600 dark:text-gray-300">
                   {video.description}
                 </p>
-                <div className="flex items-center justify-between">
+
+                {/* Botões com efeito de vidro */}
+                <div className="flex items-center justify-between gap-4">
                   <button
                     onClick={() => setSelectedVideo(video)}
-                    className="flex items-center text-sm font-medium text-blue-600 hover:text-blue-800 dark:text-blue-400 dark:hover:text-blue-300"
+                    className="flex flex-1 items-center justify-center gap-2 rounded-xl bg-blue-500/10 px-4 py-2.5 text-sm font-medium text-blue-600 backdrop-blur-sm transition-all hover:bg-blue-500/20 dark:bg-blue-400/10 dark:text-blue-400 dark:hover:bg-blue-400/20"
                   >
+                    <Play className="h-4 w-4" />
                     Assistir
-                    <Play className="ml-1 h-4 w-4" />
                   </button>
 
                   <a
-                    href={video.url}
+                    href={`https://www.youtube.com/watch?v=${video.videoId}`}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="flex items-center text-sm text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200"
+                    className="flex flex-1 items-center justify-center gap-2 rounded-xl bg-red-500/10 px-4 py-2.5 text-sm font-medium text-red-600 backdrop-blur-sm transition-all hover:bg-red-500/20 dark:bg-red-400/10 dark:text-red-400 dark:hover:bg-red-400/20"
                   >
+                    <ExternalLink className="h-4 w-4" />
                     YouTube
-                    <ExternalLink className="ml-1 h-4 w-4" />
                   </a>
                 </div>
               </div>
@@ -617,40 +626,52 @@ export default function VideosPage() {
 
       {/* Modal de vídeo */}
       {selectedVideo && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-75 p-4">
-          <div className="w-full max-w-4xl rounded-lg bg-white shadow-lg dark:bg-slate-800">
-            <div className="flex items-center justify-between border-b border-gray-200 p-4 dark:border-gray-700">
-              <h3 className="text-xl font-semibold">{selectedVideo.title}</h3>
+        <div
+          className="fixed inset-0 z-50 flex items-center justify-center bg-black/75 p-4 backdrop-blur-sm"
+          onClick={(e) => {
+            if (e.target === e.currentTarget) {
+              setSelectedVideo(null);
+            }
+          }}
+        >
+          <div className="animate-fadeIn relative w-full max-w-5xl rounded-2xl bg-white shadow-2xl dark:bg-slate-800">
+            <div className="absolute -right-3 -top-3 z-50">
               <button
                 onClick={() => setSelectedVideo(null)}
-                className="text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200"
+                className="flex h-10 w-10 items-center justify-center rounded-full bg-white text-gray-500 shadow-lg transition-all hover:bg-gray-100 hover:text-gray-700 dark:bg-slate-700 dark:text-gray-400 dark:hover:bg-slate-600 dark:hover:text-gray-200"
               >
-                <X className="h-6 w-6" />
+                <X className="h-5 w-5" />
               </button>
             </div>
 
-            <div className="aspect-w-16 aspect-h-9">
+            <div className="relative aspect-video w-full overflow-hidden rounded-t-2xl bg-black">
               <iframe
-                src={selectedVideo.url.replace("watch?v=", "embed/")}
+                src={`https://www.youtube.com/embed/${selectedVideo.videoId}?autoplay=1`}
                 title={selectedVideo.title}
                 className="h-full w-full"
                 allowFullScreen
+                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
               ></iframe>
             </div>
 
-            <div className="p-4">
-              <div className="mb-2 flex items-center justify-between">
-                <p className="text-gray-500 dark:text-gray-400">
-                  {formatVideoDate(selectedVideo.date)}
-                </p>
+            <div className="p-6">
+              <div className="mb-4 flex items-center justify-between border-b border-gray-200 pb-4 dark:border-gray-700">
+                <div>
+                  <h3 className="mb-1 text-2xl font-bold text-gray-900 dark:text-white">
+                    {selectedVideo.title}
+                  </h3>
+                  <p className="text-sm text-gray-500 dark:text-gray-400">
+                    Publicado em {formatVideoDate(selectedVideo.createdAt)}
+                  </p>
+                </div>
                 <a
-                  href={selectedVideo.url}
+                  href={`https://www.youtube.com/watch?v=${selectedVideo.videoId}`}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="flex items-center text-blue-600 hover:text-blue-800 dark:text-blue-400 dark:hover:text-blue-300"
+                  className="flex items-center gap-2 rounded-lg bg-red-50 px-4 py-2 text-sm font-medium text-red-600 transition-colors hover:bg-red-100 dark:bg-red-900/30 dark:text-red-400 dark:hover:bg-red-900/50"
                 >
-                  Ver no YouTube
-                  <ExternalLink className="ml-1 h-4 w-4" />
+                  Abrir no YouTube
+                  <ExternalLink className="h-4 w-4" />
                 </a>
               </div>
               <p className="text-gray-600 dark:text-gray-300">
@@ -660,6 +681,22 @@ export default function VideosPage() {
           </div>
         </div>
       )}
+
+      <style jsx global>{`
+        @keyframes fadeIn {
+          from {
+            opacity: 0;
+            transform: scale(0.95);
+          }
+          to {
+            opacity: 1;
+            transform: scale(1);
+          }
+        }
+        .animate-fadeIn {
+          animation: fadeIn 0.2s ease-out;
+        }
+      `}</style>
     </div>
   );
 }

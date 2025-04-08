@@ -858,15 +858,18 @@ export class FIIService {
           console.log(`Carregando detalhes do ${ticker} do localStorage`);
           return {
             ...fii,
-            priceHistory: [], // Adicione histórico real se necessário
-            dividendHistory: [], // Adicione histórico real se necessário
+            priceHistory: await this.getPriceHistoryByPeriod(ticker, "1y"),
+            dividendHistory: await this.getDividendHistory(ticker),
             composition: [],
             lastUpdate: new Date().toISOString(),
             assetValue: fii.price,
-            lastDividend: fii.dividend,
-            liquidPatrimony: fii.patrimony,
+            lastDividend: fii.dividend || 0,
+            liquidPatrimony: fii.patrimony || 0,
             dailyLiquidity: fii.price * 100000,
             marketValue: fii.patrimony * 0.9,
+            dividendYield: fii.dividendYield || 0,
+            pvp: fii.pvp || 0,
+            manager: fii.manager || "Não informado",
           };
         }
       }
@@ -916,7 +919,16 @@ export class FIIService {
           liquidPatrimony: backupFII.patrimony,
           dailyLiquidity: backupFII.price * 100000,
           marketValue: backupFII.patrimony * 0.9,
+          dividendYield: backupFII.dividendYield,
+          pvp: backupFII.pvp,
+          manager: backupFII.manager || "Não informado",
         };
+
+        // Verificar se os dados estão sendo corretamente atribuídos
+        console.log(`Detalhes do FII ${ticker}:`, {
+          dividendYield: backupFII.dividendYield,
+          pvp: backupFII.pvp,
+        });
 
         return details;
       }
@@ -990,7 +1002,16 @@ export class FIIService {
         dailyLiquidity:
           (fii.price || 0) * (fiiData.regularMarketVolume || 1000),
         marketValue: (fii.price || 0) * 1000000,
+        dividendYield: fii.dividendYield || 0,
+        pvp: fii.pvp || 0,
+        manager: fii.manager || "Não informado",
       };
+
+      // Verificar se os dados estão sendo corretamente atribuídos
+      console.log(`Detalhes do FII ${ticker}:`, {
+        dividendYield: fii.dividendYield,
+        pvp: fii.pvp,
+      });
 
       return details;
     } catch (error) {
@@ -1004,6 +1025,72 @@ export class FIIService {
 
       // Se já estamos em modo de backup e ainda falha, retorne null
       return null;
+    }
+  }
+
+  async getDividendHistory(
+    ticker: string,
+  ): Promise<{ month: string; value: number }[]> {
+    if (this.useBackupData) {
+      // Gera histórico fictício para os dados de backup
+      const today = new Date();
+      const dividendHistory: { month: string; value: number }[] = [];
+      const fii = BACKUP_FIIS.find((f) => f.ticker === ticker);
+
+      if (!fii) return [];
+
+      for (let i = 11; i >= 0; i--) {
+        const date = new Date();
+        date.setMonth(today.getMonth() - i);
+
+        dividendHistory.push({
+          month: date.toISOString().split("T")[0],
+          value: Number(
+            (fii.dividend * (0.9 + Math.random() * 0.2)).toFixed(2),
+          ),
+        });
+      }
+
+      return dividendHistory;
+    }
+
+    // Implementar lógica real para buscar histórico de dividendos da API
+    const endpoint = BRAPI_API.FII_ENDPOINT.replace("{ticker}", ticker);
+    const url = `${BRAPI_API.BASE_URL}${endpoint}`;
+
+    try {
+      const response = await fetch(url, {
+        headers: BRAPI_API.headers,
+      });
+
+      if (!response.ok) {
+        throw new Error(
+          `Erro ao buscar histórico de dividendos: ${response.status}`,
+        );
+      }
+
+      const data = await response.json();
+
+      if (
+        !data.results ||
+        !data.results[0] ||
+        !data.results[0].dividendHistory
+      ) {
+        throw new Error(
+          `Histórico de dividendos não encontrado para ${ticker}`,
+        );
+      }
+
+      return data.results[0].dividendHistory.map((item: any) => ({
+        month: new Date(item.paymentDate).toISOString().split("T")[0],
+        value: item.value,
+      }));
+    } catch (error) {
+      console.error(
+        `Erro ao buscar histórico de dividendos para ${ticker}:`,
+        error,
+      );
+      return [];
     }
   }
 }
