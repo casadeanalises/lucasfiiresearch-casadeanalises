@@ -85,80 +85,104 @@ export default function FIIPortfolio() {
     series: [],
     labels: [],
   });
+  const [availableFIIs, setAvailableFIIs] = useState<FII[]>([]);
+  const [isLoadingFIIs, setIsLoadingFIIs] = useState(false);
+  const [searchTerm, setSearchTerm] = useState("");
 
-  // Mock data para disponibilizar alguns FIIs para adição
-  const availableFIIs: FII[] = [
-    {
-      codigo: "HGLG11",
-      nome: "CSHG Logística FII",
-      setor: "Logística",
-      preco: 172.05,
-      valorPatrimonial: 165.89,
-      dividendYield: 0.78,
-      liquidezDiaria: 3456000,
-      valoracaoPVP: 1.04,
-      rentabilidadeMes: 2.34,
-      rentabilidadeAno: 11.25,
-      ultimoRendimento: 1.25,
-      dataUltimoInfoorme: "15/06/2023",
-    },
-    {
-      codigo: "KNRI11",
-      nome: "Kinea Renda Imobiliária FII",
-      setor: "Lajes Corporativas",
-      preco: 132.4,
-      valorPatrimonial: 139.76,
-      dividendYield: 0.65,
-      liquidezDiaria: 5123000,
-      valoracaoPVP: 0.95,
-      rentabilidadeMes: 1.85,
-      rentabilidadeAno: 8.76,
-      ultimoRendimento: 0.85,
-      dataUltimoInfoorme: "10/06/2023",
-    },
-    {
-      codigo: "MXRF11",
-      nome: "Maxi Renda FII",
-      setor: "Recebíveis",
-      preco: 10.25,
-      valorPatrimonial: 9.87,
-      dividendYield: 1.12,
-      liquidezDiaria: 8754000,
-      valoracaoPVP: 1.04,
-      rentabilidadeMes: 1.15,
-      rentabilidadeAno: 12.45,
-      ultimoRendimento: 0.11,
-      dataUltimoInfoorme: "18/06/2023",
-    },
-    {
-      codigo: "XPLG11",
-      nome: "XP Log FII",
-      setor: "Logística",
-      preco: 102.8,
-      valorPatrimonial: 111.23,
-      dividendYield: 0.8,
-      liquidezDiaria: 2875000,
-      valoracaoPVP: 0.92,
-      rentabilidadeMes: 3.25,
-      rentabilidadeAno: 10.35,
-      ultimoRendimento: 0.82,
-      dataUltimoInfoorme: "20/06/2023",
-    },
-    {
-      codigo: "HGBS11",
-      nome: "CSHG Brasil Shopping FII",
-      setor: "Shopping",
-      preco: 205.75,
-      valorPatrimonial: 210.86,
-      dividendYield: 0.76,
-      liquidezDiaria: 1985000,
-      valoracaoPVP: 0.98,
-      rentabilidadeMes: 2.15,
-      rentabilidadeAno: 9.85,
-      ultimoRendimento: 1.55,
-      dataUltimoInfoorme: "12/06/2023",
-    },
-  ];
+  // Carregar lista de FIIs disponíveis
+  useEffect(() => {
+    const fetchAvailableFIIs = async () => {
+      setIsLoadingFIIs(true);
+      try {
+        const response = await fetch("/api/fiis");
+        if (!response.ok) {
+          throw new Error("Erro ao carregar lista de FIIs");
+        }
+        const data = await response.json();
+        setAvailableFIIs(data.fiis);
+      } catch (error) {
+        console.error("Erro ao carregar FIIs:", error);
+        toast.error("Erro ao carregar lista de FIIs disponíveis");
+        // Carregando dados mockados como fallback
+        setAvailableFIIs([
+          {
+            codigo: "HGLG11",
+            nome: "CSHG Logística FII",
+            setor: "Logística",
+            preco: 172.05,
+            valorPatrimonial: 165.89,
+            dividendYield: 0.78,
+            liquidezDiaria: 3456000,
+            valoracaoPVP: 1.04,
+            rentabilidadeMes: 2.34,
+            rentabilidadeAno: 11.25,
+            ultimoRendimento: 1.25,
+            dataUltimoInfoorme: "15/06/2023",
+          },
+          {
+            codigo: "KNRI11",
+            nome: "Kinea Renda Imobiliária FII",
+            setor: "Lajes Corporativas",
+            preco: 132.4,
+            valorPatrimonial: 139.76,
+            dividendYield: 0.65,
+            liquidezDiaria: 5123000,
+            valoracaoPVP: 0.95,
+            rentabilidadeMes: 1.85,
+            rentabilidadeAno: 8.76,
+            ultimoRendimento: 0.85,
+            dataUltimoInfoorme: "10/06/2023",
+          },
+          {
+            codigo: "MXRF11",
+            nome: "Maxi Renda FII",
+            setor: "Recebíveis",
+            preco: 10.25,
+            valorPatrimonial: 9.87,
+            dividendYield: 1.12,
+            liquidezDiaria: 8754000,
+            valoracaoPVP: 1.04,
+            rentabilidadeMes: 1.15,
+            rentabilidadeAno: 12.45,
+            ultimoRendimento: 0.11,
+            dataUltimoInfoorme: "18/06/2023",
+          },
+          {
+            codigo: "XPLG11",
+            nome: "XP Log FII",
+            setor: "Logística",
+            preco: 102.8,
+            valorPatrimonial: 111.23,
+            dividendYield: 0.8,
+            liquidezDiaria: 2875000,
+            valoracaoPVP: 0.92,
+            rentabilidadeMes: 3.25,
+            rentabilidadeAno: 10.35,
+            ultimoRendimento: 0.82,
+            dataUltimoInfoorme: "20/06/2023",
+          },
+          {
+            codigo: "HGBS11",
+            nome: "CSHG Brasil Shopping FII",
+            setor: "Shopping",
+            preco: 205.75,
+            valorPatrimonial: 210.86,
+            dividendYield: 0.76,
+            liquidezDiaria: 1985000,
+            valoracaoPVP: 0.98,
+            rentabilidadeMes: 2.15,
+            rentabilidadeAno: 9.85,
+            ultimoRendimento: 1.55,
+            dataUltimoInfoorme: "12/06/2023",
+          },
+        ]);
+      } finally {
+        setIsLoadingFIIs(false);
+      }
+    };
+
+    fetchAvailableFIIs();
+  }, []);
 
   // Carregar portfólio do usuário
   useEffect(() => {
@@ -255,6 +279,16 @@ export default function FIIPortfolio() {
       });
     }
   }, [portfolio]);
+
+  // Filtrar FIIs com base no termo de busca
+  const filteredFIIs = availableFIIs.filter((fii) => {
+    const searchTermLower = searchTerm.toLowerCase();
+    return (
+      fii.codigo.toLowerCase().includes(searchTermLower) ||
+      fii.nome.toLowerCase().includes(searchTermLower) ||
+      fii.setor.toLowerCase().includes(searchTermLower)
+    );
+  });
 
   // Adicionar FII ao portfólio
   const addToPortfolio = async () => {
@@ -662,129 +696,83 @@ export default function FIIPortfolio() {
       <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
         {/* Gráfico de Setores */}
         <div className="rounded-xl bg-white p-6 shadow-lg">
-          <div className="mb-4 flex items-center justify-between">
+          <div className="mb-4">
             <h3 className="text-lg font-semibold text-gray-900">
               Distribuição por Setor
             </h3>
-            <div className="flex items-center gap-2">
-              <button
-                onClick={() => setChartView("pie")}
-                className={`flex items-center gap-2 rounded-lg px-3 py-1.5 text-sm ${
-                  chartView === "pie"
-                    ? "bg-blue-600 text-white"
-                    : "bg-gray-100 text-gray-600 hover:bg-gray-200"
-                }`}
-              >
-                <PieChart className="h-4 w-4" />
-                Pizza
-              </button>
-              <button
-                onClick={() => setChartView("bar")}
-                className={`flex items-center gap-2 rounded-lg px-3 py-1.5 text-sm ${
-                  chartView === "bar"
-                    ? "bg-blue-600 text-white"
-                    : "bg-gray-100 text-gray-600 hover:bg-gray-200"
-                }`}
-              >
-                <BarChart3 className="h-4 w-4" />
-                Barras
-              </button>
-            </div>
           </div>
           {portfolio.length > 0 && (
             <Chart
               options={{
                 ...chartOptions,
                 chart: {
-                  ...chartOptions.chart,
-                  type: chartView,
+                  type: "donut",
                   animations: {
                     enabled: true,
                     speed: 800,
                   },
                 },
-              }}
-              series={
-                chartView === "pie"
-                  ? chartData.series
-                  : [
-                      {
-                        name: "Alocação",
-                        data: chartData.series,
-                      },
-                    ]
-              }
-              type={chartView}
-              height={350}
-            />
-          )}
-        </div>
-
-        {/* Composição da Carteira */}
-        <div className="rounded-xl bg-white p-6 shadow-lg">
-          <div className="mb-4 flex items-center justify-between">
-            <h3 className="text-lg font-semibold text-gray-900">
-              Composição da Carteira
-            </h3>
-            <div className="flex items-center gap-2">
-              <button
-                onClick={() => setCompositionChartView("pie")}
-                className={`flex items-center gap-2 rounded-lg px-3 py-1.5 text-sm ${
-                  compositionChartView === "pie"
-                    ? "bg-blue-600 text-white"
-                    : "bg-gray-100 text-gray-600 hover:bg-gray-200"
-                }`}
-              >
-                <PieChart className="h-4 w-4" />
-                Pizza
-              </button>
-              <button
-                onClick={() => setCompositionChartView("bar")}
-                className={`flex items-center gap-2 rounded-lg px-3 py-1.5 text-sm ${
-                  compositionChartView === "bar"
-                    ? "bg-blue-600 text-white"
-                    : "bg-gray-100 text-gray-600 hover:bg-gray-200"
-                }`}
-              >
-                <BarChart3 className="h-4 w-4" />
-                Barras
-              </button>
-            </div>
-          </div>
-          {portfolio.length > 0 && (
-            <Chart
-              options={{
-                ...chartOptions,
-                chart: {
-                  ...chartOptions.chart,
-                  type: compositionChartView,
-                  animations: {
-                    enabled: true,
-                    speed: 800,
-                  },
-                  foreColor: "#1E293B",
-                },
-                labels: portfolio.map((item) => item.fii.codigo),
                 plotOptions: {
                   pie: {
-                    expandOnClick: true,
                     donut: {
-                      size: "55%",
-                      background: "transparent",
+                      size: "65%",
                       labels: {
-                        show: false,
+                        show: true,
+                        name: {
+                          show: true,
+                          fontSize: "14px",
+                          fontFamily: "sans-serif",
+                          color: "#1E293B",
+                          offsetY: -10,
+                        },
+                        value: {
+                          show: true,
+                          fontSize: "16px",
+                          fontFamily: "sans-serif",
+                          color: "#1E293B",
+                          offsetY: 5,
+                          formatter: function (val: any) {
+                            return `${Number(val).toFixed(2)}%`;
+                          },
+                        },
                       },
                     },
                   },
-                  bar: {
-                    horizontal: true,
-                    distributed: true,
-                    dataLabels: {
-                      position: "top",
-                    },
-                    borderRadius: 8,
-                    barHeight: "70%",
+                },
+                dataLabels: {
+                  enabled: true,
+                  formatter: function (val: any, opts: any) {
+                    const setor =
+                      chartData.labels[opts.seriesIndex]?.split(" (")[0];
+                    if (!setor) return "";
+                    const value =
+                      typeof val === "number" ? val.toFixed(2) : "0.00";
+                    return `${setor}\n${value}%`;
                   },
+                  style: {
+                    fontSize: "12px",
+                    fontFamily: "sans-serif",
+                    fontWeight: 600,
+                    colors: ["#1E293B"],
+                  },
+                  background: {
+                    enabled: true,
+                    foreColor: "#FFFFFF",
+                    padding: 4,
+                    borderRadius: 4,
+                    borderWidth: 0,
+                    opacity: 0.9,
+                  },
+                  dropShadow: {
+                    enabled: true,
+                    top: 1,
+                    left: 1,
+                    blur: 1,
+                    opacity: 0.45,
+                  },
+                },
+                legend: {
+                  show: false,
                 },
                 tooltip: {
                   enabled: true,
@@ -794,18 +782,9 @@ export default function FIIPortfolio() {
                     dataPointIndex,
                     w,
                   }) {
-                    const index =
-                      compositionChartView === "pie"
-                        ? seriesIndex
-                        : dataPointIndex;
-                    const fii = portfolio[index]?.fii;
-                    if (!fii) return "";
-
-                    const value = portfolio[index].quantidade * fii.preco;
-                    const total = calculateTotalValue();
-                    const percentage = Number(
-                      ((value / total) * 100).toFixed(2),
-                    );
+                    const setor = w.globals.labels[seriesIndex].split(" (")[0];
+                    const percentual = Number(series[seriesIndex]);
+                    const valor = sectorAllocation[seriesIndex].valor;
 
                     return `
                       <div style="
@@ -823,7 +802,7 @@ export default function FIIPortfolio() {
                           border-bottom: 1px solid #e2e8f0;
                           padding-bottom: 4px;
                         ">
-                          ${fii.codigo}
+                          ${setor}
                         </div>
                         <div style="
                           display: flex;
@@ -836,7 +815,7 @@ export default function FIIPortfolio() {
                             font-size: 14px;
                           ">
                             <span style="color: #4a5568;">Alocação:</span>
-                            <span style="font-weight: 600; color: #2d3748;">${percentage.toFixed(2)}%</span>
+                            <span style="font-weight: 600; color: #2d3748;">${percentual.toFixed(2)}%</span>
                           </div>
                           <div style="
                             display: flex;
@@ -844,7 +823,7 @@ export default function FIIPortfolio() {
                             font-size: 14px;
                           ">
                             <span style="color: #4a5568;">Valor:</span>
-                            <span style="font-weight: 600; color: #2d3748;">R$ ${value.toLocaleString("pt-BR", { minimumFractionDigits: 2 })}</span>
+                            <span style="font-weight: 600; color: #2d3748;">R$ ${valor.toLocaleString("pt-BR", { minimumFractionDigits: 2 })}</span>
                           </div>
                         </div>
                       </div>
@@ -860,34 +839,143 @@ export default function FIIPortfolio() {
                   "#EC4899",
                   "#6366F1",
                   "#14B8A6",
+                  "#EF4444",
+                  "#8B5CF6",
+                  "#F472B6",
+                  "#22D3EE",
+                  "#FB923C",
+                  "#A3E635",
+                  "#2DD4BF",
                 ],
               }}
-              series={
-                compositionChartView === "pie"
-                  ? portfolio.map((item) => {
-                      const value = item.quantidade * item.fii.preco;
-                      const total = calculateTotalValue();
-                      return Number(((value / total) * 100).toFixed(2));
-                    })
-                  : [
-                      {
-                        name: "Valor Total",
-                        data: portfolio.map((item) => {
-                          const value = item.quantidade * item.fii.preco;
-                          const total = calculateTotalValue();
-                          return Number(((value / total) * 100).toFixed(2));
-                        }),
+              series={chartData.series}
+              type="donut"
+              height={400}
+            />
+          )}
+        </div>
+
+        {/* Gráfico de Alocação por Ativo */}
+        <div className="rounded-xl bg-white p-6 shadow-lg">
+          <div className="mb-4">
+            <h3 className="text-lg font-semibold text-gray-900">
+              Alocação por Ativo
+            </h3>
+          </div>
+          {portfolio.length > 0 && (
+            <Chart
+              options={{
+                ...chartOptions,
+                chart: {
+                  type: "donut",
+                  animations: {
+                    enabled: true,
+                    speed: 800,
+                  },
+                },
+                plotOptions: {
+                  pie: {
+                    donut: {
+                      size: "65%",
+                      labels: {
+                        show: true,
+                        name: {
+                          show: true,
+                          fontSize: "14px",
+                          fontFamily: "sans-serif",
+                          color: "#1E293B",
+                          offsetY: -10,
+                        },
+                        value: {
+                          show: true,
+                          fontSize: "16px",
+                          fontFamily: "sans-serif",
+                          color: "#1E293B",
+                          offsetY: 5,
+                          formatter: function (val: any) {
+                            return `${Number(val).toFixed(2)}%`;
+                          },
+                        },
                       },
-                    ]
-              }
-              type={compositionChartView}
-              height={350}
+                    },
+                  },
+                },
+                dataLabels: {
+                  enabled: true,
+                  formatter: function (val: any, opts: any) {
+                    const fii = portfolio[opts.seriesIndex];
+                    if (!fii) return "";
+                    const value =
+                      typeof val === "number" ? val.toFixed(2) : "0.00";
+                    return `${fii.fii.codigo}\n${value}%`;
+                  },
+                  style: {
+                    fontSize: "12px",
+                    fontFamily: "sans-serif",
+                    fontWeight: 600,
+                    colors: ["#1E293B"],
+                  },
+                  background: {
+                    enabled: true,
+                    foreColor: "#FFFFFF",
+                    padding: 4,
+                    borderRadius: 4,
+                    borderWidth: 0,
+                    opacity: 0.9,
+                  },
+                  dropShadow: {
+                    enabled: true,
+                    top: 1,
+                    left: 1,
+                    blur: 1,
+                    opacity: 0.45,
+                  },
+                },
+                legend: {
+                  show: false,
+                },
+                tooltip: {
+                  enabled: true,
+                  y: {
+                    formatter: function (value: any) {
+                      return `${typeof value === "number" ? value.toFixed(2) : "0.00"}%`;
+                    },
+                  },
+                  style: {
+                    fontSize: "14px",
+                  },
+                },
+                colors: [
+                  "#3B82F6",
+                  "#10B981",
+                  "#F97066",
+                  "#F59E0B",
+                  "#8B5CF6",
+                  "#EC4899",
+                  "#6366F1",
+                  "#14B8A6",
+                  "#EF4444",
+                  "#8B5CF6",
+                  "#F472B6",
+                  "#22D3EE",
+                  "#FB923C",
+                  "#A3E635",
+                  "#2DD4BF",
+                ],
+              }}
+              series={portfolio.map((item) => {
+                const value = item.quantidade * item.fii.preco;
+                const total = calculateTotalValue();
+                return Number(((value / total) * 100).toFixed(2));
+              })}
+              type="donut"
+              height={400}
             />
           )}
         </div>
       </div>
 
-      {/* Header com Resumo */}
+      {/* Composição da Carteira */}
       <div className="grid grid-cols-1 gap-4 md:grid-cols-4">
         <div className="group rounded-xl bg-gradient-to-br from-blue-500 to-blue-600 p-4 text-white shadow-lg transition-all hover:scale-105">
           <div className="flex items-center justify-between">
@@ -1143,21 +1231,79 @@ export default function FIIPortfolio() {
                 <label className="mb-1 block text-sm font-medium text-gray-700">
                   Código do FII
                 </label>
-                <select
-                  value={searchCode}
-                  onChange={(e) => setSearchCode(e.target.value)}
-                  className="w-full rounded-lg border border-gray-300 p-2 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
-                >
-                  <option value="">Selecione um FII</option>
-                  {availableFIIs.map((fii) => (
-                    <option key={fii.codigo} value={fii.codigo}>
-                      {fii.codigo} - {fii.nome}
-                    </option>
-                  ))}
-                </select>
+                {isLoadingFIIs ? (
+                  <div className="flex items-center justify-center py-3">
+                    <Loader2 className="h-5 w-5 animate-spin text-blue-600" />
+                    <span className="ml-2 text-sm text-gray-600">
+                      Carregando FIIs...
+                    </span>
+                  </div>
+                ) : (
+                  <>
+                    <div className="mb-2">
+                      <input
+                        type="text"
+                        placeholder="Buscar FII por código, nome ou setor"
+                        value={searchTerm}
+                        onChange={(e) => setSearchTerm(e.target.value)}
+                        className="w-full rounded-lg border border-gray-300 p-2 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
+                      />
+                    </div>
+                    <div className="max-h-60 overflow-y-auto rounded-lg border border-gray-300">
+                      {filteredFIIs.length === 0 ? (
+                        <div className="flex items-center justify-center p-4 text-gray-500">
+                          Nenhum FII encontrado com esse termo
+                        </div>
+                      ) : (
+                        <div className="divide-y divide-gray-200">
+                          {filteredFIIs.map((fii) => (
+                            <div
+                              key={fii.codigo}
+                              className={`cursor-pointer p-3 hover:bg-gray-50 ${
+                                searchCode === fii.codigo ? "bg-blue-50" : ""
+                              }`}
+                              onClick={() => setSearchCode(fii.codigo)}
+                            >
+                              <div className="flex justify-between">
+                                <div>
+                                  <span className="font-medium">
+                                    {fii.codigo}
+                                  </span>
+                                  <p className="text-sm text-gray-600">
+                                    {fii.nome}
+                                  </p>
+                                </div>
+                                <div className="text-right">
+                                  <span className="text-sm font-semibold text-gray-900">
+                                    {fii.preco.toLocaleString("pt-BR", {
+                                      style: "currency",
+                                      currency: "BRL",
+                                    })}
+                                  </span>
+                                  <p className="text-xs text-gray-500">
+                                    Div. Yield:{" "}
+                                    {(fii.dividendYield * 100).toFixed(2)}%
+                                  </p>
+                                </div>
+                              </div>
+                              <div className="mt-1 flex justify-between text-xs">
+                                <span className="rounded-full bg-gray-100 px-2 py-0.5 text-gray-700">
+                                  {fii.setor}
+                                </span>
+                                <span className="text-gray-500">
+                                  P/VP: {fii.valoracaoPVP.toFixed(2)}
+                                </span>
+                              </div>
+                            </div>
+                          ))}
+                        </div>
+                      )}
+                    </div>
+                  </>
+                )}
               </div>
 
-              <div>
+              <div className={`${!searchCode ? "opacity-50" : ""}`}>
                 <label className="mb-1 block text-sm font-medium text-gray-700">
                   Quantidade
                 </label>
@@ -1166,10 +1312,11 @@ export default function FIIPortfolio() {
                   value={quantity}
                   onChange={(e) => setQuantity(Number(e.target.value))}
                   className="w-full rounded-lg border border-gray-300 p-2 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
+                  disabled={!searchCode}
                 />
               </div>
 
-              <div>
+              <div className={`${!searchCode ? "opacity-50" : ""}`}>
                 <label className="mb-1 block text-sm font-medium text-gray-700">
                   Preço Médio
                 </label>
@@ -1179,10 +1326,11 @@ export default function FIIPortfolio() {
                   value={averagePrice}
                   onChange={(e) => setAveragePrice(Number(e.target.value))}
                   className="w-full rounded-lg border border-gray-300 p-2 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
+                  disabled={!searchCode}
                 />
               </div>
 
-              <div>
+              <div className={`${!searchCode ? "opacity-50" : ""}`}>
                 <label className="mb-1 block text-sm font-medium text-gray-700">
                   Data da Compra
                 </label>
@@ -1191,21 +1339,39 @@ export default function FIIPortfolio() {
                   value={purchaseDate}
                   onChange={(e) => setPurchaseDate(e.target.value)}
                   className="w-full rounded-lg border border-gray-300 p-2 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
+                  disabled={!searchCode}
                 />
               </div>
 
               <div className="flex justify-end gap-2">
                 <button
-                  onClick={() => setIsAddingFII(false)}
+                  onClick={() => {
+                    setIsAddingFII(false);
+                    setSearchCode("");
+                    setSearchTerm("");
+                    resetForm();
+                  }}
                   className="rounded-lg px-4 py-2 text-sm font-medium text-gray-600 hover:bg-gray-50"
                 >
                   Cancelar
                 </button>
                 <button
                   onClick={addToPortfolio}
-                  className="rounded-lg bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700"
+                  disabled={isLoadingFIIs || isSaving || !searchCode}
+                  className={`rounded-lg px-4 py-2 text-sm font-medium text-white ${
+                    isLoadingFIIs || isSaving || !searchCode
+                      ? "cursor-not-allowed bg-blue-400"
+                      : "bg-blue-600 hover:bg-blue-700"
+                  }`}
                 >
-                  Adicionar
+                  {isSaving ? (
+                    <span className="flex items-center">
+                      <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                      Adicionando...
+                    </span>
+                  ) : (
+                    "Adicionar"
+                  )}
                 </button>
               </div>
             </div>

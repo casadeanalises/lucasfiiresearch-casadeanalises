@@ -4,6 +4,7 @@ import { isMatch } from "date-fns";
 import { getDashboard } from "../_data/get-dashboard";
 import { canUserAddTransaction } from "../_data/can-user-add-transaction";
 import dynamic from "next/dynamic";
+import Footer from "../_components/footer";
 
 // Componentes carregados dinamicamente para evitar problemas com SSR
 const FIIPortfolio = dynamic(() => import("./_components/fii-portfolio"), {
@@ -37,11 +38,14 @@ const Home = async ({ searchParams: { month } }: HomeProps) => {
   await canUserAddTransaction();
 
   return (
-    <div className="flex h-full flex-col overflow-y-auto bg-slate-50 p-6">
-      {/* Carteira de FIIs */}
-      <div className="mb-6">
-        <FIIPortfolio />
+    <div className="flex min-h-screen flex-col bg-slate-50">
+      <div className="flex-1 p-6 pb-36">
+        {/* Carteira de FIIs */}
+        <div className="mb-6">
+          <FIIPortfolio />
+        </div>
       </div>
+      <Footer />
     </div>
   );
 };
