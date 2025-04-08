@@ -1,0 +1,101 @@
+.videoSection {
+  padding: 3rem 0;
+  background-color: rgb(249 250 251);
+}
+
+.videoSection h2 {
+  text-align: center;
+  font-size: 1.875rem;
+  line-height: 2.25rem;
+  font-weight: 700;
+  margin-bottom: 2rem;
+}
+
+.videoGrid {
+  display: grid;
+  grid-template-columns: repeat(1, minmax(0, 1fr));
+  gap: 2rem;
+  max-width: 1280px;
+  margin: 0 auto;
+  padding: 0 1rem;
+}
+
+@media (min-width: 768px) {
+  .videoGrid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (min-width: 1024px) {
+  .videoGrid {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+}
+
+.videoCard {
+  background-color: white;
+  border-radius: 0.5rem;
+  overflow: hidden;
+  box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
+}
+
+.thumbnail {
+  width: 100%;
+  aspect-ratio: 16 / 9;
+  object-fit: cover;
+}
+
+.placeholderThumbnail {
+  width: 100%;
+  aspect-ratio: 16 / 9;
+  background-color: rgb(229 231 235);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: rgb(107 114 128);
+}
+
+.videoCard h3 {
+  padding: 1rem 1rem 0.5rem;
+  font-size: 1.25rem;
+  line-height: 1.75rem;
+  font-weight: 600;
+}
+
+.videoCard p {
+  padding: 0 1rem 1rem;
+  color: rgb(75 85 99);
+}
+
+.watchButton {
+  display: block;
+  margin: 0 1rem 1rem;
+  padding: 0.5rem 1rem;
+  background-color: rgb(239 68 68);
+  color: white;
+  text-align: center;
+  border-radius: 0.375rem;
+  font-weight: 500;
+  transition: background-color 0.2s;
+}
+
+.watchButton:hover {
+  background-color: rgb(220 38 38);
+}
+
+.loading {
+  text-align: center;
+  padding: 2rem 0;
+}
+
+.error {
+  text-align: center;
+  padding: 2rem 0;
+  color: rgb(239 68 68);
+}
+
+.noVideos {
+  text-align: center;
+  padding: 2rem 0;
+  color: rgb(107 114 128);
+} 

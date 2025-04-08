@@ -7,9 +7,29 @@ const config: Config = {
     "./components/**/*.{js,ts,jsx,tsx,mdx}",
     "./app/**/*.{js,ts,jsx,tsx,mdx}",
   ],
+  // In your theme.extend section
   theme: {
     extend: {
+      fontFamily: {
+        sans: ["Manrope", "sans-serif"],
+      },
       colors: {
+        primary: {
+          DEFAULT: "#002060",
+          light: "#0E289C",
+          lighter: "#0079D6",
+          lightest: "#A6CAEC",
+        },
+        secondary: {
+          DEFAULT: "#343434",
+          light: "#DBE3F4",
+          lighter: "#F2F2F2",
+        },
+        auxiliary: {
+          DEFAULT: "#156082",
+          light: "#7BA1BE",
+          lighter: "#EBF3FA",
+        },
         danger: "#F6352E",
         background: "hsl(var(--background))",
         foreground: "hsl(var(--foreground))",
@@ -20,14 +40,6 @@ const config: Config = {
         popover: {
           DEFAULT: "hsl(var(--popover))",
           foreground: "hsl(var(--popover-foreground))",
-        },
-        primary: {
-          DEFAULT: "hsl(var(--primary))",
-          foreground: "hsl(var(--primary-foreground))",
-        },
-        secondary: {
-          DEFAULT: "hsl(var(--secondary))",
-          foreground: "hsl(var(--secondary-foreground))",
         },
         muted: {
           DEFAULT: "hsl(var(--muted))",
@@ -56,6 +68,15 @@ const config: Config = {
         lg: "var(--radius)",
         md: "calc(var(--radius) - 2px)",
         sm: "calc(var(--radius) - 4px)",
+      },
+      keyframes: {
+        ticker: {
+          "0%": { transform: "translateX(0)" },
+          "100%": { transform: "translateX(-50%)" },
+        },
+      },
+      animation: {
+        ticker: "ticker 30s linear infinite",
       },
     },
   },

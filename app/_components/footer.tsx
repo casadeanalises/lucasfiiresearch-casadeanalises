@@ -17,7 +17,7 @@ const Footer = () => {
       <div className="mx-auto max-w-6xl">
         <div className="flex flex-col items-center justify-between gap-6 md:flex-row">
           <div className="flex items-center">
-            <Image src="/logo.svg" width={150} height={35} alt="Finance AI" />
+            <Image src="/logo.png" width={64} height={64} alt="Lucas FII" />
           </div>
 
           <div className="flex gap-4">
@@ -69,33 +69,37 @@ const Footer = () => {
 
           <div className="flex gap-6">
             <Link
-              href="#"
+              href="/terms"
               className="text-sm text-slate-500 hover:text-primary"
             >
               Termos
             </Link>
             <Link
-              href="#"
+              href="/privacy"
               className="text-sm text-slate-500 hover:text-primary"
             >
               Privacidade
             </Link>
-            <Link
-              href="#"
+            {/* Em Breve <Link
+              href="/contact"
               className="text-sm text-slate-500 hover:text-primary"
             >
               Contato
-            </Link>
+            </Link> */}
           </div>
         </div>
 
         <div className="mt-6 flex flex-col items-center justify-between gap-4 border-t border-slate-200 pt-6 md:flex-row">
-          <p className="text-sm text-slate-500">
-            © {new Date().getFullYear()} Lucas Fii | CasadeAnálises. Todos os
-            direitos reservados.
-          </p>
+          <div className="flex flex-col items-start gap-2">
+            <p className="text-sm text-slate-500">
+              © {new Date().getFullYear()} Lucas FII Research L&L Consultoria
+              Financeira, CNPJ: 99.999.999/9999-99
+            </p>
+          </div>
 
-          <span className="text-sm text-slate-500">
+          <p className="text-xs text-slate-500">Site: v0.1.0</p>
+
+          <span className="text-xs text-slate-400">
             Desenvolvido por{" "}
             <a
               href="https://devrocha.com.br"
