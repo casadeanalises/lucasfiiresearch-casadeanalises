@@ -82,3 +82,36 @@ export async function DELETE(request: Request) {
     );
   }
 }
+
+// PUT - Atualizar item específico do portfólio
+export async function PUT(request: Request) {
+  try {
+    const { userId } = auth();
+    if (!userId) {
+      return NextResponse.json({ error: "Não autorizado" }, { status: 401 });
+    }
+
+    const { index, item } = await request.json();
+    await connectToDatabase();
+
+    const portfolio = await Portfolio.findOne({ userId });
+    if (!portfolio) {
+      return NextResponse.json(
+        { error: "Portfólio não encontrado" },
+        { status: 404 },
+      );
+    }
+
+    // Atualiza o item específico no array
+    portfolio.items[index] = item;
+    await portfolio.save();
+
+    return NextResponse.json({ portfolio });
+  } catch (error) {
+    console.error("Erro ao atualizar item do portfólio:", error);
+    return NextResponse.json(
+      { error: "Erro ao atualizar item do portfólio" },
+      { status: 500 },
+    );
+  }
+}

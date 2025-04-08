@@ -12,6 +12,7 @@ import {
   Building2,
   ArrowUpRight,
   ArrowDownRight,
+  Pencil,
 } from "lucide-react";
 import dynamic from "next/dynamic";
 import { ApexOptions } from "apexcharts";
@@ -65,16 +66,16 @@ interface SectorAllocation {
 export default function FIIPortfolio() {
   const [portfolio, setPortfolio] = useState<PortfolioItem[]>([]);
   const [searchCode, setSearchCode] = useState("");
-  const [quantity, setQuantity] = useState<number>(0);
-  const [averagePrice, setAveragePrice] = useState<number>(0);
-  const [purchaseDate, setPurchaseDate] = useState<string>(
-    new Date().toISOString().split("T")[0],
-  );
+  const [quantity, setQuantity] = useState(0);
+  const [averagePrice, setAveragePrice] = useState(0);
+  const [purchaseDate, setPurchaseDate] = useState("");
   const [chartView, setChartView] = useState<"pie" | "bar">("pie");
   const [compositionChartView, setCompositionChartView] = useState<
     "pie" | "bar"
   >("bar");
   const [isAddingFII, setIsAddingFII] = useState(false);
+  const [isEditingFII, setIsEditingFII] = useState(false);
+  const [editingIndex, setEditingIndex] = useState<number>(-1);
   const [isLoading, setIsLoading] = useState(true);
   const [isSaving, setIsSaving] = useState(false);
   const [sectorAllocation, setSectorAllocation] = useState<SectorAllocation[]>(
@@ -305,11 +306,9 @@ export default function FIIPortfolio() {
 
   // Limpar formulário
   const resetForm = () => {
-    setSearchCode("");
     setQuantity(0);
     setAveragePrice(0);
-    setPurchaseDate(new Date().toISOString().split("T")[0]);
-    setIsAddingFII(false);
+    setPurchaseDate("");
   };
 
   // Calcular o total da carteira
@@ -596,6 +595,67 @@ export default function FIIPortfolio() {
       style: "currency",
       currency: "BRL",
     }).format(value);
+  };
+
+  // Função para iniciar edição
+  const startEditing = (index: number) => {
+    const item = portfolio[index];
+    setSearchCode(item.fii.codigo);
+    setQuantity(item.quantidade);
+    setAveragePrice(item.precoMedio);
+    setPurchaseDate(item.dataCompra);
+    setEditingIndex(index);
+    setIsEditingFII(true);
+  };
+
+  // Função para salvar edição
+  const saveEdit = async () => {
+    if (editingIndex === -1) return;
+    setIsSaving(true);
+
+    try {
+      const updatedPortfolio = [...portfolio];
+      updatedPortfolio[editingIndex] = {
+        ...updatedPortfolio[editingIndex],
+        quantidade: quantity,
+        precoMedio: averagePrice,
+        dataCompra: purchaseDate,
+      };
+
+      // Fazer requisição PUT para o MongoDB
+      const response = await fetch("/api/portfolio", {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          index: editingIndex,
+          item: updatedPortfolio[editingIndex],
+        }),
+      });
+
+      if (!response.ok) {
+        throw new Error("Erro ao atualizar o item");
+      }
+
+      setPortfolio(updatedPortfolio);
+      toast.success("Item atualizado com sucesso!");
+      setIsEditingFII(false);
+      setEditingIndex(-1);
+      resetForm();
+    } catch (error) {
+      console.error("Erro ao atualizar item:", error);
+      toast.error("Erro ao atualizar o item");
+    } finally {
+      setIsSaving(false);
+    }
+  };
+
+  const deleteItem = (index: number) => {
+    const newPortfolio = portfolio.filter((_, i) => i !== index);
+    setPortfolio(newPortfolio);
+    savePortfolio(newPortfolio);
+    toast.success("Ativo removido com sucesso!");
   };
 
   return (
@@ -1109,12 +1169,20 @@ export default function FIIPortfolio() {
                       )}
                     </td>
                     <td className="whitespace-nowrap px-6 py-4">
-                      <button
-                        onClick={() => removeFromPortfolio(index)}
-                        className="rounded-lg p-2 text-gray-400 transition-colors hover:bg-red-50 hover:text-red-600"
-                      >
-                        <Trash2 className="h-4 w-4" />
-                      </button>
+                      <div className="flex items-center gap-2">
+                        <button
+                          onClick={() => startEditing(index)}
+                          className="rounded-lg p-2 text-gray-400 transition-colors hover:bg-blue-50 hover:text-blue-600"
+                        >
+                          <Pencil className="h-4 w-4" />
+                        </button>
+                        <button
+                          onClick={() => deleteItem(index)}
+                          className="rounded-lg p-2 text-gray-400 transition-colors hover:bg-red-50 hover:text-red-600"
+                        >
+                          <Trash2 className="h-4 w-4" />
+                        </button>
+                      </div>
                     </td>
                   </tr>
                 );
@@ -1199,6 +1267,77 @@ export default function FIIPortfolio() {
                   Adicionar
                 </button>
               </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Modal de Edição de FII */}
+      {isEditingFII && (
+        <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 p-4">
+          <div className="w-full max-w-md rounded-lg bg-white p-6">
+            <h2 className="mb-4 text-xl font-bold">Editar FII</h2>
+            <div className="space-y-4">
+              <div>
+                <label className="block text-sm font-medium text-gray-700">
+                  Código do FII
+                </label>
+                <p className="mt-1 text-gray-600">
+                  {portfolio[editingIndex]?.fii.codigo}
+                </p>
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700">
+                  Quantidade
+                </label>
+                <input
+                  type="number"
+                  value={quantity}
+                  onChange={(e) => setQuantity(Number(e.target.value))}
+                  className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700">
+                  Preço Médio
+                </label>
+                <input
+                  type="number"
+                  step="0.01"
+                  value={averagePrice}
+                  onChange={(e) => setAveragePrice(Number(e.target.value))}
+                  className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700">
+                  Data da Compra
+                </label>
+                <input
+                  type="date"
+                  value={purchaseDate}
+                  onChange={(e) => setPurchaseDate(e.target.value)}
+                  className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
+                />
+              </div>
+            </div>
+            <div className="mt-6 flex justify-end space-x-3">
+              <button
+                onClick={() => {
+                  setIsEditingFII(false);
+                  setEditingIndex(-1);
+                  resetForm();
+                }}
+                className="rounded-md bg-gray-100 px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-200"
+              >
+                Cancelar
+              </button>
+              <button
+                onClick={saveEdit}
+                className="rounded-md bg-indigo-600 px-4 py-2 text-sm font-medium text-white hover:bg-indigo-700"
+              >
+                Salvar
+              </button>
             </div>
           </div>
         </div>
