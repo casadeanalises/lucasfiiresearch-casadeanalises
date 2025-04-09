@@ -30,6 +30,28 @@ const nextConfig = {
     ];
   },
 
+  // Configuração do webpack para canvas e PDF
+  webpack: (config, { isServer }) => {
+    if (!isServer) {
+      // Não tentar resolver módulos nativos no lado do cliente
+      config.resolve.fallback = {
+        ...config.resolve.fallback,
+        canvas: false,
+        encoding: false,
+        fs: false,
+        path: false,
+      };
+    }
+
+    // Ignorar arquivos binários do canvas
+    config.module.rules.push({
+      test: /node_modules\/canvas/,
+      use: 'null-loader'
+    });
+
+    return config;
+  },
+
   // Otimizações adicionais
   poweredByHeader: false,
   reactStrictMode: true,
