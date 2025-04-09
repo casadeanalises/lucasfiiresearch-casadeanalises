@@ -18,12 +18,12 @@ interface HomeProps {
 }
 
 const Home = async ({ searchParams: { month } }: HomeProps) => {
-  const { userId } = await auth();
+  const { userId } = auth();
   if (!userId) {
-    redirect("/");
+    redirect("/sign-in");
   }
 
-  const user = await clerkClient().users.getUser(userId);
+  const user = await clerkClient.users.getUser(userId);
   // Check if user has premium subscription
   if (user.publicMetadata.subscriptionPlan !== "premium") {
     redirect("/subscription?message=subscription-required");

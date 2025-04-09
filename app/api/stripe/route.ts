@@ -1,12 +1,13 @@
-import { currentUser } from "@clerk/nextjs";
+import { auth, currentUser } from "@clerk/nextjs/server";
 import { NextResponse } from "next/server";
 import { stripe } from "@/lib/stripe";
 
 export async function POST() {
   try {
+    const { userId } = await auth();
     const user = await currentUser();
-
-    if (!user?.id) {
+    
+    if (!userId || !user) {
       return new NextResponse("Unauthorized", { status: 401 });
     }
 
@@ -24,7 +25,7 @@ export async function POST() {
         },
       ],
       metadata: {
-        userId: user.id,
+        userId: userId,
       },
     });
 

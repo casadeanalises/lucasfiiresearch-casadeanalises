@@ -19,6 +19,8 @@ const SubNavbar = () => {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
   const menuItems: Record<string, MenuItem[]> = {
+
+    ...(isSignedIn && {
     Fundos: [
       { label: "Lista de Fundos", href: "/fundlists", beta: true },
       { label: "Comparador de Fundos", href: "#", soon: true },
@@ -53,13 +55,6 @@ const SubNavbar = () => {
       { label: "Ranking de Gestoras", href: "#", soon: true },
     ],
 
-    // Personalização: [
-    //   { label: "Página Inicial", href: "#", beta: true, soon: true },
-    //   { label: "Configurar Widgets", href: "#", beta: true, soon: true },
-    //   { label: "Layout de Dados", href: "#", beta: true, soon: true },
-    // ],
-
-    ...(isSignedIn && {
       "Minha Conta": [
         { label: "Minha Carteira", href: "/mywallet", beta: true },
         { label: "Sugerir Melhorias", href: "#", soon: true },

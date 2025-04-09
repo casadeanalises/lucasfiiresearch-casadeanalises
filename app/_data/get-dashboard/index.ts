@@ -1,8 +1,12 @@
 import { auth } from "@clerk/nextjs/server";
-import { connectToDatabase } from "@/app/lib/mongodb";
+import connectDB from "@/app/lib/mongodb";
 import Transaction, { TransactionType } from "@/app/models/Transaction";
 
-export async function getDashboard(month?: string) {
+export const getDashboard = async (month: string) => {
+  if (!month) {
+    throw new Error("Mês não fornecido");
+  }
+
   const { userId } = await auth();
 
   if (!userId) {
@@ -16,11 +20,11 @@ export async function getDashboard(month?: string) {
     };
   }
 
-  await connectToDatabase();
+  await connectDB();
 
   const currentDate = new Date();
   const currentYear = currentDate.getFullYear();
-  const targetMonth = month ? parseInt(month) : currentDate.getMonth() + 1;
+  const targetMonth = parseInt(month);
 
   const startDate = new Date(currentYear, targetMonth - 1, 1);
   const endDate = new Date(currentYear, targetMonth, 0);
@@ -77,4 +81,4 @@ export async function getDashboard(month?: string) {
     percentageByCategory,
     recentTransactions,
   };
-}
+};

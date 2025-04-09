@@ -1,4 +1,4 @@
-import { authMiddleware } from "@clerk/nextjs/server";
+import { withClerkMiddleware } from "@clerk/nextjs/server";
 import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
 import { verifyJWT, COOKIE_OPTIONS } from "@/lib/auth";
@@ -36,35 +36,29 @@ async function adminMiddleware(request: NextRequest) {
 }
 
 // Middleware principal que combina Clerk e admin
-export default authMiddleware({
-  publicRoutes: [
+export default withClerkMiddleware((req: NextRequest) => {
+  const publicRoutes = [
     "/",
     "/(home)/(.*)",
-    "/reports",
-    "/admin/login",
-    "/api/admin/login",
-    "/api/videos",
-    "/api/videos/(.*)",
-    "/api/home-videos",
-    "/api/home-videos/(.*)",
-    "/_next/static/(.*)",
-    "/favicon.ico",
-    "/grid.svg",
-    "/login.png",
-    "/dashboard-preview.png",
-    "/lucas_foto.png",
-  ],
-  beforeAuth: async (req: NextRequest) => {
-    const pathname = req.nextUrl.pathname;
+    "/sign-in",
+    "/sign-up",
+    "/api/webhooks(.*)",
+    "/api/reports/pdfs/(.*)",
+    "/api/reports/videos/(.*)",
+  ];
 
-    // Se for uma rota admin
-    if (pathname.startsWith("/admin") || pathname.startsWith("/api/admin")) {
-      return adminMiddleware(req);
-    }
+  // Verifica se a rota atual é pública
+  const isPublicRoute = publicRoutes.some((route) =>
+    req.nextUrl.pathname.match(new RegExp(`^${route}$`))
+  );
 
-    // Para outras rotas, continua normalmente com o Clerk
+  // Se for uma rota pública, permite o acesso
+  if (isPublicRoute) {
     return NextResponse.next();
-  },
+  }
+
+  // Se não for uma rota pública, o Clerk vai gerenciar a autenticação
+  return NextResponse.next();
 });
 
 export const config = {
