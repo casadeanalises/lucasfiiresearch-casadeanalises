@@ -1,21 +1,13 @@
 import { auth } from "@clerk/nextjs";
-import { HomeClient } from "../_components/HomeClient";
+import { redirect } from "next/navigation";
 import { LoggedInHome } from "../_components/LoggedInHome";
 
 export default function HomePage() {
   const { userId } = auth();
 
   if (!userId) {
-    return (
-      <div className="contents">
-        <HomeClient />
-      </div>
-    );
+    redirect("/login");
   }
 
-  return (
-    <div className="contents">
-      <LoggedInHome />
-    </div>
-  );
+  return <LoggedInHome />;
 }

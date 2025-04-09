@@ -1,4 +1,4 @@
-import { withClerkMiddleware } from "@clerk/nextjs/server";
+import { withClerkMiddleware, getAuth } from "@clerk/nextjs/server";
 import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
 import { verifyJWT, COOKIE_OPTIONS } from "@/lib/auth";
@@ -37,11 +37,39 @@ async function adminMiddleware(request: NextRequest) {
 
 // Middleware principal que combina Clerk e admin
 export default withClerkMiddleware((req: NextRequest) => {
+  const { userId } = getAuth(req);
+  const pathname = req.nextUrl.pathname;
+
+  // Verifica se é uma rota admin
+  if (pathname.startsWith("/admin") || pathname.startsWith("/api/admin")) {
+    return adminMiddleware(req);
+  }
+
+  // Se estiver logado e tentar acessar páginas de login/signup, redireciona para home
+  if (
+    userId &&
+    (pathname === "/login" ||
+      pathname === "/sign-in" ||
+      pathname === "/sign-up")
+  ) {
+    return NextResponse.redirect(new URL("/", req.url));
+  }
+
+  // Lista de rotas públicas
   const publicRoutes = [
     "/",
-    "/(home)/(.*)",
+    "/login",
     "/sign-in",
     "/sign-up",
+    "/api/webhook",
+    "/terms",
+    "/privacy",
+    "/contact",
+    "/favicon.ico",
+    "/grid.svg",
+    "/dots.svg",
+    "/login.png",
+    "/(home)/(.*)",
     "/api/webhooks(.*)",
     "/api/reports/pdfs/(.*)",
     "/api/reports/videos/(.*)",
@@ -49,7 +77,7 @@ export default withClerkMiddleware((req: NextRequest) => {
 
   // Verifica se a rota atual é pública
   const isPublicRoute = publicRoutes.some((route) =>
-    req.nextUrl.pathname.match(new RegExp(`^${route}$`))
+    pathname.match(new RegExp(`^${route}$`)),
   );
 
   // Se for uma rota pública, permite o acesso
@@ -57,7 +85,14 @@ export default withClerkMiddleware((req: NextRequest) => {
     return NextResponse.next();
   }
 
-  // Se não for uma rota pública, o Clerk vai gerenciar a autenticação
+  // Se não estiver autenticado e não for rota pública, redireciona para login
+  if (!userId) {
+    const signInUrl = new URL("/sign-in", req.url);
+    signInUrl.searchParams.set("redirect_url", "/");
+    return NextResponse.redirect(signInUrl);
+  }
+
+  // Se estiver autenticado, permite o acesso
   return NextResponse.next();
 });
 
