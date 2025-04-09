@@ -14,12 +14,35 @@ import {
   ArrowDownRight,
   Pencil,
 } from "lucide-react";
-import dynamic from "next/dynamic";
-import { ApexOptions } from "apexcharts";
+import { ResponsivePie } from "@nivo/pie";
 import toast from "react-hot-toast";
 
-// Importação dinâmica para evitar problemas com SSR
-const Chart = dynamic(() => import("react-apexcharts"), { ssr: false });
+// Cores para os gráficos
+const COLORS = [
+  "#3B82F6",
+  "#10B981",
+  "#F97066",
+  "#F59E0B",
+  "#8B5CF6",
+  "#EC4899",
+  "#6366F1",
+  "#14B8A6",
+  "#EF4444",
+  "#8B5CF6",
+  "#F472B6",
+  "#22D3EE",
+  "#FB923C",
+  "#A3E635",
+  "#2DD4BF",
+];
+
+// Função utilitária para formatação de moeda
+const formatCurrency = (value: number) => {
+  return new Intl.NumberFormat("pt-BR", {
+    style: "currency",
+    currency: "BRL",
+  }).format(value);
+};
 
 interface FII {
   codigo: string;
@@ -62,6 +85,87 @@ interface SectorAllocation {
   valor: number;
 }
 
+// Componente do gráfico usando Nivo
+const DonutChart = ({ data }: { data: ChartData }) => {
+  // Garantir que temos dados válidos
+  const chartData = data.series
+    .map((value, index) => ({
+      id: data.labels[index] || "N/A",
+      label: data.labels[index] || "N/A",
+      value: value || 0,
+    }))
+    .filter((item) => item.value > 0);
+
+  if (chartData.length === 0) {
+    return (
+      <div className="flex h-[400px] items-center justify-center">
+        <p className="text-gray-500">Nenhum dado disponível</p>
+      </div>
+    );
+  }
+
+  const totalValue = chartData.reduce((sum, item) => sum + item.value, 0);
+
+  return (
+    <div className="relative h-[400px] w-full">
+      <ResponsivePie
+        data={chartData}
+        margin={{ top: 20, right: 140, bottom: 20, left: 20 }}
+        innerRadius={0.6}
+        padAngle={0.5}
+        cornerRadius={3}
+        activeOuterRadiusOffset={8}
+        colors={COLORS}
+        borderWidth={2}
+        borderColor={{ from: "color", modifiers: [["darker", 0.2]] }}
+        arcLinkLabelsSkipAngle={10}
+        arcLinkLabelsTextColor="#333333"
+        arcLinkLabelsThickness={2}
+        arcLinkLabelsColor={{ from: "color" }}
+        arcLabelsSkipAngle={10}
+        arcLabelsTextColor="white"
+        enableArcLabels={true}
+        arcLabel={(d) => `${((d.value / totalValue) * 100).toFixed(1)}%`}
+        legends={[
+          {
+            anchor: "right",
+            direction: "column",
+            justify: false,
+            translateX: 120,
+            translateY: 0,
+            itemsSpacing: 6,
+            itemWidth: 100,
+            itemHeight: 18,
+            itemTextColor: "#333",
+            itemDirection: "left-to-right",
+            itemOpacity: 1,
+            symbolSize: 12,
+            symbolShape: "circle",
+          },
+        ]}
+        theme={{
+          tooltip: {
+            container: {
+              background: "#ffffff",
+              fontSize: "14px",
+              borderRadius: "8px",
+              boxShadow: "0 4px 6px -1px rgba(0, 0, 0, 0.1)",
+              padding: "12px",
+            },
+          },
+        }}
+      />
+      {/* Total no centro do donut */}
+      <div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 text-center">
+        <p className="text-sm font-medium text-gray-600">Total</p>
+        <p className="text-xl font-bold text-gray-900">
+          {formatCurrency(totalValue)}
+        </p>
+      </div>
+    </div>
+  );
+};
+
 // Componente para gerenciar a carteira de FIIs
 export default function FIIPortfolio() {
   const [portfolio, setPortfolio] = useState<PortfolioItem[]>([]);
@@ -82,8 +186,8 @@ export default function FIIPortfolio() {
     [],
   );
   const [chartData, setChartData] = useState<ChartData>({
-    series: [],
-    labels: [],
+    series: [100],
+    labels: ["Carregando..."],
   });
   const [availableFIIs, setAvailableFIIs] = useState<FII[]>([]);
   const [isLoadingFIIs, setIsLoadingFIIs] = useState(false);
@@ -230,52 +334,81 @@ export default function FIIPortfolio() {
     }
   };
 
-  // Calcular a alocação por setor e atualizar o gráfico quando o portfólio mudar
+  // Calcular a alocação por setor
   useEffect(() => {
-    if (portfolio.length > 0) {
-      const totalValue = portfolio.reduce(
+    try {
+      if (!Array.isArray(portfolio) || portfolio.length === 0) {
+        setChartData({
+          series: [100],
+          labels: ["Sem dados"],
+        });
+        return;
+      }
+
+      const validPortfolio = portfolio.filter(
+        (item) => item?.fii?.preco && item?.quantidade && item?.fii?.setor,
+      );
+
+      if (validPortfolio.length === 0) {
+        setChartData({
+          series: [100],
+          labels: ["Sem dados válidos"],
+        });
+        return;
+      }
+
+      const totalValue = validPortfolio.reduce(
         (sum, item) => sum + item.quantidade * item.fii.preco,
         0,
       );
 
-      // Agrupar por setor
-      const sectorMap: Record<string, { valor: number; percentual: number }> =
-        {};
+      if (totalValue <= 0) {
+        setChartData({
+          series: [100],
+          labels: ["Valor total inválido"],
+        });
+        return;
+      }
 
-      portfolio.forEach((item) => {
-        const itemValue = item.quantidade * item.fii.preco;
-        const setor = item.fii.setor || "Outros";
-        if (!sectorMap[setor]) {
-          sectorMap[setor] = { valor: 0, percentual: 0 };
-        }
-        sectorMap[setor].valor += itemValue;
-        sectorMap[setor].percentual =
-          (sectorMap[setor].valor / totalValue) * 100;
-      });
+      // Calcular alocação por setor
+      const sectors = validPortfolio.reduce(
+        (acc, item) => {
+          const setor = item.fii.setor;
+          const valor = item.quantidade * item.fii.preco;
+          acc[setor] = (acc[setor] || 0) + valor;
+          return acc;
+        },
+        {} as Record<string, number>,
+      );
 
-      // Converter para array e calcular valores
-      const sectorsArray = Object.entries(sectorMap).map(([setor, data]) => ({
-        setor,
-        valor: data.valor,
-        percentual: Number(data.percentual.toFixed(2)),
-      }));
+      const processedData = Object.entries(sectors)
+        .map(([setor, valor]) => ({
+          setor,
+          valor,
+          percentual: (valor / totalValue) * 100,
+        }))
+        .filter((item) => item.percentual > 0)
+        .sort((a, b) => b.valor - a.valor);
 
-      // Ordenar por valor (maior para menor)
-      sectorsArray.sort((a, b) => b.valor - a.valor);
+      if (processedData.length === 0) {
+        setChartData({
+          series: [100],
+          labels: ["Sem alocação"],
+        });
+        return;
+      }
 
-      setSectorAllocation(sectorsArray);
-
-      // Atualizar dados do gráfico
       setChartData({
-        series: sectorsArray.map((s) => s.percentual),
-        labels: sectorsArray.map(
+        series: processedData.map((s) => Number(s.percentual.toFixed(2))),
+        labels: processedData.map(
           (s) => `${s.setor} (${formatCurrency(s.valor)})`,
         ),
       });
-    } else {
+    } catch (error) {
+      console.error("Erro ao calcular alocação:", error);
       setChartData({
-        series: [],
-        labels: [],
+        series: [100],
+        labels: ["Erro ao processar dados"],
       });
     }
   }, [portfolio]);
@@ -367,268 +500,6 @@ export default function FIIPortfolio() {
     return weightedDividendYield;
   };
 
-  // Opções do gráfico
-  const chartOptions: ApexOptions = {
-    chart: {
-      type: chartView,
-      toolbar: {
-        show: false,
-      },
-      animations: {
-        enabled: true,
-        speed: 800,
-        dynamicAnimation: {
-          enabled: true,
-        },
-      },
-      fontFamily: "sans-serif",
-      foreColor: "#4A5568",
-    },
-    labels: chartData.labels,
-    xaxis: {
-      categories: chartData.labels,
-      labels: {
-        show: true,
-        rotate: -45,
-        trim: true,
-        style: {
-          fontSize: "14px",
-          fontWeight: 600,
-          fontFamily: "sans-serif",
-          colors: "#1E293B",
-        },
-      },
-      axisBorder: {
-        show: true,
-        color: "#CBD5E1",
-      },
-      axisTicks: {
-        show: true,
-        color: "#CBD5E1",
-      },
-    },
-    yaxis: {
-      labels: {
-        formatter: (val: any) => {
-          if (typeof val === "number") {
-            return `${val.toFixed(1)}%`;
-          }
-          return "0%";
-        },
-        style: {
-          fontSize: "14px",
-          fontWeight: 600,
-          colors: "#1E293B",
-        },
-      },
-      axisBorder: {
-        show: true,
-        color: "#CBD5E1",
-      },
-      axisTicks: {
-        show: true,
-        color: "#CBD5E1",
-      },
-    },
-    grid: {
-      show: true,
-      borderColor: "#E2E8F0",
-      strokeDashArray: 4,
-      position: "back",
-    },
-    legend: {
-      position: "bottom",
-      horizontalAlign: "center",
-      fontSize: "14px",
-      fontWeight: 600,
-      labels: {
-        colors: "#1E293B",
-      },
-      markers: {
-        size: 12,
-        strokeWidth: 0,
-        offsetX: 0,
-        offsetY: 0,
-      },
-      itemMargin: {
-        horizontal: 20,
-        vertical: 8,
-      },
-    },
-    colors: ["#3182CE", "#38A169", "#E53E3E", "#DD6B20", "#805AD5", "#D53F8C"],
-    tooltip: {
-      enabled: true,
-      custom: function ({ series, seriesIndex, dataPointIndex, w }) {
-        const setor = w.globals.labels[seriesIndex].split(" (")[0];
-        const percentual = Number(series[seriesIndex]);
-        const valor = sectorAllocation[seriesIndex].valor;
-
-        return `
-          <div style="
-            background: white;
-            padding: 12px;
-            border-radius: 8px;
-            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-            min-width: 180px;
-          ">
-            <div style="
-              font-size: 16px;
-              font-weight: 600;
-              color: #1a365d;
-              margin-bottom: 8px;
-              border-bottom: 1px solid #e2e8f0;
-              padding-bottom: 4px;
-            ">
-              ${setor}
-            </div>
-            <div style="
-              display: flex;
-              flex-direction: column;
-              gap: 4px;
-            ">
-              <div style="
-                display: flex;
-                justify-content: space-between;
-                font-size: 14px;
-              ">
-                <span style="color: #4a5568;">Alocação:</span>
-                <span style="font-weight: 600; color: #2d3748;">${typeof percentual === "number" ? percentual.toFixed(2) : "0.00"}%</span>
-              </div>
-              <div style="
-                display: flex;
-                justify-content: space-between;
-                font-size: 14px;
-              ">
-                <span style="color: #4a5568;">Valor:</span>
-                <span style="font-weight: 600; color: #2d3748;">R$ ${valor.toLocaleString("pt-BR", { minimumFractionDigits: 2 })}</span>
-              </div>
-            </div>
-          </div>
-        `;
-      },
-    },
-    plotOptions: {
-      pie: {
-        expandOnClick: true,
-        donut: {
-          size: "55%",
-          background: "transparent",
-          labels: {
-            show: false,
-            name: {
-              show: false,
-              fontSize: "20px",
-              fontFamily: "sans-serif",
-              fontWeight: 700,
-              color: "#FFFFFF",
-              offsetY: -10,
-              formatter: function (val: string) {
-                return val.split(" (")[0];
-              },
-            },
-            value: {
-              show: false,
-              fontSize: "26px",
-              fontFamily: "sans-serif",
-              fontWeight: 800,
-              color: "#FFFFFF",
-              offsetY: 5,
-              formatter: function (val: any) {
-                return `${Number(val).toFixed(2)}%`;
-              },
-            },
-            total: {
-              show: false,
-              label: "Total da Carteira",
-              color: "#FFFFFF",
-              fontSize: "22px",
-              fontWeight: 800,
-              formatter: () => formatCurrency(calculateTotalValue()),
-            },
-          },
-        },
-      },
-      bar: {
-        horizontal: true,
-        distributed: true,
-        dataLabels: {
-          position: "top",
-        },
-        borderRadius: 8,
-        barHeight: "70%",
-      },
-    },
-    dataLabels: {
-      enabled: false,
-      formatter: function (val: any, opts: any) {
-        if (!opts?.w?.globals?.labels?.[opts.dataPointIndex]) return "";
-
-        const label = opts.w.globals.labels[opts.dataPointIndex].split(" (")[0];
-        if (typeof val === "number") {
-          return [`${label}`, `${val.toFixed(2)}%`].join("\n");
-        }
-        return "";
-      },
-      style: {
-        fontSize: "16px",
-        fontFamily: "sans-serif",
-        fontWeight: 700,
-        colors: ["#FFFFFF"],
-      },
-      background: {
-        enabled: true,
-        foreColor: "#FFFFFF",
-        padding: 8,
-        borderRadius: 6,
-        borderWidth: 0,
-        opacity: 0.9,
-        dropShadow: {
-          enabled: true,
-          top: 2,
-          left: 2,
-          blur: 4,
-          color: "#000000",
-          opacity: 0.35,
-        },
-      },
-    },
-    stroke: {
-      width: 2,
-      colors: ["#FFFFFF"],
-    },
-    theme: {
-      mode: "light",
-      palette: "palette1",
-      monochrome: {
-        enabled: false,
-        color: "#2563EB",
-        shadeTo: "light",
-        shadeIntensity: 0.65,
-      },
-    },
-    states: {
-      hover: {
-        filter: {
-          type: "darken",
-        },
-      },
-      active: {
-        allowMultipleDataPointsSelection: false,
-        filter: {
-          type: "darken",
-        },
-      },
-    },
-  };
-
-  // Formatador de moeda
-  const formatCurrency = (value: number) => {
-    return new Intl.NumberFormat("pt-BR", {
-      style: "currency",
-      currency: "BRL",
-    }).format(value);
-  };
-
   // Função para iniciar edição
   const startEditing = (index: number) => {
     const item = portfolio[index];
@@ -692,7 +563,7 @@ export default function FIIPortfolio() {
 
   return (
     <div className="space-y-6">
-      {/* Gráficos e Análises - Movido para o topo */}
+      {/* Gráficos e Análises */}
       <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
         {/* Gráfico de Setores */}
         <div className="rounded-xl bg-white p-6 shadow-lg">
@@ -701,157 +572,12 @@ export default function FIIPortfolio() {
               Distribuição por Setor
             </h3>
           </div>
-          {portfolio.length > 0 && (
-            <Chart
-              options={{
-                ...chartOptions,
-                chart: {
-                  type: "donut",
-                  animations: {
-                    enabled: true,
-                    speed: 800,
-                  },
-                },
-                plotOptions: {
-                  pie: {
-                    donut: {
-                      size: "65%",
-                      labels: {
-                        show: true,
-                        name: {
-                          show: true,
-                          fontSize: "14px",
-                          fontFamily: "sans-serif",
-                          color: "#1E293B",
-                          offsetY: -10,
-                        },
-                        value: {
-                          show: true,
-                          fontSize: "16px",
-                          fontFamily: "sans-serif",
-                          color: "#1E293B",
-                          offsetY: 5,
-                          formatter: function (val: any) {
-                            return `${Number(val).toFixed(2)}%`;
-                          },
-                        },
-                      },
-                    },
-                  },
-                },
-                dataLabels: {
-                  enabled: true,
-                  formatter: function (val: any, opts: any) {
-                    const setor =
-                      chartData.labels[opts.seriesIndex]?.split(" (")[0];
-                    if (!setor) return "";
-                    const value =
-                      typeof val === "number" ? val.toFixed(2) : "0.00";
-                    return `${setor}\n${value}%`;
-                  },
-                  style: {
-                    fontSize: "12px",
-                    fontFamily: "sans-serif",
-                    fontWeight: 600,
-                    colors: ["#1E293B"],
-                  },
-                  background: {
-                    enabled: true,
-                    foreColor: "#FFFFFF",
-                    padding: 4,
-                    borderRadius: 4,
-                    borderWidth: 0,
-                    opacity: 0.9,
-                  },
-                  dropShadow: {
-                    enabled: true,
-                    top: 1,
-                    left: 1,
-                    blur: 1,
-                    opacity: 0.45,
-                  },
-                },
-                legend: {
-                  show: false,
-                },
-                tooltip: {
-                  enabled: true,
-                  custom: function ({
-                    series,
-                    seriesIndex,
-                    dataPointIndex,
-                    w,
-                  }) {
-                    const setor = w.globals.labels[seriesIndex].split(" (")[0];
-                    const percentual = Number(series[seriesIndex]);
-                    const valor = sectorAllocation[seriesIndex].valor;
-
-                    return `
-                      <div style="
-                        background: white;
-                        padding: 12px;
-                        border-radius: 8px;
-                        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-                        min-width: 180px;
-                      ">
-                        <div style="
-                          font-size: 16px;
-                          font-weight: 600;
-                          color: #1a365d;
-                          margin-bottom: 8px;
-                          border-bottom: 1px solid #e2e8f0;
-                          padding-bottom: 4px;
-                        ">
-                          ${setor}
-                        </div>
-                        <div style="
-                          display: flex;
-                          flex-direction: column;
-                          gap: 4px;
-                        ">
-                          <div style="
-                            display: flex;
-                            justify-content: space-between;
-                            font-size: 14px;
-                          ">
-                            <span style="color: #4a5568;">Alocação:</span>
-                            <span style="font-weight: 600; color: #2d3748;">${percentual.toFixed(2)}%</span>
-                          </div>
-                          <div style="
-                            display: flex;
-                            justify-content: space-between;
-                            font-size: 14px;
-                          ">
-                            <span style="color: #4a5568;">Valor:</span>
-                            <span style="font-weight: 600; color: #2d3748;">R$ ${valor.toLocaleString("pt-BR", { minimumFractionDigits: 2 })}</span>
-                          </div>
-                        </div>
-                      </div>
-                    `;
-                  },
-                },
-                colors: [
-                  "#3B82F6",
-                  "#10B981",
-                  "#F97066",
-                  "#F59E0B",
-                  "#8B5CF6",
-                  "#EC4899",
-                  "#6366F1",
-                  "#14B8A6",
-                  "#EF4444",
-                  "#8B5CF6",
-                  "#F472B6",
-                  "#22D3EE",
-                  "#FB923C",
-                  "#A3E635",
-                  "#2DD4BF",
-                ],
-              }}
-              series={chartData.series}
-              type="donut"
-              height={400}
-            />
+          {!isLoading ? (
+            <DonutChart data={chartData} />
+          ) : (
+            <div className="flex h-[400px] items-center justify-center">
+              <p className="text-gray-500">Carregando...</p>
+            </div>
           )}
         </div>
 
@@ -862,115 +588,78 @@ export default function FIIPortfolio() {
               Alocação por Ativo
             </h3>
           </div>
-          {portfolio.length > 0 && (
-            <Chart
-              options={{
-                ...chartOptions,
-                chart: {
-                  type: "donut",
-                  animations: {
-                    enabled: true,
-                    speed: 800,
+          {!isLoading ? (
+            <div className="relative h-[400px] w-full">
+              <ResponsivePie
+                data={portfolio.map((item) => ({
+                  id: item.fii.codigo,
+                  label: `${item.fii.codigo} (${formatCurrency(item.quantidade * item.fii.preco)})`,
+                  value: item.quantidade * item.fii.preco,
+                }))}
+                margin={{ top: 20, right: 140, bottom: 20, left: 20 }}
+                innerRadius={0.6}
+                padAngle={0.5}
+                cornerRadius={3}
+                activeOuterRadiusOffset={8}
+                colors={COLORS}
+                borderWidth={2}
+                borderColor={{ from: "color", modifiers: [["darker", 0.2]] }}
+                arcLinkLabelsSkipAngle={10}
+                arcLinkLabelsTextColor="#333333"
+                arcLinkLabelsThickness={2}
+                arcLinkLabelsColor={{ from: "color" }}
+                arcLabelsSkipAngle={10}
+                arcLabelsTextColor="white"
+                enableArcLabels={true}
+                arcLabel={(d) =>
+                  `${((d.value / portfolio.reduce((sum, item) => sum + item.quantidade * item.fii.preco, 0)) * 100).toFixed(1)}%`
+                }
+                legends={[
+                  {
+                    anchor: "right",
+                    direction: "column",
+                    justify: false,
+                    translateX: 120,
+                    translateY: 0,
+                    itemsSpacing: 6,
+                    itemWidth: 100,
+                    itemHeight: 18,
+                    itemTextColor: "#333",
+                    itemDirection: "left-to-right",
+                    itemOpacity: 1,
+                    symbolSize: 12,
+                    symbolShape: "circle",
                   },
-                },
-                plotOptions: {
-                  pie: {
-                    donut: {
-                      size: "65%",
-                      labels: {
-                        show: true,
-                        name: {
-                          show: true,
-                          fontSize: "14px",
-                          fontFamily: "sans-serif",
-                          color: "#1E293B",
-                          offsetY: -10,
-                        },
-                        value: {
-                          show: true,
-                          fontSize: "16px",
-                          fontFamily: "sans-serif",
-                          color: "#1E293B",
-                          offsetY: 5,
-                          formatter: function (val: any) {
-                            return `${Number(val).toFixed(2)}%`;
-                          },
-                        },
-                      },
+                ]}
+                theme={{
+                  tooltip: {
+                    container: {
+                      background: "#ffffff",
+                      fontSize: "14px",
+                      borderRadius: "8px",
+                      boxShadow: "0 4px 6px -1px rgba(0, 0, 0, 0.1)",
+                      padding: "12px",
                     },
                   },
-                },
-                dataLabels: {
-                  enabled: true,
-                  formatter: function (val: any, opts: any) {
-                    const fii = portfolio[opts.seriesIndex];
-                    if (!fii) return "";
-                    const value =
-                      typeof val === "number" ? val.toFixed(2) : "0.00";
-                    return `${fii.fii.codigo}\n${value}%`;
-                  },
-                  style: {
-                    fontSize: "12px",
-                    fontFamily: "sans-serif",
-                    fontWeight: 600,
-                    colors: ["#1E293B"],
-                  },
-                  background: {
-                    enabled: true,
-                    foreColor: "#FFFFFF",
-                    padding: 4,
-                    borderRadius: 4,
-                    borderWidth: 0,
-                    opacity: 0.9,
-                  },
-                  dropShadow: {
-                    enabled: true,
-                    top: 1,
-                    left: 1,
-                    blur: 1,
-                    opacity: 0.45,
-                  },
-                },
-                legend: {
-                  show: false,
-                },
-                tooltip: {
-                  enabled: true,
-                  y: {
-                    formatter: function (value: any) {
-                      return `${typeof value === "number" ? value.toFixed(2) : "0.00"}%`;
-                    },
-                  },
-                  style: {
-                    fontSize: "14px",
-                  },
-                },
-                colors: [
-                  "#3B82F6",
-                  "#10B981",
-                  "#F97066",
-                  "#F59E0B",
-                  "#8B5CF6",
-                  "#EC4899",
-                  "#6366F1",
-                  "#14B8A6",
-                  "#EF4444",
-                  "#8B5CF6",
-                  "#F472B6",
-                  "#22D3EE",
-                  "#FB923C",
-                  "#A3E635",
-                  "#2DD4BF",
-                ],
-              }}
-              series={portfolio.map((item) => {
-                const value = item.quantidade * item.fii.preco;
-                const total = calculateTotalValue();
-                return Number(((value / total) * 100).toFixed(2));
-              })}
-              type="donut"
-              height={400}
-            />
+                }}
+              />
+              {/* Total no centro do donut */}
+              <div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 text-center">
+                <p className="text-sm font-medium text-gray-600">Total</p>
+                <p className="text-xl font-bold text-gray-900">
+                  {formatCurrency(
+                    portfolio.reduce(
+                      (sum, item) => sum + item.quantidade * item.fii.preco,
+                      0,
+                    ),
+                  )}
+                </p>
+              </div>
+            </div>
+          ) : (
+            <div className="flex h-[400px] items-center justify-center">
+              <p className="text-gray-500">Carregando...</p>
+            </div>
           )}
         </div>
       </div>
