@@ -1,19 +1,17 @@
-import { cookies } from "next/headers";
-import HomePage from "./(home)/page";
-import { LoggedInHome } from "./(home)/LoggedInHome";
+import { auth } from "@clerk/nextjs";
 import { redirect } from "next/navigation";
+import { LoggedInHome } from "./(home)/LoggedInHome";
 
 // Força renderização dinâmica
 export const dynamic = "force-dynamic";
 export const fetchCache = "force-no-store";
 
-export default function Home() {
-  const cookieStore = cookies();
-  const isAuthenticated = cookieStore.has("__session");
+export default async function Home() {
+  const { userId } = auth();
 
-  if (isAuthenticated) {
-    return <LoggedInHome />;
+  if (!userId) {
+    redirect("/login");
   }
 
-  return <HomePage />;
+  return <LoggedInHome />;
 }
