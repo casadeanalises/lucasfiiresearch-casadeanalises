@@ -57,4 +57,49 @@ model Report {
   updatedAt     DateTime @updatedAt
 }
 
+enum TransactionType {
+  INCOME
+  EXPENSE
+  DEPOSIT
+  INVESTMENT
+}
+
+enum TransactionCategory {
+  SALARY
+  INVESTMENT
+  FOOD
+  TRANSPORT
+  TRANSPORTATION
+  HOUSING
+  UTILITIES
+  UTILITY
+  ENTERTAINMENT
+  HEALTH
+  EDUCATION
+  OTHER
+}
+
+enum TransactionPaymentMethod {
+  CREDIT_CARD
+  DEBIT_CARD
+  CASH
+  BANK_TRANSFER
+  BANK_SLIP
+  PIX
+  OTHER
+}
+
+model Transaction {
+  id            String                  @id @default(auto()) @map("_id") @db.ObjectId
+  userId        String
+  name          String
+  amount        Float
+  type          TransactionType
+  category      TransactionCategory
+  paymentMethod TransactionPaymentMethod
+  date          DateTime
+  createdAt     DateTime               @default(now())
+  updatedAt     DateTime               @updatedAt
+}
+
 // Você pode adicionar mais modelos conforme necessário 

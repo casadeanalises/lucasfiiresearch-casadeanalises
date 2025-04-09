@@ -1,9 +1,9 @@
-import { currentUser } from "@clerk/nextjs/server";
+import { currentUser } from "@clerk/nextjs";
 import ReportsAdminClient from "./reports-admin-client";
 
 export default async function ReportsPage() {
   const user = await currentUser();
-  const userEmail = user?.primaryEmailAddress?.emailAddress || "";
+  const adminEmail = user?.emailAddresses?.[0]?.emailAddress || "";
 
   return (
     <div className="container mx-auto px-4 py-8">
@@ -16,7 +16,7 @@ export default async function ReportsPage() {
         </p>
       </div>
 
-      <ReportsAdminClient adminEmail={userEmail} />
+      <ReportsAdminClient adminEmail={adminEmail} />
     </div>
   );
 }
