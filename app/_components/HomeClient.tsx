@@ -2,7 +2,8 @@
 
 import { useEffect } from "react";
 import Image from "next/image";
-import { Button, buttonVariants } from "./ui/button";
+import { Button } from "./ui/button";
+import Link from "next/link";
 import {
   BarChart3Icon,
   TrendingUpIcon,
@@ -91,6 +92,14 @@ export function HomeClient() {
               <p className="text-sm text-slate-300">Suporte</p>
             </div>
           </div>
+        </div>
+
+        <div className="mt-8 flex justify-center">
+          <Link href="/sign-in">
+            <Button size="lg" className="bg-primary hover:bg-primary/90">
+              Fazer Login
+            </Button>
+          </Link>
         </div>
       </section>
 
