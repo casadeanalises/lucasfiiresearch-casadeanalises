@@ -129,7 +129,7 @@ const LoggedInHome = () => {
     const fetchVideos = async () => {
       try {
         console.log("Iniciando busca de vídeos...");
-        const response = await fetch("/api/videos");
+        const response = await fetch("/api/home-videos");
         console.log("Status da resposta:", response.status);
 
         if (!response.ok) {

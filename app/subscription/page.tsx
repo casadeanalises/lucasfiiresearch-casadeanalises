@@ -14,11 +14,11 @@ interface SubscriptionPageProps {
 }
 
 const SubscriptionPage = async ({ searchParams }: SubscriptionPageProps) => {
-  const { userId } = await auth();
+  const { userId } = auth();
   if (!userId) {
-    redirect("/login");
+    redirect("/");
   }
-  const user = await clerkClient().users.getUser(userId);
+  const user = await clerkClient.users.getUser(userId);
   const currentMonthSubscriptions = await getCurrentMonthSubscriptions();
   const hasPremiumPlan = user.publicMetadata.subscriptionPlan == "premium";
 
