@@ -4,6 +4,8 @@ import Admin from "@/app/models/Admin";
 import { cookies } from "next/headers";
 import { verifyJWT } from "@/lib/auth";
 
+export const dynamic = "force-dynamic";
+
 export async function GET() {
   try {
     // Verifica autenticação

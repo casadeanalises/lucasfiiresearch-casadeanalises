@@ -1,6 +1,8 @@
 import { NextResponse } from "next/server";
 import { auth } from "@clerk/nextjs/server";
 
+export const dynamic = "force-dynamic";
+
 // Função para buscar FIIs da API externa (simulada por enquanto)
 async function fetchFIIsFromExternalAPI() {
   // Em um cenário real, você faria uma requisição para uma API externa
