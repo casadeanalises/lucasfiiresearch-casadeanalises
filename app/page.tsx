@@ -250,7 +250,7 @@ const HomePage = () => {
         </div>
       </div>
 
-      {/* Seção Principal */}
+  
       <div className="grid grid-cols-12 gap-6 p-6">
         {/* Coluna da Esquerda */}
         <div className="col-span-6">
@@ -283,7 +283,7 @@ const HomePage = () => {
           </div>
         </div>
 
-        {/* Coluna Central - Carousel */}
+      
         <div className="col-span-6">
           <div className="relative h-full overflow-hidden rounded-xl bg-[#00247D]">
             {/* Slides */}
