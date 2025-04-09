@@ -128,13 +128,13 @@ export async function DELETE(
       return NextResponse.json({ error: "Não autorizado" }, { status: 401 });
     }
 
-    const user = await clerkClient().users.getUser(userId);
+    const user = await clerkClient.users.getUser(userId);
 
     if (!user) {
       return NextResponse.json({ error: "Não autorizado" }, { status: 401 });
     }
 
-    const userEmail = user.primaryEmailAddress?.emailAddress;
+    const userEmail = user.emailAddresses?.[0]?.emailAddress;
 
     if (!isAdmin(userEmail)) {
       console.log("Usuário não é admin:", { userEmail });

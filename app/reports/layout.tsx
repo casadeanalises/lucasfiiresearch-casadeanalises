@@ -7,13 +7,12 @@ export default async function ReportsLayout({
 }: {
   children: React.ReactNode;
 }) {
-  const { userId } = await auth();
-
+  const { userId } = auth();
   if (!userId) {
-    redirect("/");
+    return null;
   }
 
-  const user = await clerkClient().users.getUser(userId);
+  const user = await clerkClient.users.getUser(userId);
 
   // Verifica se o usuário tem plano premium
   if (user.publicMetadata.subscriptionPlan !== "premium") {

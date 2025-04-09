@@ -1,6 +1,8 @@
+"use client";
+
 import Image from "next/image";
 import Link from "next/link";
-import { Button } from "../_components/ui/button";
+import { Button, buttonVariants } from "../_components/ui/button";
 import {
   BarChart3Icon,
   TrendingUpIcon,
@@ -129,7 +131,7 @@ const LoggedInHome = () => {
     const fetchVideos = async () => {
       try {
         console.log("Iniciando busca de vídeos...");
-        const response = await fetch("/api/videos");
+        const response = await fetch("/api/home-videos");
         console.log("Status da resposta:", response.status);
 
         if (!response.ok) {
@@ -563,8 +565,6 @@ const LoggedInHome = () => {
         <DialogContent className="overflow-hidden bg-black p-0 sm:max-w-[900px]">
           <div className="relative">
             <Button
-              variant="ghost"
-              size="icon"
               className="absolute right-2 top-2 z-50 h-8 w-8 rounded-full bg-black/50 p-0 text-white backdrop-blur-sm transition-all hover:bg-black/70"
               onClick={() => setIsVideoModalOpen(false)}
             >

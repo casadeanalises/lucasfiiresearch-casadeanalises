@@ -1,8 +1,10 @@
 "use client";
 
+export const dynamic = "force-dynamic";
+
 import { useEffect } from "react";
 import Image from "next/image";
-import { Button } from "../_components/ui/button";
+import { Button, buttonVariants } from "../_components/ui/button";
 import { useAuth } from "@clerk/nextjs";
 import {
   // LogInIcon,
@@ -24,6 +26,7 @@ import Footer from "../_components/footer";
 import AOS from "aos";
 import "aos/dist/aos.css";
 import { LoggedInHome } from "./LoggedInHome";
+import { cn } from "../_lib/utils";
 
 const LandingPage = () => {
   const { isSignedIn } = useAuth();
@@ -626,8 +629,9 @@ const LandingPage = () => {
                   rel="noopener noreferrer"
                 >
                   <Button
-                    className="rounded-full bg-black px-10 text-white shadow-md hover:bg-black/90"
-                    size="lg"
+                    className={cn(
+                      "h-11 rounded-full bg-black px-10 text-white shadow-md hover:bg-black/90",
+                    )}
                   >
                     Mais Vídeos
                   </Button>

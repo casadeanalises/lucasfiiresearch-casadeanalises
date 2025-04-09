@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import { auth } from "@clerk/nextjs/server";
-import { connectToDatabase } from "@/app/lib/mongodb";
+import connectDB from "@/app/lib/mongodb";
 import { Portfolio } from "@/app/_models/Portfolio";
 
 // GET - Buscar portfólio do usuário
@@ -11,7 +11,7 @@ export async function GET() {
       return NextResponse.json({ error: "Não autorizado" }, { status: 401 });
     }
 
-    await connectToDatabase();
+    await connectDB();
     const portfolio = await Portfolio.findOne({ userId });
 
     return NextResponse.json({ portfolio: portfolio?.items || [] });
@@ -33,7 +33,7 @@ export async function POST(request: Request) {
     }
 
     const { items } = await request.json();
-    await connectToDatabase();
+    await connectDB();
 
     const portfolio = await Portfolio.findOneAndUpdate(
       { userId },
@@ -60,7 +60,7 @@ export async function DELETE(request: Request) {
     }
 
     const { itemIndex } = await request.json();
-    await connectToDatabase();
+    await connectDB();
 
     const portfolio = await Portfolio.findOne({ userId });
     if (!portfolio) {
@@ -92,7 +92,7 @@ export async function PUT(request: Request) {
     }
 
     const { index, item } = await request.json();
-    await connectToDatabase();
+    await connectDB();
 
     const portfolio = await Portfolio.findOne({ userId });
     if (!portfolio) {
