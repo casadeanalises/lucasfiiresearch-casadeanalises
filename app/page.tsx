@@ -155,7 +155,6 @@ const HomePage = () => {
           throw new Error("Formato de resposta inválido");
         }
 
-        // Filtrar apenas vídeos ativos e ordenar
         const activeVideos = data.videos
           .filter((v: HomeVideo) => v.active)
           .sort((a: HomeVideo, b: HomeVideo) => a.order - b.order);
