@@ -3,7 +3,6 @@
 import { useEffect } from "react";
 import Image from "next/image";
 import { Button, buttonVariants } from "./ui/button";
-import { useAuth } from "@clerk/nextjs";
 import {
   BarChart3Icon,
   TrendingUpIcon,
@@ -20,12 +19,9 @@ import {
 import Footer from "./footer";
 import AOS from "aos";
 import "aos/dist/aos.css";
-import { LoggedInHome } from "../(home)/LoggedInHome";
 import { cn } from "../_lib/utils";
 
 export function HomeClient() {
-  const { isSignedIn } = useAuth();
-
   useEffect(() => {
     AOS.init({
       duration: 800,
@@ -33,10 +29,6 @@ export function HomeClient() {
       once: false,
     });
   }, []);
-
-  if (isSignedIn) {
-    return <LoggedInHome />;
-  }
 
   return (
     <div className="w-full overflow-x-hidden">
@@ -51,25 +43,22 @@ export function HomeClient() {
               CasaDeAnálises | Lucas FII
             </div>
             <h1 className="text-4xl font-bold md:text-5xl lg:text-6xl">
-              {isSignedIn
-                ? "Bem-vindo de volta!"
-                : "Seja Bem Vindo a CasaDeAnálises!"}{" "}
+              Seja Bem Vindo a CasaDeAnálises!{" "}
               <span className="bg-gradient-to-r from-primary to-indigo-400 bg-clip-text text-transparent">
-                {isSignedIn
-                  ? "Vamos analisar o mercado?"
-                  : "VENHA APRENDER A INVESTIR COM SABEDORIA!"}
+                VENHA APRENDER A INVESTIR COM SABEDORIA!
               </span>
             </h1>
             <p className="text-lg text-slate-300">
-              {isSignedIn
-                ? "Continue suas análises e acompanhe as últimas atualizações do mercado. Temos novos conteúdos exclusivos para você!"
-                : "À plataforma Casa de Análises do Lucas FII! Aqui você encontra análises completas e aprofundadas sobre Fundos Imobiliários (FIIs), tendências do mercado, oportunidades de investimento e muito mais."}
+              À plataforma Casa de Análises do Lucas FII! Aqui você encontra
+              análises completas e aprofundadas sobre Fundos Imobiliários
+              (FIIs), tendências do mercado, oportunidades de investimento e
+              muito mais.
             </p>
           </div>
           <div className="relative h-[400px] md:h-[500px]" data-aos="fade-left">
             <div className="absolute -left-10 -top-10 h-full w-full rounded-2xl bg-gradient-to-br from-primary/20 to-indigo-500/20 blur-xl"></div>
             <Image
-              src={isSignedIn ? "/dashboard-preview.png" : "/login.png"}
+              src="/login.png"
               alt="CasaDeAnálises | Lucas FII"
               fill
               className="relative z-10 rounded-xl object-cover shadow-2xl"
