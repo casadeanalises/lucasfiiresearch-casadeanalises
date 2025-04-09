@@ -69,6 +69,26 @@ const nextConfig = {
   },
   staticPageGenerationTimeout: 1000,
   output: 'standalone',
+
+  // Forçar renderização do lado do cliente
+  compiler: {
+    styledComponents: true
+  },
+  pageExtensions: ['tsx', 'ts', 'jsx', 'js'],
+  trailingSlash: false,
+  distDir: '.next',
+  generateEtags: false,
+  compress: true,
+  productionBrowserSourceMaps: false,
+  optimizeFonts: true,
+  skipMiddlewareUrlNormalize: true,
+  skipTrailingSlashRedirect: true,
+  async rewrites() {
+    return [];
+  },
+  async redirects() {
+    return [];
+  }
 };
 
 module.exports = nextConfig; 
