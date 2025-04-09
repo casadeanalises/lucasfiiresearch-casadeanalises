@@ -13,9 +13,9 @@ export const POST = async (request: Request) => {
   }
   const text = await request.text();
   const stripe = new Stripe(process.env.STRIPE_SECRET_KEY, {
-    apiVersion: "2025-02-24.acacia",
+    apiVersion: "2023-10-16",
   });
-  
+
   try {
     const event = stripe.webhooks.constructEvent(
       text,
@@ -28,14 +28,19 @@ export const POST = async (request: Request) => {
     switch (event.type) {
       case "invoice.paid": {
         const invoice = event.data.object as Stripe.Invoice;
-        const subscription = await stripe.subscriptions.retrieve(invoice.subscription as string);
+        const subscription = await stripe.subscriptions.retrieve(
+          invoice.subscription as string,
+        );
         const clerkUserId = subscription.metadata.clerk_user_id;
-        const stripeCustomerId = typeof invoice.customer === 'string' ? invoice.customer : invoice.customer?.toString();
+        const stripeCustomerId =
+          typeof invoice.customer === "string"
+            ? invoice.customer
+            : invoice.customer?.toString();
 
         console.log("Dados do invoice.paid:", {
           clerkUserId,
           subscription: subscription.id,
-          customer: stripeCustomerId
+          customer: stripeCustomerId,
         });
 
         if (!clerkUserId) {
@@ -56,7 +61,7 @@ export const POST = async (request: Request) => {
 
         // Criar ou atualizar assinatura no banco de dados
         const existingSubscription = await prisma.subscription.findFirst({
-          where: { userId: clerkUserId }
+          where: { userId: clerkUserId },
         });
 
         await prisma.subscription.upsert({
@@ -83,13 +88,15 @@ export const POST = async (request: Request) => {
       }
       case "checkout.session.completed": {
         const session = event.data.object as Stripe.Checkout.Session;
-        const subscription = await stripe.subscriptions.retrieve(session.subscription as string);
+        const subscription = await stripe.subscriptions.retrieve(
+          session.subscription as string,
+        );
         const clerkUserId = session.client_reference_id;
-        
+
         console.log("Dados do checkout.session.completed:", {
           clerkUserId,
           subscription: subscription.id,
-          customer: session.customer
+          customer: session.customer,
         });
 
         if (!clerkUserId) {
@@ -110,7 +117,7 @@ export const POST = async (request: Request) => {
 
         // Criar ou atualizar assinatura no banco de dados
         const existingSubscription = await prisma.subscription.findFirst({
-          where: { userId: clerkUserId }
+          where: { userId: clerkUserId },
         });
 
         await prisma.subscription.upsert({
@@ -140,10 +147,10 @@ export const POST = async (request: Request) => {
           event.data.object.id,
         );
         const clerkUserId = subscription.metadata.clerk_user_id;
-        
+
         console.log("Dados do subscription.deleted:", {
           clerkUserId,
-          subscriptionId: subscription.id
+          subscriptionId: subscription.id,
         });
 
         if (!clerkUserId) {
@@ -175,7 +182,7 @@ export const POST = async (request: Request) => {
         });
       }
     }
-    
+
     return NextResponse.json({ received: true });
   } catch (error) {
     console.error("Erro no webhook:", error);
