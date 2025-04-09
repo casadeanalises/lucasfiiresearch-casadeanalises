@@ -1,7 +1,7 @@
 "use client";
 
-import { LoggedInHomeContent } from "./LoggedInHomeContent";
 import { Suspense } from "react";
+import { LoggedInHomeContent } from "./LoggedInHomeContent";
 
 export function LoggedInHome() {
   return (

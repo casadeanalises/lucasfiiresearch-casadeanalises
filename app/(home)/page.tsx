@@ -1,10 +1,21 @@
 import { auth } from "@clerk/nextjs";
-import { HomeWrapper } from "../_components/HomeWrapper";
+import { HomeClient } from "../_components/HomeClient";
+import { LoggedInHome } from "../_components/LoggedInHome";
 
-export const dynamic = "force-dynamic";
-
-export default async function HomePage() {
+export default function HomePage() {
   const { userId } = auth();
 
-  return <HomeWrapper isAuthenticated={!!userId} />;
+  if (!userId) {
+    return (
+      <div className="contents">
+        <HomeClient />
+      </div>
+    );
+  }
+
+  return (
+    <div className="contents">
+      <LoggedInHome />
+    </div>
+  );
 }
