@@ -183,7 +183,7 @@ const HomePage = () => {
 
   return (
     <div className="min-h-screen bg-slate-50">
-      {/* Barra de Cotação de Fundos */}
+   
       <div className="w-full bg-white shadow-sm">
         <div className="mx-auto max-w-7xl px-4">
           <div className="flex items-center justify-between py-2">
@@ -202,7 +202,7 @@ const HomePage = () => {
               ) : (
                 <div className="relative overflow-hidden">
                   <div className="animate-ticker flex whitespace-nowrap">
-                    {/* Duplicate the array to create a seamless loop */}
+                  
                     {[...Array(2)].map((_, arrayIndex) => (
                       <div
                         key={arrayIndex}
