@@ -21,9 +21,8 @@
     "paths": {
       "@/*": ["./*"]
     },
-    "baseUrl": ".",
-    "typeRoots": ["./node_modules/@types", "./types"]
+    "baseUrl": "."
   },
-  "include": ["next-env.d.ts", "**/*.ts", "**/*.tsx", ".next/types/**/*.ts", "types/**/*.d.ts"],
+  "include": ["next-env.d.ts", "**/*.ts", "**/*.tsx", ".next/types/**/*.ts"],
   "exclude": ["node_modules"]
 }
