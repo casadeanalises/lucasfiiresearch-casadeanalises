@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { UserButton, useUser } from "@clerk/nextjs";
 import { Button } from "@/app/_components/ui/button";
-import { AdminButton } from "./admin-button";
+import AdminButton from "./admin-button";
 
 export default function Navbar() {
   const { user } = useUser();
