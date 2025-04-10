@@ -2,10 +2,10 @@
 
 import { useState } from "react";
 import Link from "next/link";
-import { ChevronDown } from "lucide-react";
+import { ChevronDown, User } from "lucide-react";
 import { useAuth } from "@clerk/nextjs";
 
-// Definindo a interface para os itens de menu
+
 interface MenuItem {
   label: string;
   href: string;
@@ -57,10 +57,10 @@ const SubNavbar = () => {
 
       "Minha Conta": [
         { label: "Minha Carteira", href: "/mywallet", beta: true },
-        { label: "Sugerir Melhorias", href: "#", soon: true },
-        { label: "Reportar Bugs", href: "#", soon: true },
-        { label: "Central de Ajuda", href: "#", soon: true },
-        { label: "Tema do Site", href: "#", soon: true },
+        { label: "Gerenciar Plano", href: "/subscription" },
+        { label: "Suporte", href: "/contact", soon: true },
+        // TODO: not so important { label: "Sugerir Melhorias", href: "#", soon: true },
+        // { label: "Reportar Bugs", href: "#", soon: true },
       ],
     }),
   };
@@ -87,7 +87,7 @@ const SubNavbar = () => {
 
   return (
     <nav className="border-b border-gray-800 bg-[#111827]">
-      {/* Desktop Menu */}
+     
       <div className="mx-auto hidden max-w-7xl px-4 lg:block">
         <div className="flex justify-center space-x-8">
           {Object.entries(menuItems).map(([menu, items]) => (
@@ -98,6 +98,7 @@ const SubNavbar = () => {
               onMouseLeave={handleMouseLeave}
             >
               <button className="flex items-center px-3 py-3 text-sm font-medium text-gray-300 hover:text-white">
+                {menu === "Minha Conta" && <User className="mr-2 h-4 w-4" />}
                 {menu}
                 <ChevronDown className="ml-1 h-4 w-4" />
               </button>
@@ -135,7 +136,7 @@ const SubNavbar = () => {
         </div>
       </div>
 
-      {/* Mobile Menu */}
+     
       <div className="lg:hidden">
         <div className="flex items-center justify-between px-4 py-3">
           <button
@@ -159,7 +160,10 @@ const SubNavbar = () => {
                   onClick={() => handleMobileItemClick(menu)}
                   className="flex w-full items-center justify-between px-3 py-2 text-sm font-medium text-gray-300 hover:text-white"
                 >
-                  {menu}
+                  <div className="flex items-center">
+                    {menu === "Minha Conta" && <User className="mr-2 h-4 w-4" />}
+                    {menu}
+                  </div>
                   <ChevronDown
                     className={`h-4 w-4 transition-transform duration-200 ${
                       activeDropdown === menu ? "rotate-180" : ""
