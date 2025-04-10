@@ -27,14 +27,18 @@
 
 First, run the development server:
 
+### Instalação
+
+```bash
+npm ci
+# or
+npm install
+```
+
 ```bash
 npm run dev
 # or
 yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
 Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
@@ -299,9 +303,6 @@ vercel deploy
 
 - GitHub: [github.com/DevRocha/casadeanalises-lucasfii](https://github.com/alanrochagomes/casadeanalises-lucasfii)
 
-- ## 📝 Licença
-
-© 2025 Lucas Fii | CasadeAnálises. Todos os direitos reservados.
 
 ## Configuração do Ambiente
 
@@ -320,8 +321,8 @@ cp .env.example .env
 - `NEXT_PUBLIC_API_BASE_URL`: URL base da API (http://localhost:3000 para desenvolvimento)
 - `ADMIN_EMAIL`: Email do administrador do sistema
 
-### Instalação
 
-```bash
-npm install
-```
+
+- ## 📝 Licença
+
+© 2025 Lucas FII Research L&L Consultoria Financeira. Todos os direitos reservados.
