@@ -340,7 +340,6 @@ const Navbar = () => {
             }}
           >
             <Button className="bg-blue-500 text-white hover:bg-blue-600">
-              <LogInIcon className="mr-2 h-4 w-4" />
               Assine já
             </Button>
           </Link>
@@ -362,14 +361,17 @@ const Navbar = () => {
         </div>
       </div>
 
-      {/* === Layout Mobile e Tablet === */}
+    
       <div className="flex items-center justify-between px-4 py-4 lg:hidden">
+        {/* TODO: Hamburger menu disabled for now
+        
         <Sheet open={isOpen} onOpenChange={setIsOpen}>
           <SheetTrigger asChild>
             <Button variant="ghost" size="icon" className="hover:bg-primary/10">
               <Menu className="h-6 w-6 text-gray-700" />
             </Button>
           </SheetTrigger>
+
           <SheetContent
             side="left"
             className="w-80 border-r border-blue-100 bg-gradient-to-br from-white to-blue-50 p-0"
@@ -379,11 +381,12 @@ const Navbar = () => {
                 Menu
               </SheetTitle>
             </SheetHeader>
+            
             <div className="flex flex-col gap-3 p-4">
               <NavLinks />
             </div>
           </SheetContent>
-        </Sheet>
+        </Sheet> */}
 
         <div className="flex flex-1 items-center justify-center">
           <Link href="/" className="flex items-center gap-2">
@@ -399,7 +402,7 @@ const Navbar = () => {
         </div>
 
         <div className="flex items-center gap-2">
-          {/* Busca para dispositivos móveis */}
+      
           <Link
             href="/fundlists"
             className="flex h-10 w-10 items-center justify-center rounded-full bg-gray-100"

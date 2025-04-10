@@ -8,7 +8,7 @@ export default function AdminDashboard() {
       description: "Visão geral do sistema",
       icon: <Home className="h-8 w-8" />,
       href: "/admin",
-      color: "gray",
+      color: "blue",
       isNew: false,
     },
     {
@@ -16,7 +16,7 @@ export default function AdminDashboard() {
       description: "Gerencie PDFs e vídeos de análises do mercado",
       icon: <FileText className="h-8 w-8" />,
       href: "/admin/reports",
-      color: "blue",
+      color: "indigo",
       isNew: false,
     },
     {
@@ -24,7 +24,7 @@ export default function AdminDashboard() {
       description: "Gerencie os vídeos exibidos na página inicial",
       icon: <PlayCircle className="h-8 w-8" />,
       href: "/admin/home-videos",
-      color: "red",
+      color: "purple",
       isNew: false,
     },
     {
@@ -32,7 +32,7 @@ export default function AdminDashboard() {
       description: "Área administrativa da carteira (Em breve)",
       icon: <BarChart3 className="h-8 w-8" />,
       href: "#",
-      color: "purple",
+      color: "cyan",
       isNew: true,
     },
     {
@@ -40,74 +40,141 @@ export default function AdminDashboard() {
       description: "Configurações gerais do sistema (Em breve)",
       icon: <Settings className="h-8 w-8" />,
       href: "#",
-      color: "gray",
+      color: "slate",
       isNew: true,
     },
   ];
 
-  return (
-    <div>
-      <div className="mb-8">
-        <h1 className="text-2xl font-bold text-gray-900">
-          Painel Administrativo
-        </h1>
-        <p className="mt-1 text-sm text-gray-600">
-          Gerencie todos os aspectos do sistema
-        </p>
-      </div>
+  const getGradientClass = (color: string) => {
+    switch (color) {
+      case "blue":
+        return "from-blue-600 to-blue-800";
+      case "indigo":
+        return "from-indigo-600 to-indigo-800";
+      case "purple":
+        return "from-purple-600 to-purple-800";
+      case "cyan":
+        return "from-cyan-600 to-cyan-800";
+      default:
+        return "from-slate-600 to-slate-800";
+    }
+  };
 
-      <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
-        {adminAreas.map((area) => (
-          <Link
-            key={area.title}
-            href={area.href}
-            className={`group relative overflow-hidden rounded-xl border p-6 transition-all hover:shadow-lg ${
-              area.href === "#"
-                ? "cursor-not-allowed opacity-60"
-                : "hover:border-blue-500"
-            }`}
-          >
-            <div className="mb-4">
-              <div
-                className={`inline-flex rounded-lg p-3 ring-4 ring-opacity-30 ${
-                  area.color === "blue"
-                    ? "bg-blue-50 text-blue-600 ring-blue-500"
-                    : area.color === "purple"
-                      ? "bg-purple-50 text-purple-600 ring-purple-500"
-                      : area.color === "red"
-                        ? "bg-red-50 text-red-600 ring-red-500"
-                        : "bg-gray-50 text-gray-600 ring-gray-500"
-                }`}
-              >
-                {area.icon}
-              </div>
-            </div>
+  const getIconClass = (color: string) => {
+    switch (color) {
+      case "blue":
+        return "bg-blue-50 text-blue-600";
+      case "indigo":
+        return "bg-indigo-50 text-indigo-600";
+      case "purple":
+        return "bg-purple-50 text-purple-600";
+      case "cyan":
+        return "bg-cyan-50 text-cyan-600";
+      default:
+        return "bg-slate-50 text-slate-600";
+    }
+  };
+
+  const getProgressClass = (color: string) => {
+    switch (color) {
+      case "blue":
+        return "from-blue-500 to-blue-600";
+      case "indigo":
+        return "from-indigo-500 to-indigo-600";
+      case "purple":
+        return "from-purple-500 to-purple-600";
+      case "cyan":
+        return "from-cyan-500 to-cyan-600";
+      default:
+        return "from-slate-500 to-slate-600";
+    }
+  };
+
+  return (
+    <div className="min-h-screen bg-gradient-to-br from-gray-50 via-white to-gray-50">
+      <div className="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
+    
+        <div className="mb-8 overflow-hidden rounded-2xl bg-gradient-to-r from-blue-600 to-indigo-600 p-8 shadow-lg">
+          <div className="flex items-center justify-between">
             <div>
-              <h3 className="text-lg font-semibold text-gray-900">
-                {area.title}
-                {area.isNew && (
-                  <span className="ml-2 inline-flex items-center rounded-full bg-blue-50 px-2 py-1 text-xs font-medium text-blue-700">
-                    Em breve
-                  </span>
-                )}
-              </h3>
-              <p className="mt-2 text-sm text-gray-600">{area.description}</p>
+              <h1 className="text-3xl font-bold text-white">
+                Painel Administrativo
+              </h1>
+              <p className="mt-2 text-blue-100">
+                Gerencie todos os aspectos do sistema
+              </p>
             </div>
-            {!area.isNew && (
+            <div className="hidden rounded-full bg-white/10 p-4 backdrop-blur-sm lg:block">
+              <Home className="h-8 w-8 text-white" />
+            </div>
+          </div>
+        </div>
+
+      
+        <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+          {adminAreas.map((area) => (
+            <Link
+              key={area.title}
+              href={area.href}
+              className={`group relative overflow-hidden rounded-xl bg-white p-6 transition-all hover:shadow-xl ${
+                area.href === "#"
+                  ? "cursor-not-allowed opacity-60"
+                  : "hover:scale-[1.02]"
+              }`}
+            >
+      
               <div
-                className={`absolute bottom-0 left-0 h-1 w-full transform bg-gradient-to-r ${
-                  area.color === "blue"
-                    ? "from-blue-400 to-blue-600"
-                    : area.color === "purple"
-                      ? "from-purple-400 to-purple-600"
-                      : area.color === "red"
-                        ? "from-red-400 to-red-600"
-                        : "from-gray-400 to-gray-600"
-                }`}
+                className={`absolute inset-0 bg-gradient-to-br opacity-[0.08] ${getGradientClass(
+                  area.color
+                )}`}
               />
-            )}
-          </Link>
-        ))}
+
+   
+              <div className="relative mb-4">
+                <div
+                  className={`absolute inset-0 rounded-full blur-xl opacity-20 ${
+                    area.color === "blue"
+                      ? "bg-blue-500"
+                      : area.color === "indigo"
+                      ? "bg-indigo-500"
+                      : area.color === "purple"
+                      ? "bg-purple-500"
+                      : area.color === "cyan"
+                      ? "bg-cyan-500"
+                      : "bg-slate-500"
+                  }`}
+                />
+                <div className={`relative inline-flex rounded-xl p-3 ${getIconClass(area.color)}`}>
+                  {area.icon}
+                </div>
+              </div>
+
+       
+              <div className="relative">
+                <h3 className="flex items-center text-lg font-semibold text-gray-900">
+                  {area.title}
+                  {area.isNew && (
+                    <span className="ml-2 inline-flex items-center rounded-full bg-blue-50 px-2 py-1 text-xs font-medium text-blue-700">
+                      Em breve
+                    </span>
+                  )}
+                </h3>
+                <p className="mt-2 text-sm text-gray-600">{area.description}</p>
+              </div>
+
+             
+              {!area.isNew && (
+                <div className="absolute bottom-0 left-0 h-1 w-full">
+                  <div
+                    className={`h-full w-full transform bg-gradient-to-r opacity-80 ${getProgressClass(
+                      area.color
+                    )}`}
+                  />
+                </div>
+              )}
+            </Link>
+          ))}
+        </div>
       </div>
     </div>
   );

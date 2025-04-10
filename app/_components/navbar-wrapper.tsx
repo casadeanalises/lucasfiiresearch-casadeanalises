@@ -2,8 +2,9 @@
 
 import dynamic from "next/dynamic";
 import SubNavbar from "../components/SubNavbar";
+import { usePathname } from "next/navigation";
 
-// Importar o Navbar apenas no lado do cliente sem SSR
+
 const Navbar = dynamic(() => import("./navbar"), {
   ssr: false,
   loading: () => (
@@ -21,6 +22,13 @@ const Navbar = dynamic(() => import("./navbar"), {
 });
 
 export default function NavbarWrapper() {
+  const pathname = usePathname();
+  const isAdminLoginPage = pathname === "/admin/login";
+
+  if (isAdminLoginPage) {
+    return null;
+  }
+
   return (
     <>
       <Navbar />
