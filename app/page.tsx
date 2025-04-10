@@ -25,6 +25,8 @@ import { useEffect, useState } from "react";
 import { useFIIData } from "./hooks/useFIIData";
 import { Dialog, DialogContent } from "./_components/ui/dialog";
 import Footer from "./_components/footer";
+import { useAuth } from "@clerk/nextjs";
+import { useRouter } from "next/navigation";
 
 interface HomeVideo {
   _id: string;
@@ -46,6 +48,12 @@ interface FIIQuote {
 }
 
 const HomePage = () => {
+  // Auth and routing
+  const { isSignedIn } = useAuth();
+  const router = useRouter();
+  const [isLoading, setIsLoading] = useState(true);
+
+  // Data and UI states
   const [currentSlide, setCurrentSlide] = useState(0);
   const { quotes, loading } = useFIIData();
   const [videos, setVideos] = useState<HomeVideo[]>([]);
@@ -118,6 +126,16 @@ const HomePage = () => {
     },
   ];
 
+  // Auth check effect
+  useEffect(() => {
+    if (isSignedIn === false) {
+      router.push("/bem-vindo");
+    } else {
+      setIsLoading(false);
+    }
+  }, [isSignedIn, router]);
+
+  // Animation and carousel effect
   useEffect(() => {
     AOS.init({
       duration: 800,
@@ -125,7 +143,6 @@ const HomePage = () => {
       once: false,
     });
 
-    // Auto-play do carousel
     const interval = setInterval(() => {
       setCurrentSlide((prev) => (prev + 1) % carouselItems.length);
     }, 5000);
@@ -133,7 +150,7 @@ const HomePage = () => {
     return () => clearInterval(interval);
   }, []);
 
-  // Buscar vídeos
+  // Fetch videos effect
   useEffect(() => {
     const fetchVideos = async () => {
       try {
@@ -170,6 +187,11 @@ const HomePage = () => {
 
     fetchVideos();
   }, []);
+
+  // Loading or not authenticated
+  if (isLoading || !isSignedIn) {
+    return null;
+  }
 
   const nextSlide = () => {
     setCurrentSlide((prev) => (prev + 1) % carouselItems.length);
