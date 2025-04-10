@@ -25,6 +25,8 @@ import { useEffect, useState } from "react";
 import { useFIIData } from "./hooks/useFIIData";
 import { Dialog, DialogContent } from "./_components/ui/dialog";
 import Footer from "./_components/footer";
+import { useAuth } from "@clerk/nextjs";
+import { useRouter } from "next/navigation";
 
 interface HomeVideo {
   _id: string;
@@ -46,6 +48,12 @@ interface FIIQuote {
 }
 
 const HomePage = () => {
+  // Auth and routing
+  const { isSignedIn } = useAuth();
+  const router = useRouter();
+  const [isLoading, setIsLoading] = useState(true);
+
+  // Data and UI states
   const [currentSlide, setCurrentSlide] = useState(0);
   const { quotes, loading } = useFIIData();
   const [videos, setVideos] = useState<HomeVideo[]>([]);
@@ -118,6 +126,16 @@ const HomePage = () => {
     },
   ];
 
+  // Auth check effect
+  useEffect(() => {
+    if (isSignedIn === false) {
+      router.push("/bem-vindo");
+    } else {
+      setIsLoading(false);
+    }
+  }, [isSignedIn, router]);
+
+  // Animation and carousel effect
   useEffect(() => {
     AOS.init({
       duration: 800,
@@ -125,7 +143,6 @@ const HomePage = () => {
       once: false,
     });
 
-    // Auto-play do carousel
     const interval = setInterval(() => {
       setCurrentSlide((prev) => (prev + 1) % carouselItems.length);
     }, 5000);
@@ -133,7 +150,7 @@ const HomePage = () => {
     return () => clearInterval(interval);
   }, []);
 
-  // Buscar vídeos
+  // Fetch videos effect
   useEffect(() => {
     const fetchVideos = async () => {
       try {
@@ -155,7 +172,6 @@ const HomePage = () => {
           throw new Error("Formato de resposta inválido");
         }
 
-        // Filtrar apenas vídeos ativos e ordenar
         const activeVideos = data.videos
           .filter((v: HomeVideo) => v.active)
           .sort((a: HomeVideo, b: HomeVideo) => a.order - b.order);
@@ -172,6 +188,11 @@ const HomePage = () => {
     fetchVideos();
   }, []);
 
+  // Loading or not authenticated
+  if (isLoading || !isSignedIn) {
+    return null;
+  }
+
   const nextSlide = () => {
     setCurrentSlide((prev) => (prev + 1) % carouselItems.length);
   };
@@ -184,7 +205,7 @@ const HomePage = () => {
 
   return (
     <div className="min-h-screen bg-slate-50">
-      {/* Barra de Cotação de Fundos */}
+   
       <div className="w-full bg-white shadow-sm">
         <div className="mx-auto max-w-7xl px-4">
           <div className="flex items-center justify-between py-2">
@@ -203,7 +224,7 @@ const HomePage = () => {
               ) : (
                 <div className="relative overflow-hidden">
                   <div className="animate-ticker flex whitespace-nowrap">
-                    {/* Duplicate the array to create a seamless loop */}
+                  
                     {[...Array(2)].map((_, arrayIndex) => (
                       <div
                         key={arrayIndex}
@@ -251,7 +272,7 @@ const HomePage = () => {
         </div>
       </div>
 
-      {/* Seção Principal */}
+  
       <div className="grid grid-cols-12 gap-6 p-6">
         {/* Coluna da Esquerda */}
         <div className="col-span-6">
@@ -284,7 +305,7 @@ const HomePage = () => {
           </div>
         </div>
 
-        {/* Coluna Central - Carousel */}
+      
         <div className="col-span-6">
           <div className="relative h-full overflow-hidden rounded-xl bg-[#00247D]">
             {/* Slides */}
