@@ -61,7 +61,8 @@ export default withClerkMiddleware((req: NextRequest) => {
     "/login",
     "/sign-in",
     "/sign-up",
-    "/api/webhook",
+    "/webhook",
+    "/api/webhooks/stripe",
     "/terms",
     "/privacy",
     "/contact",
@@ -70,7 +71,6 @@ export default withClerkMiddleware((req: NextRequest) => {
     "/dots.svg",
     "/login.png",
     "/(home)/(.*)",
-    "/api/webhooks(.*)",
     "/api/reports/pdfs/(.*)",
     "/api/reports/videos/(.*)",
   ];
@@ -97,5 +97,9 @@ export default withClerkMiddleware((req: NextRequest) => {
 });
 
 export const config = {
-  matcher: ["/((?!.+\\.[\\w]+$|_next).*)", "/", "/(api|trpc)(.*)"],
+  matcher: [
+    "/((?!_next/static|_next/image|favicon.ico).*)",
+    "/",
+    "/(api|trpc)(.*)"
+  ],
 };
